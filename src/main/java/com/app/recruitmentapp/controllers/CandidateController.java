@@ -41,7 +41,7 @@ public class CandidateController {
     @PostMapping(value = "/candidate", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Candidate> addCandidate(
             @ModelAttribute Candidate candidate,
-            @RequestPart("image") MultipartFile imageFile) {
+            @RequestParam("image") MultipartFile imageFile) {
 
         Candidate savedCandidate = candidateService.saveCandidate(candidate, imageFile);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedCandidate);

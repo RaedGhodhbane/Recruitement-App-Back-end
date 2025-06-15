@@ -124,4 +124,21 @@ public class CandidateServiceImpl implements CandidateService{
         return Files.readAllBytes(path);
     }
 
+    @Override
+    public Candidate login(String email, String password) {
+        Optional<Candidate> candidateOpt = candidateRepository.findByEmail(email);
+        if (candidateOpt.isEmpty()) {
+            throw new RuntimeException("Email non trouvé");
+        }
+
+        Candidate candidate = candidateOpt.get();
+
+        if (!candidate.getPassword().equals(password)) {
+            throw new RuntimeException("Mot de passe incorrect");
+        }
+
+        return candidate;
+    }
+
+
 }

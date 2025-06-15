@@ -86,10 +86,6 @@ public class Candidate extends User{
         this.image = image;
     }
 
-    public boolean isActive() {
-        return active;
-    }
-
     public void setTitle(String title) {
         this.title = title;
     }

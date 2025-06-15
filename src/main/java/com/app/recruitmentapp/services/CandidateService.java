@@ -22,4 +22,7 @@ public interface CandidateService {
 
     byte[] downloadCVPDF(Long candidateId) throws IOException;
 
+    Candidate login(String email, String password);
+
+
 }
