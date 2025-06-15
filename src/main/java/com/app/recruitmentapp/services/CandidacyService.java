@@ -20,4 +20,6 @@ public interface CandidacyService {
     void acceptApplication(Long id);
 
     void declineApplication(Long id);
+
+
 }
