@@ -12,7 +12,9 @@ public interface CandidateService {
 
     Optional<Candidate> getCandidateById(Long id);
 
-    Candidate saveCandidate(Candidate candidate, MultipartFile imageFile);
+    Candidate saveCandidateWithoutPicture(Candidate candidate);
+
+    Candidate saveCandidateWithPicture(Candidate candidate, MultipartFile imageFile);
 
     Candidate updateCandidate(Long id, Candidate candidate);
 
@@ -22,7 +24,7 @@ public interface CandidateService {
 
     byte[] downloadCVPDF(Long candidateId) throws IOException;
 
-    Candidate login(String email, String password);
+    Candidate login(String email, String rawPassword);
 
 
 }

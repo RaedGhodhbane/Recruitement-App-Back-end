@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+//import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,7 +27,9 @@ public class CandidateServiceImpl implements CandidateService{
 
     @Autowired
     private CandidateRepository candidateRepository;
-
+/*@Autowired
+    private PasswordEncoder passwordEncoder;
+ */
     @Value("${file.upload-dir}")
     private String uploadDir;
 
@@ -41,31 +44,34 @@ public class CandidateServiceImpl implements CandidateService{
         return candidateRepository.findById(id);
     }
 
+   @Override
+    public Candidate saveCandidateWithPicture(Candidate candidate, MultipartFile imageFile) {
+       candidate.setActive(false);
+       candidate.setRole(Role.CANDIDATE);
+       if (imageFile != null && !imageFile.isEmpty()) {
+           String ext = "." + FilenameUtils.getExtension(imageFile.getOriginalFilename());
+           String fileName = UUID.randomUUID().toString();
+           String finalFileName = fileName + ext;
+
+           try {
+               Path rootLocation = Paths.get(uploadDir);
+               System.out.println(rootLocation.toAbsolutePath());
+               Files.copy(imageFile.getInputStream(), rootLocation.resolve(finalFileName));
+
+               candidate.setImage(finalFileName);
+           } catch (IOException e) {
+               e.printStackTrace();
+           }
+       }
+       return candidateRepository.save(candidate);
+   }
+
     @Override
-    public Candidate saveCandidate(Candidate candidate, MultipartFile imageFile) {
+    public Candidate saveCandidateWithoutPicture(Candidate candidate) {
         candidate.setActive(false);
         candidate.setRole(Role.CANDIDATE);
-        if (imageFile != null && !imageFile.isEmpty()) {
-            try {
-                String ext = "." + FilenameUtils.getExtension(imageFile.getOriginalFilename());
-                String fileName = UUID.randomUUID().toString();
-                String finalFileName = fileName + ext;
-
-                Path rootLocation = Paths.get(uploadDir);
-                Files.copy(imageFile.getInputStream(), rootLocation.resolve(finalFileName));
-
-                candidate.setImage(finalFileName);
-            } catch (IOException e) {
-                return candidate;
-            }
-        }
-        else {
-            System.out.println("error");
-        }
-
         return candidateRepository.save(candidate);
     }
-
     @Override
     public Candidate updateCandidate(Long id, Candidate newCandidate) {
         Candidate c = candidateRepository.findById(id).orElse(null);
@@ -125,17 +131,13 @@ public class CandidateServiceImpl implements CandidateService{
     }
 
     @Override
-    public Candidate login(String email, String password) {
-        Optional<Candidate> candidateOpt = candidateRepository.findByEmail(email);
-        if (candidateOpt.isEmpty()) {
-            throw new RuntimeException("Email non trouvé");
-        }
-
-        Candidate candidate = candidateOpt.get();
-
-        if (!candidate.getPassword().equals(password)) {
+    public Candidate login(String email, String rawPassword) {
+        Candidate candidate = candidateRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+  /*      if (!passwordEncoder.matches(rawPassword, candidate.getPassword())) {
             throw new RuntimeException("Mot de passe incorrect");
-        }
+
+   */
 
         return candidate;
     }

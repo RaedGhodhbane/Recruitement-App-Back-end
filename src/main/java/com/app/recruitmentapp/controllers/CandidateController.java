@@ -38,16 +38,21 @@ public class CandidateController {
         return candidate.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PostMapping(value = "/candidate", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Candidate> addCandidate(
-            @ModelAttribute Candidate candidate,
-            @RequestParam("image") MultipartFile imageFile) {
 
-        Candidate savedCandidate = candidateService.saveCandidate(candidate, imageFile);
+    @PostMapping("/addCandidate1")
+    public ResponseEntity<Candidate> addCandidateWithoutPicture(@RequestBody Candidate candidate) {
+        Candidate savedCandidate = candidateService.saveCandidateWithoutPicture(candidate);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedCandidate);
     }
 
+    @PostMapping("/addCandidate2")
+    public ResponseEntity<Candidate> addCandidateWithPicture(
+            @ModelAttribute Candidate candidate,
+            @RequestParam("imageFile") MultipartFile imageFile) {
 
+        Candidate savedCandidate = candidateService.saveCandidateWithPicture(candidate, imageFile);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedCandidate);
+    }
 
     @PutMapping("/{id}")
     public ResponseEntity<Candidate> updateCandidate(@PathVariable Long id, @RequestBody Candidate candidate) {
