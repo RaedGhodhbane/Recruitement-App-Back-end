@@ -2,13 +2,17 @@ package com.app.recruitmentapp.services;
 
 import com.app.recruitmentapp.entities.Candidate;
 import com.app.recruitmentapp.entities.Role;
+import com.app.recruitmentapp.exceptions.EmailAlreadyUsedException;
 import com.app.recruitmentapp.repositories.CandidateRepository;
+import com.app.recruitmentapp.repositories.UserRepository;
+import com.app.recruitmentapp.security.JwtUtil;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 //import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,22 +22,25 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
-public class CandidateServiceImpl implements CandidateService{
+public class CandidateServiceImpl implements CandidateService {
 
     @Autowired
     private CandidateRepository candidateRepository;
-/*@Autowired
+    @Autowired
     private PasswordEncoder passwordEncoder;
- */
     @Value("${file.upload-dir}")
     private String uploadDir;
 
+    @Autowired
+    private UserRepository userRepository;
+
     private static final String CV_FOLDER = "/C:/downloads";
+    @Autowired
+    private JwtUtil jwtUtil;
+
     @Override
     public List<Candidate> getAllCandidates() {
         return candidateRepository.findAll();
@@ -44,34 +51,55 @@ public class CandidateServiceImpl implements CandidateService{
         return candidateRepository.findById(id);
     }
 
-   @Override
+    @Override
     public Candidate saveCandidateWithPicture(Candidate candidate, MultipartFile imageFile) {
-       candidate.setActive(false);
-       candidate.setRole(Role.CANDIDATE);
-       if (imageFile != null && !imageFile.isEmpty()) {
-           String ext = "." + FilenameUtils.getExtension(imageFile.getOriginalFilename());
-           String fileName = UUID.randomUUID().toString();
-           String finalFileName = fileName + ext;
+        candidate.setActive(false);
+        candidate.setRole(Role.CANDIDATE);
+        if (imageFile != null && !imageFile.isEmpty()) {
+            String ext = "." + FilenameUtils.getExtension(imageFile.getOriginalFilename());
+            String fileName = UUID.randomUUID().toString();
+            String finalFileName = fileName + ext;
 
-           try {
-               Path rootLocation = Paths.get(uploadDir);
-               System.out.println(rootLocation.toAbsolutePath());
-               Files.copy(imageFile.getInputStream(), rootLocation.resolve(finalFileName));
+            try {
+                Path rootLocation = Paths.get(uploadDir);
+                System.out.println(rootLocation.toAbsolutePath());
+                Files.copy(imageFile.getInputStream(), rootLocation.resolve(finalFileName));
 
-               candidate.setImage(finalFileName);
-           } catch (IOException e) {
-               e.printStackTrace();
-           }
-       }
-       return candidateRepository.save(candidate);
-   }
+                candidate.setImage(finalFileName);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return candidateRepository.save(candidate);
+    }
 
     @Override
+    public Candidate registerCandidate(String email, String rawPassword) {
+
+        if (userRepository.findByEmail(email).isPresent()) {
+            throw new EmailAlreadyUsedException("Cet e-mail est déjà utilisé");
+        }
+
+        Candidate candidate = new Candidate();
+        candidate.setActive(false);
+        candidate.setRole(Role.CANDIDATE);
+        candidate.setEmail(email);
+        candidate.setPassword(passwordEncoder.encode(rawPassword));
+
+        return candidateRepository.save(candidate);
+    }
+   /*
+   @Override
     public Candidate saveCandidateWithoutPicture(Candidate candidate) {
         candidate.setActive(false);
         candidate.setRole(Role.CANDIDATE);
+        String hashedPassword = passwordEncoder.encode(candidate.getPassword());
+        candidate.setPassword(hashedPassword);
         return candidateRepository.save(candidate);
     }
+
+    */
+
     @Override
     public Candidate updateCandidate(Long id, Candidate newCandidate) {
         Candidate c = candidateRepository.findById(id).orElse(null);
@@ -94,6 +122,7 @@ public class CandidateServiceImpl implements CandidateService{
     @Override
     public void deleteCandidate(Long id) {
         if (candidateRepository.existsById(id)) {
+            System.out.println("Bien");
             candidateRepository.deleteById(id);
         } else {
             throw new RuntimeException("Candidat non trouvé");
@@ -130,17 +159,20 @@ public class CandidateServiceImpl implements CandidateService{
         return Files.readAllBytes(path);
     }
 
-    @Override
+   /*@Override
     public Candidate login(String email, String rawPassword) {
         Candidate candidate = candidateRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
-  /*      if (!passwordEncoder.matches(rawPassword, candidate.getPassword())) {
+        if (!passwordEncoder.matches(rawPassword, candidate.getPassword())) {
             throw new RuntimeException("Mot de passe incorrect");
-
-   */
-
+        }
         return candidate;
     }
+
+    */
+
+
+
 
 
 }

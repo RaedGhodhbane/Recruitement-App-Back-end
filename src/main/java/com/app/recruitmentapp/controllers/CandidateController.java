@@ -18,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -39,10 +40,26 @@ public class CandidateController {
     }
 
 
+    /*
     @PostMapping("/addCandidate1")
     public ResponseEntity<Candidate> addCandidateWithoutPicture(@RequestBody Candidate candidate) {
         Candidate savedCandidate = candidateService.saveCandidateWithoutPicture(candidate);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedCandidate);
+    }
+
+     */
+
+    @PostMapping("/registerCandidate")
+    public ResponseEntity<?> registerCandidate(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        String password = request.get("password");
+
+        try {
+            Candidate candidate = candidateService.registerCandidate(email,password);
+            return ResponseEntity.ok(candidate);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", e.getMessage()));
+        }
     }
 
     @PostMapping("/addCandidate2")
@@ -96,4 +113,6 @@ public class CandidateController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
+
+
 }

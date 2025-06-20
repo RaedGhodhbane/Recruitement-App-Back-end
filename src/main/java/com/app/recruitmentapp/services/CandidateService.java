@@ -5,6 +5,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface CandidateService {
@@ -12,7 +13,10 @@ public interface CandidateService {
 
     Optional<Candidate> getCandidateById(Long id);
 
-    Candidate saveCandidateWithoutPicture(Candidate candidate);
+    //Candidate saveCandidateWithoutPicture(Candidate candidate);
+
+    Candidate registerCandidate(String email, String rawPassword);
+
 
     Candidate saveCandidateWithPicture(Candidate candidate, MultipartFile imageFile);
 
@@ -24,7 +28,7 @@ public interface CandidateService {
 
     byte[] downloadCVPDF(Long candidateId) throws IOException;
 
-    Candidate login(String email, String rawPassword);
+
 
 
 }
