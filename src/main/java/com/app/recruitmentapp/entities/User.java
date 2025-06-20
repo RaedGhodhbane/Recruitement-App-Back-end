@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "user")
+@Table(name = "user", uniqueConstraints = @UniqueConstraint(columnNames = "email"))
 @Builder
 @Inheritance(strategy = InheritanceType.JOINED)
 public class User {
@@ -19,7 +19,9 @@ public class User {
     private Long id;
     private String name;
     private String firstName;
+    @Column(unique = true, nullable = false)
     private String email;
+    @Column(nullable = false)
     private String password;
     @Enumerated(EnumType.STRING)
     private Role role;
