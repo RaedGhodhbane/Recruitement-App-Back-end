@@ -22,6 +22,7 @@ import java.util.List;
 public class Recruiter extends User {
     private String address;
     private Instant creationDate;
+    private String image;
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "recruiter")
     private List<Offer> offerList;
@@ -58,5 +59,17 @@ public class Recruiter extends User {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
+
+    public boolean isActive() {
+        return active;
     }
 }
