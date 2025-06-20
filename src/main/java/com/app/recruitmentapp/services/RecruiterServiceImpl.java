@@ -1,19 +1,41 @@
 package com.app.recruitmentapp.services;
 
+import com.app.recruitmentapp.entities.Candidate;
 import com.app.recruitmentapp.entities.Recruiter;
 import com.app.recruitmentapp.entities.Role;
+import com.app.recruitmentapp.exceptions.EmailAlreadyUsedException;
 import com.app.recruitmentapp.repositories.RecruiterRepository;
+import com.app.recruitmentapp.repositories.UserRepository;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class RecruiterServiceImpl implements RecruiterService {
 
     @Autowired
     private RecruiterRepository recruiterRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Value("${file.upload-dir}")
+    private String uploadDir;
+
     @Override
     public List<Recruiter> getAllRecruiters() {
         return recruiterRepository.findAll();
@@ -24,12 +46,50 @@ public class RecruiterServiceImpl implements RecruiterService {
         return recruiterRepository.findById(id);
     }
 
-    @Override
-    public Recruiter saveRecruiter(Recruiter recruiter) {
+    /*@Override
+    public Recruiter addRecruiterWithoutPicture(Recruiter recruiter) {
         recruiter.setActive(false);
         recruiter.setRole(Role.RECRUITER);
         return recruiterRepository.save(recruiter);
     }
+     */
+
+    @Override
+    public Recruiter registerRecruiter(String email, String rawPassword) {
+
+        if (userRepository.findByEmail(email).isPresent()) {
+            throw new EmailAlreadyUsedException("Cet e-mail est déjà utilisé");
+        }
+
+        Recruiter recruiter = new Recruiter();
+        recruiter.setActive(false);
+        recruiter.setRole(Role.RECRUITER);
+        recruiter.setEmail(email);
+        recruiter.setPassword(passwordEncoder.encode(rawPassword));
+
+        return recruiterRepository.save(recruiter);
+    }
+
+    @Override
+    public Recruiter addRecruiterWithPicture(Recruiter recruiter, MultipartFile imageFile) {
+        recruiter.setActive(false);
+        recruiter.setRole(Role.RECRUITER);
+        if (imageFile != null && !imageFile.isEmpty()) {
+            String ext = "." + FilenameUtils.getExtension(imageFile.getOriginalFilename());
+            String fileName = UUID.randomUUID().toString();
+            String finalFileName = fileName + ext;
+
+            try {
+                Path rootLocation = Paths.get(uploadDir);
+                Files.copy(imageFile.getInputStream(), rootLocation.resolve(finalFileName));
+                recruiter.setImage(finalFileName);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return recruiterRepository.save(recruiter);
+    }
+
 
     @Override
     public Recruiter updateRecruiter(Long id, Recruiter newRecruiter) {
