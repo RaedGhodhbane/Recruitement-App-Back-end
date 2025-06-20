@@ -12,7 +12,9 @@ public interface AdminService {
 
     Optional<Admin> getAdminById(Long id);
 
-    Admin saveAdmin(Admin admin);
+    // Admin saveAdmin(Admin admin);
+    Admin registerAdmin(String email, String rawPassword);
+
 
     Admin updateAdmin(Long id, Admin admin);
 
@@ -25,4 +27,8 @@ public interface AdminService {
     void activateCandidateAccount(Long candidateId);
 
     void desactivateCandidateAccount(Long candidateId);
+
+
+
+
 }

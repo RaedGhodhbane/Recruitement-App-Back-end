@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -28,10 +29,25 @@ public class AdminController {
         return admin.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    /*
     @PostMapping()
     public ResponseEntity<Admin> addAdmin(@RequestBody Admin admin) {
         Admin savedAdmin = adminService.saveAdmin(admin);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedAdmin);
+    }
+     */
+
+    @PostMapping("/registerAdmin")
+    public ResponseEntity<?> registerAdmin(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        String password = request.get("password");
+
+        try {
+            Admin admin = adminService.registerAdmin(email,password);
+            return ResponseEntity.ok(admin);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", e.getMessage()));
+        }
     }
 
     @PutMapping("/{id}")
@@ -77,5 +93,7 @@ public class AdminController {
         adminService.desactivateCandidateAccount(id);
         return ResponseEntity.ok().build();
     }
+
+
 }
 

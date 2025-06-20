@@ -1,11 +1,14 @@
 package com.app.recruitmentapp.services;
 
 import com.app.recruitmentapp.entities.Admin;
+import com.app.recruitmentapp.entities.Recruiter;
 import com.app.recruitmentapp.entities.Role;
+import com.app.recruitmentapp.exceptions.EmailAlreadyUsedException;
 import com.app.recruitmentapp.repositories.AdminRepository;
 import com.app.recruitmentapp.repositories.CandidateRepository;
 import com.app.recruitmentapp.repositories.RecruiterRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +26,9 @@ public class AdminServiceImpl implements AdminService{
     @Autowired
     private CandidateRepository candidateRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Override
     public List<Admin> getAllAdmins() {
         return adminRepository.findAll();
@@ -32,10 +38,27 @@ public class AdminServiceImpl implements AdminService{
         return adminRepository.findById(id);
     }
 
+    /*
     @Override
     public Admin saveAdmin(Admin admin) {
         admin.setActive(true);
         admin.setRole(Role.ADMIN);
+        return adminRepository.save(admin);
+    }
+     */
+    @Override
+    public Admin registerAdmin(String email, String rawPassword) {
+
+        if (adminRepository.findByEmail(email).isPresent()) {
+            throw new EmailAlreadyUsedException("Cet e-mail est déjà utilisé");
+        }
+
+        Admin admin = new Admin();
+        admin.setActive(false);
+        admin.setRole(Role.ADMIN);
+        admin.setEmail(email);
+        admin.setPassword(passwordEncoder.encode(rawPassword));
+
         return adminRepository.save(admin);
     }
 
@@ -104,5 +127,4 @@ public class AdminServiceImpl implements AdminService{
             throw new RuntimeException("Candidat non trouvé avec l'ID: " + candidateId);
         });
     }
-
 }
