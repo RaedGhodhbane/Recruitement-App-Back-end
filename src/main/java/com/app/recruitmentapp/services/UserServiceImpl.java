@@ -95,5 +95,9 @@ public class UserServiceImpl implements UserService {
         return response;
     }
 
+    public void logout(String token) {
+        System.out.println("Logout - JWT token reçu : " + token);
+    }
+
 
 }

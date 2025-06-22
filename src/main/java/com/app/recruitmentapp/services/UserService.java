@@ -21,4 +21,5 @@ public interface UserService {
 
     Map<String, Object> login(String email, String rawPassword);
 
+    void logout(String token);
 }
