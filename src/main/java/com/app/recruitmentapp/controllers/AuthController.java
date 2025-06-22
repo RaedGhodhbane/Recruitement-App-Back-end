@@ -5,6 +5,8 @@ import com.app.recruitmentapp.entities.Candidate;
 import com.app.recruitmentapp.entities.Recruiter;
 import com.app.recruitmentapp.security.JwtUtil;
 import com.app.recruitmentapp.services.*;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,9 +25,6 @@ public class AuthController {
     private UserService userService;
 
     @Autowired
-    private TokenBlacklistService tokenBlacklistService;
-
-    @Autowired
     private JwtUtil jwtUtil;
 
     @PostMapping("/login")
@@ -42,19 +41,14 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(@RequestHeader("Authorization") String authHeader) {
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "Missing or invalid Authorization header."));
+    public ResponseEntity<String> logout(HttpServletRequest request) {
+        String token = jwtUtil.extractToken(request);
+        if (token != null) {
+            userService.logout(token);
+            return ResponseEntity.ok("Déconnexion réussie");
         }
-
-        String token = authHeader.substring(7); // Retire "Bearer "
-
-        userService.logout(token);
-
-        Date expiration = jwtUtil.extractExpiration(token);
-        tokenBlacklistService.blacklistToken(token, expiration.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
-
-        return ResponseEntity.ok(Map.of("message", "Logged out successfully."));
+        return ResponseEntity.badRequest().body("Token manquant");
     }
+
 }
 

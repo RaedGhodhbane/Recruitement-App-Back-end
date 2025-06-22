@@ -1,5 +1,6 @@
 package com.app.recruitmentapp.security;
 
+import com.app.recruitmentapp.services.TokenBlacklistService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,27 +20,38 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    private TokenBlacklistService tokenBlacklistService;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        String authHeader = request.getHeader("Authorization");
+        String token = jwtUtil.extractToken(request);
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
-            String email = jwtUtil.extractEmail(token);
+        if(tokenBlacklistService.isTokenBlacklisted(token)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+        if (token != null) {
+            try {
+                String email = jwtUtil.extractEmail(token);
 
-            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                if (jwtUtil.isTokenValid(token, email)) {
-                    UsernamePasswordAuthenticationToken auth =
-                            new UsernamePasswordAuthenticationToken(email, null, List.of());
-                    SecurityContextHolder.getContext().setAuthentication(auth);
+                if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                    if (jwtUtil.isTokenValid(token, email)) {
+                        UsernamePasswordAuthenticationToken auth =
+                                new UsernamePasswordAuthenticationToken(email, null, List.of());
+                        SecurityContextHolder.getContext().setAuthentication(auth);
+                    }
                 }
+            } catch (io.jsonwebtoken.JwtException e ) {
+                System.out.println("JWT invalid: " + e.getMessage());
             }
         }
 
         filterChain.doFilter(request, response);
     }
+
 }
 
