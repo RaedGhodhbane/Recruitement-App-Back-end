@@ -36,7 +36,10 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // — règles d’accès —
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()   // login / register / refresh / logout
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/candidate/registerCandidate").permitAll()
+                        .requestMatchers("/candidate/**").permitAll()
+                        .requestMatchers("/recruiter/**").permitAll()
                         .anyRequest().authenticated())
                 // — filtre qui valide le JWT avant UsernamePasswordAuthenticationFilter —
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
