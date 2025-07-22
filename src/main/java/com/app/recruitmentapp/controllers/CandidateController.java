@@ -5,6 +5,7 @@ import com.app.recruitmentapp.services.CandidateService;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -22,6 +23,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+@CrossOrigin("http://localhost:4200")
 @RestController
 @RequestMapping("/candidate")
 public class CandidateController {
@@ -33,7 +35,7 @@ public class CandidateController {
         return candidateService.getAllCandidates();
     }
 
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<Candidate> getCandidateById(@PathVariable Long id) {
         Optional<Candidate> candidate = candidateService.getCandidateById(id);
         return candidate.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
@@ -113,6 +115,14 @@ public class CandidateController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
+
+    @GetMapping("/files/{filename:.+}")
+    @ResponseBody
+    public ResponseEntity<Resource> getFile(@PathVariable String filename) {
+        ResponseEntity<Resource> resource = candidateService.getFile(filename);
+        return ResponseEntity.ok(resource.getBody());
+    }
+
 
 
 }

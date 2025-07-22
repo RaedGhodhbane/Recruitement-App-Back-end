@@ -1,6 +1,9 @@
 package com.app.recruitmentapp.services;
 
 import com.app.recruitmentapp.entities.Candidate;
+import org.apache.coyote.Response;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -27,6 +30,8 @@ public interface CandidateService {
     void createCV(Long candidateId, MultipartFile cvFile) throws IOException;
 
     byte[] downloadCVPDF(Long candidateId) throws IOException;
+
+    ResponseEntity<Resource> getFile(String filename);
 
 
 
