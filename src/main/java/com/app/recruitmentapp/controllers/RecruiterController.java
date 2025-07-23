@@ -4,6 +4,7 @@ import com.app.recruitmentapp.entities.Candidate;
 import com.app.recruitmentapp.entities.Recruiter;
 import com.app.recruitmentapp.services.RecruiterService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -81,5 +82,12 @@ public class RecruiterController {
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
+    }
+
+    @GetMapping("/files/{filename:.+}")
+    @ResponseBody
+    public ResponseEntity<Resource> getFile(@PathVariable String filename) {
+        ResponseEntity<Resource> resource = recruiterService.getFile(filename);
+        return ResponseEntity.ok(resource.getBody());
     }
 }

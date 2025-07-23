@@ -9,11 +9,16 @@ import com.app.recruitmentapp.repositories.UserRepository;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -112,6 +117,26 @@ public class RecruiterServiceImpl implements RecruiterService {
             recruiterRepository.deleteById(id);
         } else {
             throw new RuntimeException("Recruteur non trouvé");
+        }
+    }
+
+    @Override
+    public ResponseEntity<Resource> getFile(String filename) {
+        // Il construit le chemin complet du fichier en combinant le dossier d’upload //(`uploadDir`) et le nom du fichier reçu.
+        Path file = Paths.get(uploadDir).resolve(filename);
+        Resource resource;
+        try {
+//Il convertit le fichier en un objet `Resource` pour pouvoir être renvoyé dans la réponse HTTP
+            resource = new UrlResource(file.toUri());
+        } catch (MalformedURLException e) {
+            return ResponseEntity.notFound().build();
+        }
+        if (resource.exists() || resource.isReadable()) {
+//HttpHeaders.CONTENT_DISPOSITION permet d'envoyer le fichier avec une suggestion de téléchargement.
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() +"\"").body(resource);
+        } else {
+            return ResponseEntity.notFound().build();
         }
     }
 
