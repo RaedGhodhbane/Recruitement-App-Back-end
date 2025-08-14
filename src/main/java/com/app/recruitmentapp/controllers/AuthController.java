@@ -45,7 +45,7 @@ public class AuthController {
         String token = jwtUtil.extractToken(request);
         if (token != null) {
             userService.logout(token);
-            return ResponseEntity.ok("Déconnexion réussie");
+            return ResponseEntity.ok(Map.of("message", "Déconnexion réussie").toString());
         }
         return ResponseEntity.badRequest().body("Token manquant");
     }
