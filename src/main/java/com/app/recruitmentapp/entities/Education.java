@@ -19,7 +19,9 @@ public class Education {
     private String diploma;
     private String university;
     private String endDate;
-    @ManyToOne(fetch = FetchType.LAZY)
+    private String description;
+
+    @ManyToOne
     @JoinColumn(name = "candidate_id")
     private Candidate candidate;
 
@@ -54,6 +56,15 @@ public class Education {
     public void setEndDate(String endDate) {
         this.endDate = endDate;
     }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
 
     public Candidate getCandidate() {
         return candidate;

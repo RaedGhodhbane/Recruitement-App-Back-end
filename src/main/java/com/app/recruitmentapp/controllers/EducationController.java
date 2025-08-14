@@ -7,9 +7,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+@CrossOrigin("http://localhost:4200")
 @RestController
 @RequestMapping("/education")
 public class EducationController {
@@ -44,10 +47,10 @@ public class EducationController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteEducation(@PathVariable Long id) {
+    public ResponseEntity<Map<String, String>> deleteEducation(@PathVariable Long id) {
         try {
             educationService.deleteEducation(id);
-            return ResponseEntity.ok("Education deleted successfully");
+            return ResponseEntity.ok(Collections.singletonMap("message", "Education deleted successfully"));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }

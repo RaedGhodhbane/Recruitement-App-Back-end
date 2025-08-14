@@ -39,7 +39,7 @@ public class EducationServiceImpl implements EducationService {
         e.setDiploma(newEducation.getDiploma());
         e.setUniversity(newEducation.getUniversity());
         e.setEndDate(newEducation.getEndDate());
-        e.setCandidate(newEducation.getCandidate());
+        e.setDescription(newEducation.getDescription());
         educationRepository.saveAndFlush(e);
         return e;
     }
@@ -49,7 +49,7 @@ public class EducationServiceImpl implements EducationService {
         if (educationRepository.existsById(id)) {
             educationRepository.deleteById(id);
         } else {
-            throw new RuntimeException("Candidat non trouvé");
+            throw new RuntimeException("Education non trouvé");
         }
     }
 
