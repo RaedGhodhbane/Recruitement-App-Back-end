@@ -99,15 +99,47 @@ public class RecruiterServiceImpl implements RecruiterService {
     @Override
     public Recruiter updateRecruiter(Long id, Recruiter newRecruiter) {
          Recruiter r = recruiterRepository.findById(id).orElse(null);
-         r.setName(newRecruiter.getName());
-         r.setFirstName(newRecruiter.getFirstName());
-         r.setActive(newRecruiter.getActive());
-         r.setAddress(newRecruiter.getAddress());
-         r.setEmail(newRecruiter.getEmail());
-         r.setPassword(newRecruiter.getPassword());
-         r.setRole(newRecruiter.getRole());
-         r.setCreationDate(newRecruiter.getCreationDate());
-         r.setOfferList(newRecruiter.getOfferList());
+        if (newRecruiter.getName() != null) {
+            r.setName(newRecruiter.getName());
+        }
+
+        if (newRecruiter.getFirstName() != null) {
+            r.setFirstName(newRecruiter.getFirstName());
+        }
+
+
+
+        if (newRecruiter.getAddress() != null) {
+            r.setAddress(newRecruiter.getAddress());
+        }
+
+        if (newRecruiter.getEmail() != null) {
+            r.setEmail(newRecruiter.getEmail());
+        }
+
+        if (newRecruiter.getRole() != null) {
+            r.setRole(newRecruiter.getRole());
+        }
+
+        if (newRecruiter.getCreationDate() != null) {
+            r.setCreationDate(newRecruiter.getCreationDate());
+        }
+
+        if (newRecruiter.getCompanyName() != null) {
+            r.setCompanyName(newRecruiter.getCompanyName());
+        }
+
+        if (newRecruiter.getPhone() != null) {
+            r.setPhone(newRecruiter.getPhone());
+        }
+
+        if (newRecruiter.getWebsite() != null) {
+            r.setWebsite(newRecruiter.getWebsite());
+        }
+
+        if (newRecruiter.getDescription() != null) {
+            r.setDescription(newRecruiter.getDescription());
+        }
          recruiterRepository.saveAndFlush(r);
          return r;
     }

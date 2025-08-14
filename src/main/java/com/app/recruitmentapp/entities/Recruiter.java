@@ -27,6 +27,10 @@ public class Recruiter extends User {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "recruiter")
     private List<Offer> offerList;
     private boolean active;
+    private String companyName;
+    private String phone;
+    private String website;
+    private String description;
 
 
     public String getAddress() {
@@ -71,5 +75,37 @@ public class Recruiter extends User {
 
     public boolean isActive() {
         return active;
+    }
+
+    public String getCompanyName() {
+        return companyName;
+    }
+
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getWebsite() {
+        return website;
+    }
+
+    public void setWebsite(String website) {
+        this.website = website;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }
