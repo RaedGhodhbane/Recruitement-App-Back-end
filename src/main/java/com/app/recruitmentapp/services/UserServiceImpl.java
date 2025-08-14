@@ -88,7 +88,11 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("Mot de passe incorrect");
         }
 
-        String token = jwtUtil.generateToken(user.getEmail());
+        List<String> roles = List.of("ROLE_" + user.getRole().name());
+
+
+        String token = jwtUtil.generateToken(user.getEmail(), roles);
+
 
         Map<String, Object> response = new HashMap<>();
         response.put("token", token);
