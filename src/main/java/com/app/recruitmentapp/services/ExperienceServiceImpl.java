@@ -38,9 +38,9 @@ public class ExperienceServiceImpl implements ExperienceService {
         Experience ex = experienceRepository.findById(id).orElse(null);
         ex.setCompanyName(newExperience.getCompanyName());
         ex.setJobTitle(newExperience.getJobTitle());
-        ex.setStartDate(newExperience.getStartDate());
-        ex.setEndDate(newExperience.getEndDate());
-        ex.setCandidate(newExperience.getCandidate());
+        ex.setStartExpDate(newExperience.getStartExpDate());
+        ex.setEndExpDate(newExperience.getEndExpDate());
+        ex.setDescription(newExperience.getDescription());
         experienceRepository.saveAndFlush(ex);
         return ex;
     }

@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.Date;
 import java.time.Instant;
 
 @Entity
@@ -21,9 +22,10 @@ public class Experience {
     private Long id;
     private String companyName;
     private String jobTitle;
-    private Instant startDate;
-    private Instant endDate;
-    @ManyToOne(fetch = FetchType.LAZY)
+    private Date startExpDate;
+    private Date endExpDate;
+    private String description;
+    @ManyToOne
     @JoinColumn(name = "candidate_id")
     private Candidate candidate;
 
@@ -51,20 +53,28 @@ public class Experience {
         this.jobTitle = jobTitle;
     }
 
-    public Instant getStartDate() {
-        return startDate;
+    public Date getStartExpDate() {
+        return startExpDate;
     }
 
-    public void setStartDate(Instant startDate) {
-        this.startDate = startDate;
+    public void setStartExpDate(Date startExpDate) {
+        this.startExpDate = startExpDate;
     }
 
-    public Instant getEndDate() {
-        return endDate;
+    public Date getEndExpDate() {
+        return endExpDate;
     }
 
-    public void setEndDate(Instant endDate) {
-        this.endDate = endDate;
+    public void setEndExpDate(Date endExpDate) {
+        this.endExpDate = endExpDate;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public Candidate getCandidate() {

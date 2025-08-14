@@ -7,7 +7,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -44,10 +46,10 @@ public class ExperienceController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteExperience(@PathVariable Long id) {
+    public ResponseEntity<Map<String,String>> deleteExperience(@PathVariable Long id) {
         try {
             experienceService.deleteExperience(id);
-            return ResponseEntity.ok("Experience deleted successfully");
+            return ResponseEntity.ok(Collections.singletonMap("message","Experience deleted successfully"));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
