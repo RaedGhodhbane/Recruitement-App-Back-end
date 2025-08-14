@@ -73,9 +73,10 @@ public class CandidateController {
         return ResponseEntity.status(HttpStatus.CREATED).body(savedCandidate);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<Candidate> updateCandidate(@PathVariable Long id, @RequestBody Candidate candidate) {
         try {
+            System.out.println("x");
             Candidate updatedCandidate = candidateService.updateCandidate(id, candidate);
             return ResponseEntity.ok(updatedCandidate);
         } catch (RuntimeException e) {

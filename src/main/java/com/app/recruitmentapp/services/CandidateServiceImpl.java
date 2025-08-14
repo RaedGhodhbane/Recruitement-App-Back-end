@@ -107,11 +107,14 @@ public class CandidateServiceImpl implements CandidateService {
     @Override
     public Candidate updateCandidate(Long id, Candidate newCandidate) {
         Candidate c = candidateRepository.findById(id).orElse(null);
+
         c.setName(newCandidate.getName());
         c.setFirstName(newCandidate.getFirstName());
         c.setEmail(newCandidate.getEmail());
-        c.setPassword(newCandidate.getPassword());
-        c.setRole(newCandidate.getRole());
+      // c.setPassword(newCandidate.getPassword());
+        if (newCandidate.getRole() != null) {
+            c.setRole(newCandidate.getRole());
+        }
         c.setCv(newCandidate.getCv());
         c.setDescription(newCandidate.getDescription());
         c.setAddress(newCandidate.getAddress());
@@ -119,7 +122,11 @@ public class CandidateServiceImpl implements CandidateService {
         c.setCandidacyList(newCandidate.getCandidacyList());
         c.setExperienceList(newCandidate.getExperienceList());
         c.setActive(newCandidate.getActive());
+        c.setPhone(newCandidate.getPhone());
+        c.setDateOfBirth(newCandidate.getDateOfBirth());
+        c.setGender(newCandidate.getGender());
         candidateRepository.saveAndFlush(c);
+
         return c;
     }
 

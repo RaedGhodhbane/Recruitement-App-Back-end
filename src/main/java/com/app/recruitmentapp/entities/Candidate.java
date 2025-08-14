@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -19,6 +20,10 @@ public class Candidate extends User{
     private String address;
     private String title;
     private String image;
+    private String phone;
+    private Date dateOfBirth;
+    private String gender;
+    @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "candidate")
     private List<Candidacy> candidacyList;
     @JsonIgnore
@@ -120,5 +125,29 @@ public class Candidate extends User{
 
     public void setEducationList(List<Education> educationList) {
         this.educationList = educationList;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public Date getDateOfBirth() {
+        return dateOfBirth;
+    }
+
+    public void setDateOfBirth(Date dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
     }
 }
