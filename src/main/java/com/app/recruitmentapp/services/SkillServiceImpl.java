@@ -37,7 +37,7 @@ public class SkillServiceImpl implements SkillService{
     public Skill updateSkill(Long id, Skill newSkill) {
         Skill sk = skillRepository.findById(id).orElse(null);
         sk.setTitle(newSkill.getTitle());
-        sk.setLevel(newSkill.getLevel());
+        sk.setPercentage(newSkill.getPercentage());
         sk.setCandidate(newSkill.getCandidate());
         skillRepository.saveAndFlush(sk);
         return sk;

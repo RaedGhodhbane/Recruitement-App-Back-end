@@ -7,7 +7,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -44,10 +46,10 @@ public class SkillController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteSkill(@PathVariable Long id) {
+    public ResponseEntity<Map<String,String>> deleteSkill(@PathVariable Long id) {
         try {
             skillService.deleteSkill(id);
-            return ResponseEntity.ok("Skill deleted successfully");
+            return ResponseEntity.ok(Collections.singletonMap("message", "Skill deleted successfully"));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }

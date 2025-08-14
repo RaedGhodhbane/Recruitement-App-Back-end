@@ -17,8 +17,8 @@ public class Skill {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String title;
-    private String level;
-    @ManyToOne(fetch = FetchType.LAZY)
+    private String percentage;
+    @ManyToOne
     @JoinColumn(name = "candidate_id")
     private Candidate candidate;
 
@@ -38,12 +38,12 @@ public class Skill {
         this.title = title;
     }
 
-    public String getLevel() {
-        return level;
+    public String getPercentage() {
+        return percentage;
     }
 
-    public void setLevel(String level) {
-        this.level = level;
+    public void setPercentage(String percentage) {
+        this.percentage = percentage;
     }
 
     public Candidate getCandidate() {
