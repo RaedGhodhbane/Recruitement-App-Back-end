@@ -6,8 +6,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.cglib.core.Local;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -24,10 +26,11 @@ public class Offer {
     private String description;
     private String type;
     private String address;
-    private double salaire;
+    private double salary;
     private String experience;
-    private Instant publicationDate;
-    private Instant expirationDate;
+    private LocalDate publicationDate;
+    private LocalDate expirationDate;
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "offer")
     private List<Candidacy> candidacyList;
     @JsonIgnore
@@ -36,7 +39,6 @@ public class Offer {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recruiter_id")
     private Recruiter recruiter;
-
     public Long getId() {
         return id;
     }
@@ -77,12 +79,12 @@ public class Offer {
         this.address = address;
     }
 
-    public double getSalaire() {
-        return salaire;
+    public double getSalary() {
+        return salary;
     }
 
-    public void setSalaire(double salaire) {
-        this.salaire = salaire;
+    public void setSalary(double salary) {
+        this.salary = salary;
     }
 
     public String getExperience() {
@@ -93,19 +95,19 @@ public class Offer {
         this.experience = experience;
     }
 
-    public Instant getPublicationDate() {
+    public LocalDate getPublicationDate() {
         return publicationDate;
     }
 
-    public void setPublicationDate(Instant publicationDate) {
+    public void setPublicationDate(LocalDate publicationDate) {
         this.publicationDate = publicationDate;
     }
 
-    public Instant getExpirationDate() {
+    public LocalDate getExpirationDate() {
         return expirationDate;
     }
 
-    public void setExpirationDate(Instant expirationDate) {
+    public void setExpirationDate(LocalDate expirationDate) {
         this.expirationDate = expirationDate;
     }
 
