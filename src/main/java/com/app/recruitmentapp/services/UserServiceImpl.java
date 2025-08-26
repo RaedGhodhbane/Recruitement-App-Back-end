@@ -88,6 +88,18 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("Mot de passe incorrect");
         }
 
+        if (user instanceof Candidate candidate) {
+            if (!candidate.isActive()) {
+                throw new RuntimeException("Compte désactivé. Veuillez contacter l'administrateur.");
+            }
+        }
+
+        if (user instanceof Recruiter recruiter) {
+            if (!recruiter.isActive()) {
+                throw new RuntimeException("Compte désactivé. Veuillez contacter l'administrateur.");
+            }
+        }
+
         List<String> roles = List.of("ROLE_" + user.getRole().name());
 
 
