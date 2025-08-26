@@ -50,6 +50,9 @@ public class SecurityConfig {
                         .requestMatchers("/candidate/**").permitAll()
                         .requestMatchers("/recruiter/**").permitAll()
                         .requestMatchers("/offer/**").permitAll()
+                        .requestMatchers("/admin/**").permitAll()
+
+
                         .anyRequest().authenticated())
                 // — filtre qui valide le JWT avant UsernamePasswordAuthenticationFilter —
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
