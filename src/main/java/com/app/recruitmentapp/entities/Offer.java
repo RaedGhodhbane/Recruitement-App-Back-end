@@ -31,14 +31,19 @@ public class Offer {
     private LocalDate publicationDate;
     private LocalDate expirationDate;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "offer")
-    private List<Candidacy> candidacyList;
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "offer")
+    private List<Candidacy> candidacyList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "offer")
     private List<Question> questionList;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "recruiter_id")
     private Recruiter recruiter;
+
+    @JsonIgnore
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "offer")
+    private List<Favourite> favouriteList;
+
     public Long getId() {
         return id;
     }
@@ -133,5 +138,13 @@ public class Offer {
 
     public void setRecruiter(Recruiter recruiter) {
         this.recruiter = recruiter;
+    }
+
+    public List<Favourite> getFavouriteList() {
+        return favouriteList;
+    }
+
+    public void setFavouriteList(List<Favourite> favouriteList) {
+        this.favouriteList = favouriteList;
     }
 }

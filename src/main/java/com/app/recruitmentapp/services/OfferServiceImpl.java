@@ -74,7 +74,7 @@ public class OfferServiceImpl implements OfferService {
         if (offerRepository.existsById(id)) {
             offerRepository.deleteById(id);
         } else {
-            throw new RuntimeException("Candidat non trouvé");
+            throw new RuntimeException("Offre non trouvé");
         }
     }
 

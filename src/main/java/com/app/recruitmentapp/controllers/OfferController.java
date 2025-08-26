@@ -35,6 +35,7 @@ public class OfferController {
         return offer.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @PreAuthorize("hasRole('RECRUITER')")
     @PostMapping(path = "/{idRecruiter}")
     public ResponseEntity<Offer> addOffer(
             @RequestBody Offer offer,
