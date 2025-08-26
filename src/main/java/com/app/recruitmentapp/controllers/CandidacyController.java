@@ -65,4 +65,10 @@ public class CandidacyController {
         return ResponseEntity.noContent().build(); // 204 No Content
     }
 
+    @GetMapping("/candidacies/exists")
+    public boolean existsCandidacy(@RequestParam Long offerId, @RequestParam Long candidateId) {
+        return candidacyService.candidacyExists(offerId, candidateId);
+    }
+
+
 }

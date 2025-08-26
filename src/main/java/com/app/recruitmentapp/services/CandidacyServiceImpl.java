@@ -62,4 +62,9 @@ public class CandidacyServiceImpl implements CandidacyService {
         candidacy.setStatus(Status.DECLINED);
         candidacyRepository.save(candidacy);
     }
+
+    public boolean candidacyExists(Long offerId, Long candidateId) {
+        return candidacyRepository.existsByOfferIdAndCandidateId(offerId, candidateId);
+    }
+
 }

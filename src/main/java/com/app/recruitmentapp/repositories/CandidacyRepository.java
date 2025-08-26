@@ -4,4 +4,5 @@ import com.app.recruitmentapp.entities.Candidacy;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CandidacyRepository extends JpaRepository<Candidacy, Long> {
+    boolean existsByOfferIdAndCandidateId(Long offerId, Long candidateId);
 }

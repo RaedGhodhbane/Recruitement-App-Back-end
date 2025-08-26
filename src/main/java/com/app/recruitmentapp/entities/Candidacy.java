@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -17,15 +18,14 @@ public class Candidacy {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     @Column(name = "submission_date")
-    private Instant submissionDate;
+    private Date submissionDate;
+    @Enumerated(value = EnumType.STRING)
     private Status status;
     private double score;
-    @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "candidate_id")
     private Candidate candidate;
-    @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "offer_id")
     private Offer offer;
 
@@ -37,11 +37,11 @@ public class Candidacy {
         this.id = id;
     }
 
-    public Instant getSubmissionDate() {
+    public Date getSubmissionDate() {
         return submissionDate;
     }
 
-    public void setSubmissionDate(Instant submissionDate) {
+    public void setSubmissionDate(Date submissionDate) {
         this.submissionDate = submissionDate;
     }
 

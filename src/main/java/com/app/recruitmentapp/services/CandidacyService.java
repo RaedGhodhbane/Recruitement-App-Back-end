@@ -21,5 +21,5 @@ public interface CandidacyService {
 
     void declineApplication(Long id);
 
-
+    boolean candidacyExists(Long offerId, Long candidateId);
 }
