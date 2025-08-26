@@ -1,6 +1,7 @@
 package com.app.recruitmentapp.services;
 
 import com.app.recruitmentapp.entities.Candidate;
+import com.app.recruitmentapp.entities.ChangePassword;
 import org.apache.coyote.Response;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +33,8 @@ public interface CandidateService {
     byte[] downloadCVPDF(Long candidateId) throws IOException;
 
     ResponseEntity<Resource> getFile(String filename);
+
+    String changePassword(Long id, ChangePassword changePasswordRequest);
 
 
 
