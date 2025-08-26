@@ -1,6 +1,4 @@
 package com.app.recruitmentapp.services;
-
-
 import com.app.recruitmentapp.entities.Message;
 
 import java.util.List;
@@ -12,11 +10,9 @@ public interface MessageService {
 
     Optional<Message> getMessageById(Long id);
 
-    Message sendMessageByRecruiter(Message message, Long idRecruiter);
-
-    Message sendMessageByCandidate(Message message, Long idCandidate);
-
-    Message updateMessage(Long id, Message message);
+    Message sendMessage(Message message, Long idUserSend, Long idUserReceive);
 
     void deleteMessage(Long id);
+
 }
+

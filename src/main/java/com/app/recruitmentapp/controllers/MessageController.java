@@ -28,31 +28,14 @@ public class MessageController {
         return message.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PostMapping(path = "/recruiter/{idRecruiter}")
-    public ResponseEntity<Message> sendMessageByRecruiter(
-            @RequestBody Message message, @PathVariable Long idRecruiter
+    @PostMapping(path = "/{idUserSend}/{idUserReceive}")
+    public ResponseEntity<Message> sendMessageByUser(
+            @RequestBody Message message, @PathVariable Long idUserSend, @PathVariable Long idUserReceive
     ) {
-        Message savedMessage = messageService.sendMessageByRecruiter(message,idRecruiter);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedMessage);
+        Message sendMessageByUser = messageService.sendMessage(message,idUserSend,idUserReceive);
+        return ResponseEntity.status(HttpStatus.CREATED).body(sendMessageByUser);
     }
 
-    @PostMapping(path = "/candidate/{idCandidate}")
-    public ResponseEntity<Message> sendMessageByCandidate(
-            @RequestBody Message message, @PathVariable Long idCandidate
-    ) {
-        Message savedMessage = messageService.sendMessageByCandidate(message,idCandidate);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedMessage);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<Message> updateMessage(@RequestBody Message message,@PathVariable Long id) {
-        try {
-            Message updatedMessage = messageService.updateMessage(id,message);
-            return ResponseEntity.ok(updatedMessage);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteMessage(@PathVariable Long id) {

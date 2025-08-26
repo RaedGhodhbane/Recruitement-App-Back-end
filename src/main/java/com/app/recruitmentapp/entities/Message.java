@@ -16,15 +16,14 @@ public class Message {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String fullName;
-    private String email;
     private String subject;
     private String message;
     @ManyToOne
-    @JoinColumn(name= "recruiter_id")
-    private Recruiter recruiter;
+    @JoinColumn(name= "send_id")
+    private User userSend;
     @ManyToOne
-    @JoinColumn(name = "candidate_id")
-    private Candidate candidate;
+    @JoinColumn(name = "receive_id")
+    private User userReceive;
 
     public Long getId() {
         return id;
@@ -40,14 +39,6 @@ public class Message {
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
     }
 
     public String getSubject() {
@@ -66,19 +57,19 @@ public class Message {
         this.message = message;
     }
 
-    public Recruiter getRecruiter() {
-        return recruiter;
+    public User getUserSend() {
+        return userSend;
     }
 
-    public void setRecruiter(Recruiter recruiter) {
-        this.recruiter = recruiter;
+    public void setUserSend(User userSend) {
+        this.userSend = userSend;
     }
 
-    public Candidate getCandidate() {
-        return candidate;
+    public User getUserReceive() {
+        return userReceive;
     }
 
-    public void setCandidate(Candidate candidate) {
-        this.candidate = candidate;
+    public void setUserReceive(User userReceive) {
+        this.userReceive = userReceive;
     }
 }
