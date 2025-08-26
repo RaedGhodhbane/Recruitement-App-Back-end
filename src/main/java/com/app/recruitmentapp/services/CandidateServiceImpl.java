@@ -1,6 +1,7 @@
 package com.app.recruitmentapp.services;
 
 import com.app.recruitmentapp.entities.Candidate;
+import com.app.recruitmentapp.entities.ChangePassword;
 import com.app.recruitmentapp.entities.Role;
 import com.app.recruitmentapp.exceptions.EmailAlreadyUsedException;
 import com.app.recruitmentapp.repositories.CandidateRepository;
@@ -35,6 +36,7 @@ public class CandidateServiceImpl implements CandidateService {
     private CandidateRepository candidateRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
+
     @Value("${file.upload-dir}")
     private String uploadDir;
 
@@ -184,21 +186,32 @@ public class CandidateServiceImpl implements CandidateService {
 
     @Override
     public ResponseEntity<Resource> getFile(String filename) {
-        // Il construit le chemin complet du fichier en combinant le dossier d’upload //(`uploadDir`) et le nom du fichier reçu.
         Path file = Paths.get(uploadDir).resolve(filename);
         Resource resource;
         try {
-//Il convertit le fichier en un objet `Resource` pour pouvoir être renvoyé dans la réponse HTTP
             resource = new UrlResource(file.toUri());
         } catch (MalformedURLException e) {
             return ResponseEntity.notFound().build();
         }
         if (resource.exists() || resource.isReadable()) {
-//HttpHeaders.CONTENT_DISPOSITION permet d'envoyer le fichier avec une suggestion de téléchargement.
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() +"\"").body(resource);
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+    @Override
+    public String changePassword(Long candidateId, ChangePassword changePasswordRequest) {
+        Candidate candidate = candidateRepository.findById(candidateId)
+                .orElseThrow(() -> new RuntimeException("Candidat non trouvé"));
+
+        if (!passwordEncoder.matches(changePasswordRequest.getCurrentPassword(), candidate.getPassword())) {
+            throw new IllegalArgumentException("Ancien mot de passe incorrect !");
+        }
+
+        candidate.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
+        candidateRepository.save(candidate);
+
+        return "Mot de passe changé avec succès !";
     }
 }
