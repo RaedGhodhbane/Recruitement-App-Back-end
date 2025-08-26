@@ -1,29 +1,19 @@
 package com.app.recruitmentapp.controllers;
 
 import com.app.recruitmentapp.entities.Candidate;
+import com.app.recruitmentapp.entities.ChangePassword;
 import com.app.recruitmentapp.services.CandidateService;
-import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import java.util.*;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-
-@CrossOrigin("http://localhost:4200")
+@CrossOrigin("*")
 @RestController
 @RequestMapping("/candidate")
 public class CandidateController {
@@ -124,6 +114,18 @@ public class CandidateController {
         return ResponseEntity.ok(resource.getBody());
     }
 
-
+    @PutMapping("/{id}/change-password")
+    public ResponseEntity<Map<String,String>> changePassword(
+            @PathVariable Long id,
+            @RequestBody ChangePassword changePasswordRequest) {
+        try {
+            String message = candidateService.changePassword(id, changePasswordRequest);
+            return ResponseEntity.ok().body(Collections.singletonMap("message", message));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("erreur",e.getMessage()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.singletonMap("erreur",e.getMessage()));
+        }
+    }
 
 }
