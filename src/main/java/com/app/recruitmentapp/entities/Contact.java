@@ -72,7 +72,7 @@ public class Contact {
     }
 
     public void setMessage(String message) {
-        message = message;
+        this.message = message;
     }
 
     public User getUserSend() {
