@@ -1,24 +1,21 @@
 package com.app.recruitmentapp.entities;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.Date;
+import java.util.List;
 
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Admin extends User{
+public class Admin extends User {
     private boolean active;
 
     private String gender;
@@ -37,6 +34,20 @@ public class Admin extends User{
 
     @Column(columnDefinition = "LONGTEXT")
     private String image;
+
+
+    public Admin(Long id, String name, String firstName, String email, String password, Role role, List<Message> sendMessageList, List<Message> receiveMessageList, List<Favourite> favouriteList, boolean active, String gender, Date birthdate, String address, String city, String state, String country, String phone, String image) {
+        super(id, name, firstName, email, password, role, sendMessageList, receiveMessageList, favouriteList);
+        this.active = active;
+        this.gender = gender;
+        this.birthdate = birthdate;
+        this.address = address;
+        this.city = city;
+        this.state = state;
+        this.country = country;
+        this.phone = phone;
+        this.image = image;
+    }
 
 
     public boolean getActive() {
