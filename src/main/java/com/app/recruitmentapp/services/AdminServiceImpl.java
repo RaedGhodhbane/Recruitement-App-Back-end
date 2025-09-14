@@ -5,6 +5,8 @@ import com.app.recruitmentapp.exceptions.EmailAlreadyUsedException;
 import com.app.recruitmentapp.repositories.AdminRepository;
 import com.app.recruitmentapp.repositories.CandidateRepository;
 import com.app.recruitmentapp.repositories.RecruiterRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,6 +32,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class AdminServiceImpl implements AdminService{
     @Autowired
     private RecruiterRepository recruiterRepository;
