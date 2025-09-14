@@ -15,7 +15,7 @@ public interface RecruiterService {
 
     // Recruiter addRecruiterWithoutPicture(Recruiter recruiter);
 
-    Recruiter registerRecruiter(String email, String rawPassword);
+    Recruiter registerRecruiter(String email, String rawPassword, String name, String firstName, String phone);
 
     Recruiter addRecruiterWithPicture(Recruiter recruiter, MultipartFile imageFile);
 

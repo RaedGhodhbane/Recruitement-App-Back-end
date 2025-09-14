@@ -45,9 +45,12 @@ public class RecruiterController {
     public ResponseEntity<?> registerRecruiter(@RequestBody Map<String, String> request) {
         String email = request.get("email");
         String password = request.get("password");
+        String name = request.get("name");
+        String firstName = request.get("firstName");
+        String phone = request.get("phone");
 
         try {
-            Recruiter recruiter = recruiterService.registerRecruiter(email,password);
+            Recruiter recruiter = recruiterService.registerRecruiter(email,password, name,firstName,phone);
             return ResponseEntity.ok(recruiter);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", e.getMessage()));

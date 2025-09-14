@@ -60,7 +60,8 @@ public class RecruiterServiceImpl implements RecruiterService {
      */
 
     @Override
-    public Recruiter registerRecruiter(String email, String rawPassword) {
+    public Recruiter registerRecruiter(String email, String rawPassword
+            , String name, String firstName, String phone) {
 
         if (userRepository.findByEmail(email).isPresent()) {
             throw new EmailAlreadyUsedException("Cet e-mail est déjà utilisé");
@@ -71,6 +72,9 @@ public class RecruiterServiceImpl implements RecruiterService {
         recruiter.setRole(Role.RECRUITER);
         recruiter.setEmail(email);
         recruiter.setPassword(passwordEncoder.encode(rawPassword));
+        recruiter.setName(name);
+        recruiter.setFirstName(firstName);
+        recruiter.setPhone(phone);
 
         return recruiterRepository.save(recruiter);
     }
