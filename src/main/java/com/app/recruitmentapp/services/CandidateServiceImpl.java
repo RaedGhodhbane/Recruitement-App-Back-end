@@ -80,7 +80,8 @@ public class CandidateServiceImpl implements CandidateService {
     }
 
     @Override
-    public Candidate registerCandidate(String email, String rawPassword) {
+    public Candidate registerCandidate(String email, String rawPassword
+            , String name, String firstName, String phone) {
 
         if (userRepository.findByEmail(email).isPresent()) {
             throw new EmailAlreadyUsedException("Cet e-mail est déjà utilisé");
@@ -91,6 +92,9 @@ public class CandidateServiceImpl implements CandidateService {
         candidate.setRole(Role.CANDIDATE);
         candidate.setEmail(email);
         candidate.setPassword(passwordEncoder.encode(rawPassword));
+        candidate.setName(name);
+        candidate.setFirstName(firstName);
+        candidate.setPhone(phone);
 
         return candidateRepository.save(candidate);
     }

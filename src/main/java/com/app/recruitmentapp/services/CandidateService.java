@@ -19,7 +19,7 @@ public interface CandidateService {
 
     //Candidate saveCandidateWithoutPicture(Candidate candidate);
 
-    Candidate registerCandidate(String email, String rawPassword);
+    Candidate registerCandidate(String email, String rawPassword, String name, String firstName, String phone);
 
 
     Candidate saveCandidateWithPicture(Candidate candidate, MultipartFile imageFile);
