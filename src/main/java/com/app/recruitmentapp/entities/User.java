@@ -41,6 +41,21 @@ public class User {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
     private List<Favourite> favouriteList;
 
+    public User(Long id, String name, String firstName, String email, String password, Role role, List<Message> sendMessageList, List<Message> receiveMessageList, List<Favourite> favouriteList) {
+        this.id = id;
+        this.name = name;
+        this.firstName = firstName;
+        this.email = email;
+        this.password = password;
+        this.role = role;
+        this.sendMessageList = sendMessageList;
+        this.receiveMessageList = receiveMessageList;
+        this.favouriteList = favouriteList;
+    }
+
+    public User() {
+    }
+
     public Long getId() {
         return id;
     }
