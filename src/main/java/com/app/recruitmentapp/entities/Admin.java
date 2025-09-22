@@ -8,7 +8,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Date;
-import java.util.List;
 
 @Entity
 @Data
@@ -34,20 +33,6 @@ public class Admin extends User {
 
     @Column(columnDefinition = "LONGTEXT")
     private String image;
-
-
-    public Admin(Long id, String name, String firstName, String email, String password, Role role, List<Message> sendMessageList, List<Message> receiveMessageList, List<Favourite> favouriteList, boolean active, String gender, Date birthdate, String address, String city, String state, String country, String phone, String image) {
-        super(id, name, firstName, email, password, role, sendMessageList, receiveMessageList, favouriteList);
-        this.active = active;
-        this.gender = gender;
-        this.birthdate = birthdate;
-        this.address = address;
-        this.city = city;
-        this.state = state;
-        this.country = country;
-        this.phone = phone;
-        this.image = image;
-    }
 
 
     public boolean getActive() {
