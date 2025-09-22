@@ -4,24 +4,21 @@ import com.app.recruitmentapp.entities.Offer;
 import com.app.recruitmentapp.entities.Recruiter;
 import com.app.recruitmentapp.repositories.OfferRepository;
 import com.app.recruitmentapp.repositories.RecruiterRepository;
-import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class OfferServiceImpl implements OfferService {
@@ -92,9 +89,17 @@ public class OfferServiceImpl implements OfferService {
         if (resource.exists() || resource.isReadable()) {
 //HttpHeaders.CONTENT_DISPOSITION permet d'envoyer le fichier avec une suggestion de téléchargement.
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() +"\"").body(resource);
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"").body(resource);
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @Override
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void deleteOfferExpired() {
+        LocalDate aujourdHui = LocalDate.now();
+        offerRepository.deleteByExpirationDateBefore(aujourdHui);
+        System.out.println("Offer expired at" + aujourdHui);
     }
 }
