@@ -1,11 +1,15 @@
 package com.app.recruitmentapp.entities;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@Getter
 @Entity
 @Table(name = "saved_jobs")
-@NoArgsConstructor @AllArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 public class Favourite {
 
     @Id
