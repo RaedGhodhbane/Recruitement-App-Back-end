@@ -264,14 +264,14 @@ class RecruiterServiceImplTest {
         }
 
         @Test
-        @DisplayName("Should throw NullPointerException when recruiter not found")
+        @DisplayName("Should throw RuntimeException when recruiter not found")
         void shouldThrowWhenRecruiterNotFound() {
             Recruiter updatedData = new Recruiter();
             updatedData.setName("Any");
 
             when(recruiterRepository.findById(99L)).thenReturn(Optional.empty());
 
-            assertThrows(NullPointerException.class,
+            assertThrows(RuntimeException.class,
                     () -> recruiterService.updateRecruiter(99L, updatedData));
             verify(recruiterRepository).findById(99L);
             verify(recruiterRepository, never()).saveAndFlush(any());

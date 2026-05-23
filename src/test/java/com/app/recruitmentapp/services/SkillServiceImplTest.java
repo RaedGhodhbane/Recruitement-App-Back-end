@@ -179,14 +179,14 @@ class SkillServiceImplTest {
         }
 
         @Test
-        @DisplayName("Should throw NullPointerException when skill not found")
+        @DisplayName("Should throw RuntimeException when skill not found")
         void shouldThrowWhenSkillNotFound() {
             Skill updatedData = new Skill();
             updatedData.setTitle("Kubernetes");
 
             when(skillRepository.findById(99L)).thenReturn(Optional.empty());
 
-            assertThrows(NullPointerException.class,
+            assertThrows(RuntimeException.class,
                     () -> skillService.updateSkill(99L, updatedData));
             verify(skillRepository).findById(99L);
             verify(skillRepository, never()).saveAndFlush(any());

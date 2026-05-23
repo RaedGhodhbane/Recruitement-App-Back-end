@@ -50,7 +50,8 @@ public class OfferServiceImpl implements OfferService {
 
     @Override
     public Offer updateOffer(Long id, Offer newOffer) {
-        Offer o = offerRepository.findById(id).orElse(null);
+        Offer o = offerRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Offre non trouvé"));
         o.setTitle(newOffer.getTitle());
         o.setDescription(newOffer.getDescription());
         o.setType(newOffer.getType());

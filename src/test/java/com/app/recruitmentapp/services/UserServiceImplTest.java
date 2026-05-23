@@ -189,16 +189,15 @@ class UserServiceImplTest {
         }
 
         @Test
-        @DisplayName("Should return null when user not found")
-        void shouldReturnNullWhenUserNotFound() {
+        @DisplayName("Should throw RuntimeException when user not found")
+        void shouldThrowWhenUserNotFound() {
             User updatedData = new User();
             updatedData.setName("Any");
 
             when(userRepository.findById(99L)).thenReturn(Optional.empty());
 
-            User result = userService.updateUser(99L, updatedData);
-
-            assertNull(result);
+            assertThrows(RuntimeException.class,
+                    () -> userService.updateUser(99L, updatedData));
             verify(userRepository).findById(99L);
             verify(userRepository, never()).saveAndFlush(any());
         }

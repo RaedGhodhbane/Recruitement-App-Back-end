@@ -207,14 +207,14 @@ class CandidateServiceImplTest {
         }
 
         @Test
-        @DisplayName("Should throw NullPointerException when candidate not found")
+        @DisplayName("Should throw RuntimeException when candidate not found")
         void shouldThrowWhenCandidateNotFound() {
             Candidate updatedData = new Candidate();
             updatedData.setName("Any");
 
             when(candidateRepository.findById(99L)).thenReturn(Optional.empty());
 
-            assertThrows(NullPointerException.class,
+            assertThrows(RuntimeException.class,
                     () -> candidateService.updateCandidate(99L, updatedData));
             verify(candidateRepository).findById(99L);
             verify(candidateRepository, never()).saveAndFlush(any());

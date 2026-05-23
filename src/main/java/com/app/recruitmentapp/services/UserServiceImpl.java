@@ -47,8 +47,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User updateUser(Long id, User newUser) {
-        User u = userRepository.findById(id).orElse(null);
-        if (u == null) return null;
+        User u = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
 
         if (newUser.getName() != null)
             u.setName(newUser.getName());
@@ -75,7 +75,7 @@ public class UserServiceImpl implements UserService {
         if (userRepository.existsById(id)) {
             userRepository.deleteById(id);
         } else {
-            throw new RuntimeException("Recruteur non trouvé");
+            throw new RuntimeException("Utilisateur non trouvé");
         }
     }
 

@@ -36,7 +36,8 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     public Question updateQuestion(Long id, Question newQuestion) {
-        Question q = questionRepository.findById(id).orElse(null);
+        Question q = questionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Question non trouvé"));
         q.setTitle(newQuestion.getTitle());
         q.setChoice1(newQuestion.getChoice1());
         q.setChoice2(newQuestion.getChoice2());
@@ -52,7 +53,7 @@ public class QuestionServiceImpl implements QuestionService {
         if (questionRepository.existsById(id)) {
             questionRepository.deleteById(id);
         } else {
-            throw new RuntimeException("Candidat non trouvé");
+            throw new RuntimeException("Question non trouvé");
         }
     }
 

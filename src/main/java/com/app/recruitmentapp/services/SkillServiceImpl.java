@@ -35,7 +35,8 @@ public class SkillServiceImpl implements SkillService{
 
     @Override
     public Skill updateSkill(Long id, Skill newSkill) {
-        Skill sk = skillRepository.findById(id).orElse(null);
+        Skill sk = skillRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Skill non trouvé"));
         sk.setTitle(newSkill.getTitle());
         sk.setPercentage(newSkill.getPercentage());
         sk.setCandidate(newSkill.getCandidate());
@@ -48,7 +49,7 @@ public class SkillServiceImpl implements SkillService{
         if (skillRepository.existsById(id)) {
             skillRepository.deleteById(id);
         } else {
-            throw new RuntimeException("Recruteur non trouvé");
+            throw new RuntimeException("Skill non trouvé");
         }
     }
 }

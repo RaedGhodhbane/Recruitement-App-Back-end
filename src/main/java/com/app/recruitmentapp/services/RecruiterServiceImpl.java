@@ -102,7 +102,8 @@ public class RecruiterServiceImpl implements RecruiterService {
 
     @Override
     public Recruiter updateRecruiter(Long id, Recruiter newRecruiter) {
-         Recruiter r = recruiterRepository.findById(id).orElse(null);
+         Recruiter r = recruiterRepository.findById(id)
+                 .orElseThrow(() -> new RuntimeException("Recruteur non trouvé"));
         if (newRecruiter.getName() != null) {
             r.setName(newRecruiter.getName());
         }

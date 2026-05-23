@@ -187,14 +187,14 @@ class EducationServiceImplTest {
         }
 
         @Test
-        @DisplayName("Should throw NullPointerException when education not found")
+        @DisplayName("Should throw RuntimeException when education not found")
         void shouldThrowWhenEducationNotFound() {
             Education updatedData = new Education();
             updatedData.setDiploma("MBA");
 
             when(educationRepository.findById(99L)).thenReturn(Optional.empty());
 
-            assertThrows(NullPointerException.class,
+            assertThrows(RuntimeException.class,
                     () -> educationService.updateEducation(99L, updatedData));
             verify(educationRepository).findById(99L);
             verify(educationRepository, never()).saveAndFlush(any());

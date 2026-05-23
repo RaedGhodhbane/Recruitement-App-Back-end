@@ -35,7 +35,8 @@ public class EducationServiceImpl implements EducationService {
 
     @Override
     public Education updateEducation(Long id, Education newEducation) {
-        Education e = educationRepository.findById(id).orElse(null);
+        Education e = educationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Education non trouvé"));
         e.setDiploma(newEducation.getDiploma());
         e.setUniversity(newEducation.getUniversity());
         e.setEndDate(newEducation.getEndDate());

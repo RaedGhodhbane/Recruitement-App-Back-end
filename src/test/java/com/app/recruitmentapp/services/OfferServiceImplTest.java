@@ -206,14 +206,14 @@ class OfferServiceImplTest {
         }
 
         @Test
-        @DisplayName("Should throw NullPointerException when offer not found")
+        @DisplayName("Should throw RuntimeException when offer not found")
         void shouldThrowWhenOfferNotFound() {
             Offer updatedData = new Offer();
             updatedData.setTitle("Senior Engineer");
 
             when(offerRepository.findById(99L)).thenReturn(Optional.empty());
 
-            assertThrows(NullPointerException.class,
+            assertThrows(RuntimeException.class,
                     () -> offerService.updateOffer(99L, updatedData));
             verify(offerRepository).findById(99L);
             verify(offerRepository, never()).saveAndFlush(any());

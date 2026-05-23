@@ -35,7 +35,8 @@ public class ExperienceServiceImpl implements ExperienceService {
 
     @Override
     public Experience updateExperience(Long id, Experience newExperience) {
-        Experience ex = experienceRepository.findById(id).orElse(null);
+        Experience ex = experienceRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Experience non trouvé"));
         ex.setCompanyName(newExperience.getCompanyName());
         ex.setJobTitle(newExperience.getJobTitle());
         ex.setStartExpDate(newExperience.getStartExpDate());
@@ -50,7 +51,7 @@ public class ExperienceServiceImpl implements ExperienceService {
         if (experienceRepository.existsById(id)) {
             experienceRepository.deleteById(id);
         } else {
-            throw new RuntimeException("Candidat non trouvé");
+            throw new RuntimeException("Experience non trouvé");
         }
     }
 

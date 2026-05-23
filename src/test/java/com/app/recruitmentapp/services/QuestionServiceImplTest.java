@@ -194,14 +194,14 @@ class QuestionServiceImplTest {
         }
 
         @Test
-        @DisplayName("Should throw NullPointerException when question not found")
+        @DisplayName("Should throw RuntimeException when question not found")
         void shouldThrowWhenQuestionNotFound() {
             Question updatedData = new Question();
             updatedData.setTitle("Framework préféré ?");
 
             when(questionRepository.findById(99L)).thenReturn(Optional.empty());
 
-            assertThrows(NullPointerException.class,
+            assertThrows(RuntimeException.class,
                     () -> questionService.updateQuestion(99L, updatedData));
             verify(questionRepository).findById(99L);
             verify(questionRepository, never()).saveAndFlush(any());

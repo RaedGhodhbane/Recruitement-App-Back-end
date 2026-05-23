@@ -193,14 +193,14 @@ class ExperienceServiceImplTest {
         }
 
         @Test
-        @DisplayName("Should throw NullPointerException when experience not found")
+        @DisplayName("Should throw RuntimeException when experience not found")
         void shouldThrowWhenExperienceNotFound() {
             Experience updatedData = new Experience();
             updatedData.setCompanyName("Apple");
 
             when(experienceRepository.findById(99L)).thenReturn(Optional.empty());
 
-            assertThrows(NullPointerException.class,
+            assertThrows(RuntimeException.class,
                     () -> experienceService.updateExperience(99L, updatedData));
             verify(experienceRepository).findById(99L);
             verify(experienceRepository, never()).saveAndFlush(any());
