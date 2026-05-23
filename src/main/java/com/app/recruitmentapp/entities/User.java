@@ -14,7 +14,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "user", uniqueConstraints = @UniqueConstraint(columnNames = "email"))
-@Builder
 @Inheritance(strategy = InheritanceType.JOINED)
 public class User {
     @Id
@@ -41,90 +40,4 @@ public class User {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
     private List<Favourite> favouriteList;
 
-    public User(Long id, String name, String firstName, String email, String password, Role role, List<Message> sendMessageList, List<Message> receiveMessageList, List<Favourite> favouriteList) {
-        this.id = id;
-        this.name = name;
-        this.firstName = firstName;
-        this.email = email;
-        this.password = password;
-        this.role = role;
-        this.sendMessageList = sendMessageList;
-        this.receiveMessageList = receiveMessageList;
-        this.favouriteList = favouriteList;
-    }
-
-    public User() {
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
-    }
-
-    public List<Message> getSendMessageList() {
-        return sendMessageList;
-    }
-
-    public void setSendMessageList(List<Message> sendMessageList) {
-        this.sendMessageList = sendMessageList;
-    }
-
-    public List<Message> getReceiveMessageList() {
-        return receiveMessageList;
-    }
-
-    public void setReceiveMessageList(List<Message> receiveMessageList) {
-        this.receiveMessageList = receiveMessageList;
-    }
-
-    public List<Favourite> getFavouriteList() {
-        return favouriteList;
-    }
-
-    public void setFavouriteList(List<Favourite> favouriteList) {
-        this.favouriteList = favouriteList;
-    }
 }

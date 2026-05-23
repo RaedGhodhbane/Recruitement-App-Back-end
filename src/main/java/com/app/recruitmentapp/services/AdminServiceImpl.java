@@ -7,8 +7,6 @@ import com.app.recruitmentapp.repositories.CandidateRepository;
 import com.app.recruitmentapp.repositories.RecruiterRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FilenameUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -20,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
@@ -34,18 +31,12 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class AdminServiceImpl implements AdminService{
-    @Autowired
-    private RecruiterRepository recruiterRepository;
+public class AdminServiceImpl implements AdminService {
 
-    @Autowired
-    private AdminRepository adminRepository;
-
-    @Autowired
-    private CandidateRepository candidateRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final RecruiterRepository recruiterRepository;
+    private final AdminRepository adminRepository;
+    private final CandidateRepository candidateRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Value("${file.upload-dir}")
     private String uploadDir;
@@ -69,7 +60,6 @@ public class AdminServiceImpl implements AdminService{
      */
     @Override
     public Admin registerAdminWithPicture(String email, String rawPassword, Admin admin, MultipartFile imageFile) {
-
         if (adminRepository.findByEmail(email).isPresent()) {
             throw new EmailAlreadyUsedException("Cet e-mail est déjà utilisé");
         }
@@ -80,21 +70,23 @@ public class AdminServiceImpl implements AdminService{
         admin1.setEmail(email);
         admin1.setPassword(passwordEncoder.encode(rawPassword));
 
-        if (imageFile != null && !imageFile.isEmpty()) {
-            String ext = "." + FilenameUtils.getExtension(imageFile.getOriginalFilename());
-            String fileName = UUID.randomUUID().toString();
-            String finalFileName = fileName + ext;
-
-            try {
-                Path rootLocation = Paths.get(uploadDir);
-                System.out.println(rootLocation.toAbsolutePath());
-                Files.copy(imageFile.getInputStream(), rootLocation.resolve(finalFileName));
-
-                admin1.setImage(finalFileName);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        if (admin != null) {
+            admin1.setName(admin.getName());
+            admin1.setFirstName(admin.getFirstName());
+            admin1.setGender(admin.getGender());
+            admin1.setBirthdate(admin.getBirthdate());
+            admin1.setAddress(admin.getAddress());
+            admin1.setCity(admin.getCity());
+            admin1.setState(admin.getState());
+            admin1.setCountry(admin.getCountry());
+            admin1.setPhone(admin.getPhone());
         }
+
+        if (imageFile != null && !imageFile.isEmpty()) {
+            String fileName = saveFile(imageFile);
+            admin1.setImage(fileName);
+        }
+
         return adminRepository.save(admin1);
     }
 
@@ -112,7 +104,7 @@ public class AdminServiceImpl implements AdminService{
             a.setEmail(newAdmin.getEmail());
         }
         if (newAdmin.getPassword() != null) {
-            a.setPassword(newAdmin.getPassword());
+            a.setPassword(passwordEncoder.encode(newAdmin.getPassword()));
         }
         if (newAdmin.getGender() != null) {
             a.setGender(newAdmin.getGender());
@@ -145,20 +137,22 @@ public class AdminServiceImpl implements AdminService{
     }
 
 
-    public String saveFile(MultipartFile file) {
+    private String saveFile(MultipartFile file) {
         try {
             String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
 
-            File dir = new File(uploadDir);
-            if (!dir.exists()) {
-                dir.mkdirs();
+            Path uploadPath = Paths.get(uploadDir);
+            if (Files.notExists(uploadPath)) {
+                Files.createDirectories(uploadPath);
             }
 
-            Path filePath = Paths.get(uploadDir, fileName);
+            Path filePath = uploadPath.resolve(fileName);
             Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
+            log.info("Fichier sauvegardé : {}", fileName);
             return fileName;
         } catch (IOException e) {
+            log.error("Erreur lors de l'enregistrement du fichier", e);
             throw new RuntimeException("Erreur lors de l'enregistrement du fichier", e);
         }
     }
@@ -168,7 +162,7 @@ public class AdminServiceImpl implements AdminService{
         if (adminRepository.existsById(id)) {
             adminRepository.deleteById(id);
         } else {
-            throw new RuntimeException("Recruteur non trouvé");
+            throw new RuntimeException("Admin non trouvé");
         }
     }
 
@@ -238,10 +232,19 @@ public class AdminServiceImpl implements AdminService{
         try {
             resource = new UrlResource(file.toUri());
         } catch (MalformedURLException e) {
+            log.error("Erreur lors du chargement du fichier : {}", filename, e);
             return ResponseEntity.notFound().build();
         }
         if (resource.exists() && resource.isReadable()) {
-            MediaType mediaType = MediaType.IMAGE_JPEG; // ou détecte à partir du filename
+            MediaType mediaType = MediaType.IMAGE_JPEG;
+            try {
+                String contentType = Files.probeContentType(file);
+                if (contentType != null) {
+                    mediaType = MediaType.parseMediaType(contentType);
+                }
+            } catch (IOException e) {
+                log.warn("Impossible de détecter le type MIME pour : {}", filename);
+            }
             return ResponseEntity.ok()
                     .contentType(mediaType)
                     .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
@@ -249,6 +252,5 @@ public class AdminServiceImpl implements AdminService{
         } else {
             return ResponseEntity.notFound().build();
         }
-
     }
 }
