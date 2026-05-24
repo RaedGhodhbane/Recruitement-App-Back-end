@@ -1,22 +1,18 @@
 package com.app.recruitmentapp.controllers;
 
-import com.app.recruitmentapp.entities.Admin;
-import com.app.recruitmentapp.entities.Candidate;
-import com.app.recruitmentapp.entities.Recruiter;
 import com.app.recruitmentapp.security.JwtUtil;
 import com.app.recruitmentapp.services.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
 import java.util.Map;
 
+@Tag(name = "Authentification", description = "Endpoints de connexion et déconnexion")
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -27,6 +23,7 @@ public class AuthController {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Operation(summary = "Authentifier un utilisateur", description = "Connecte un utilisateur et retourne un token JWT")
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> request) {
         String email = request.get("email");
@@ -40,6 +37,7 @@ public class AuthController {
         }
     }
 
+    @Operation(summary = "Déconnecter un utilisateur", description = "Invalide le token JWT de l'utilisateur")
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletRequest request) {
         String token = jwtUtil.extractToken(request);

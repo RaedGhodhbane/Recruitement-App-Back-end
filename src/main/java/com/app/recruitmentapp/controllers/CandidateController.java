@@ -3,6 +3,8 @@ package com.app.recruitmentapp.controllers;
 import com.app.recruitmentapp.dto.CandidateDTO;
 import com.app.recruitmentapp.entities.ChangePassword;
 import com.app.recruitmentapp.services.CandidateService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.*;
 
+@Tag(name = "Candidats", description = "Gestion des candidats")
 @CrossOrigin("*")
 @RestController
 @RequestMapping("/candidate")
@@ -20,11 +23,13 @@ public class CandidateController {
     @Autowired
     private CandidateService candidateService;
 
+    @Operation(summary = "Liste des candidats", description = "Retourne tous les candidats")
     @GetMapping("/candidates")
     public List<CandidateDTO> getAllCandidates() {
         return candidateService.getAllCandidates();
     }
 
+    @Operation(summary = "Détail d'un candidat", description = "Retourne un candidat par son ID")
     @GetMapping("/{id}")
     public ResponseEntity<CandidateDTO> getCandidateById(@PathVariable Long id) {
         return candidateService.getCandidateById(id)
@@ -32,6 +37,7 @@ public class CandidateController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @Operation(summary = "Inscription candidat", description = "Inscrit un nouveau candidat")
     @PostMapping("/registerCandidate")
     public ResponseEntity<?> registerCandidate(@RequestBody Map<String, String> request) {
         String email = request.get("email");
@@ -48,6 +54,7 @@ public class CandidateController {
         }
     }
 
+    @Operation(summary = "Ajouter candidat avec photo", description = "Ajoute un candidat avec une image de profil")
     @PostMapping("/addCandidate2")
     public ResponseEntity<CandidateDTO> addCandidateWithPicture(
             @ModelAttribute CandidateDTO candidateDTO,
@@ -56,6 +63,7 @@ public class CandidateController {
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
+    @Operation(summary = "Modifier un candidat", description = "Met à jour un candidat existant")
     @PutMapping("/update/{id}")
     public ResponseEntity<CandidateDTO> updateCandidate(@PathVariable Long id, @RequestBody CandidateDTO candidateDTO) {
         try {
@@ -67,6 +75,7 @@ public class CandidateController {
         }
     }
 
+    @Operation(summary = "Supprimer un candidat", description = "Supprime un candidat par son ID")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteCandidate(@PathVariable Long id) {
         try {
@@ -77,6 +86,7 @@ public class CandidateController {
         }
     }
 
+    @Operation(summary = "Upload CV", description = "Télécharge un fichier CV pour un candidat")
     @PostMapping("/{id}/cv")
     public ResponseEntity<String> createCV(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
         try {
@@ -87,6 +97,7 @@ public class CandidateController {
         }
     }
 
+    @Operation(summary = "Télécharger CV", description = "Télécharge le CV d'un candidat au format PDF")
     @GetMapping("/{id}/cv")
     public ResponseEntity<byte[]> downloadCVPDF(@PathVariable Long id) {
         try {
@@ -100,6 +111,7 @@ public class CandidateController {
         }
     }
 
+    @Operation(summary = "Fichier candidat", description = "Retourne un fichier attaché à un candidat")
     @GetMapping("/files/{filename:.+}")
     @ResponseBody
     public ResponseEntity<Resource> getFile(@PathVariable String filename) {
@@ -107,6 +119,7 @@ public class CandidateController {
         return ResponseEntity.ok(resource.getBody());
     }
 
+    @Operation(summary = "Changer mot de passe", description = "Change le mot de passe d'un candidat")
     @PutMapping("/{id}/change-password")
     public ResponseEntity<Map<String,String>> changePassword(
             @PathVariable Long id,
