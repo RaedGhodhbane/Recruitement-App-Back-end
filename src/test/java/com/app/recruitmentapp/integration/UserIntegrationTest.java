@@ -1,5 +1,6 @@
 package com.app.recruitmentapp.integration;
 
+import com.app.recruitmentapp.dto.UserDTO;
 import com.app.recruitmentapp.entities.Role;
 import com.app.recruitmentapp.entities.User;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.*;
 
 import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -36,18 +36,17 @@ class UserIntegrationTest extends AbstractIntegrationTest {
     @Test
     @DisplayName("POST /admin/user should create a user")
     void addUser_shouldReturn201() {
-        User user = new User();
-        user.setEmail("newuser@test.com");
-        user.setPassword("password123");
-        user.setName("New");
-        user.setFirstName("User");
-        user.setRole(Role.CANDIDATE);
+        UserDTO userDTO = new UserDTO();
+        userDTO.setEmail("newuser@test.com");
+        userDTO.setName("New");
+        userDTO.setFirstName("User");
+        userDTO.setRole("CANDIDATE");
 
-        ResponseEntity<User> response = restTemplate.exchange(
-                "/admin/user",
+        ResponseEntity<UserDTO> response = restTemplate.exchange(
+                "/admin/user?password=password123",
                 HttpMethod.POST,
-                authEntity(user, adminToken),
-                User.class);
+                authEntity(userDTO, adminToken),
+                UserDTO.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(response.getBody()).isNotNull();
@@ -59,11 +58,11 @@ class UserIntegrationTest extends AbstractIntegrationTest {
     void getUserById_whenFound_shouldReturn200() {
         User saved = userRepository.findAll().stream().findFirst().orElseThrow();
 
-        ResponseEntity<User> response = restTemplate.exchange(
+        ResponseEntity<UserDTO> response = restTemplate.exchange(
                 "/admin/user/" + saved.getId(),
                 HttpMethod.GET,
                 authHeader(adminToken),
-                User.class);
+                UserDTO.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody().getEmail()).isEqualTo(saved.getEmail());
@@ -72,8 +71,8 @@ class UserIntegrationTest extends AbstractIntegrationTest {
     @Test
     @DisplayName("GET /admin/user/{id} should return 404 when not found")
     void getUserById_whenNotFound_shouldReturn404() {
-        ResponseEntity<User> response = restTemplate.exchange(
-                "/admin/user/9999", HttpMethod.GET, authHeader(adminToken), User.class);
+        ResponseEntity<UserDTO> response = restTemplate.exchange(
+                "/admin/user/9999", HttpMethod.GET, authHeader(adminToken), UserDTO.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
@@ -83,14 +82,14 @@ class UserIntegrationTest extends AbstractIntegrationTest {
     void updateUser_shouldReturn200() {
         User saved = userRepository.findAll().stream().findFirst().orElseThrow();
 
-        User updates = new User();
+        UserDTO updates = new UserDTO();
         updates.setName("Updated Name");
 
-        ResponseEntity<User> response = restTemplate.exchange(
+        ResponseEntity<UserDTO> response = restTemplate.exchange(
                 "/admin/user/" + saved.getId(),
                 HttpMethod.PUT,
                 authEntity(updates, adminToken),
-                User.class);
+                UserDTO.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody().getName()).isEqualTo("Updated Name");
@@ -99,11 +98,11 @@ class UserIntegrationTest extends AbstractIntegrationTest {
     @Test
     @DisplayName("PUT /admin/user/{id} should return 404 when not found")
     void updateUser_whenNotFound_shouldReturn404() {
-        User updates = new User();
+        UserDTO updates = new UserDTO();
         updates.setName("No matter");
 
-        ResponseEntity<User> response = restTemplate.exchange(
-                "/admin/user/9999", HttpMethod.PUT, authEntity(updates, adminToken), User.class);
+        ResponseEntity<UserDTO> response = restTemplate.exchange(
+                "/admin/user/9999", HttpMethod.PUT, authEntity(updates, adminToken), UserDTO.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }

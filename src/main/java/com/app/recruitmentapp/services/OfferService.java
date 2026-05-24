@@ -1,6 +1,6 @@
 package com.app.recruitmentapp.services;
 
-import com.app.recruitmentapp.entities.Offer;
+import com.app.recruitmentapp.dto.OfferDTO;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 
@@ -9,13 +9,13 @@ import java.util.Optional;
 
 public interface OfferService {
 
-    List<Offer> getAllOffers();
+    List<OfferDTO> getAllOffers();
 
-    Optional<Offer> getOfferById(Long id);
+    Optional<OfferDTO> getOfferById(Long id);
 
-    Offer saveOffer(Offer offer, Long idRecruiter);
+    OfferDTO saveOffer(OfferDTO offerDTO, Long idRecruiter);
 
-    Offer updateOffer(Long id, Offer offer);
+    OfferDTO updateOffer(Long id, OfferDTO offerDTO);
 
     void deleteOffer(Long id);
 

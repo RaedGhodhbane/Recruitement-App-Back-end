@@ -1,8 +1,10 @@
 package com.app.recruitmentapp.services;
 
+import com.app.recruitmentapp.dto.UserDTO;
 import com.app.recruitmentapp.entities.Candidate;
 import com.app.recruitmentapp.entities.Role;
 import com.app.recruitmentapp.entities.User;
+import com.app.recruitmentapp.mapper.EntityMapper;
 import com.app.recruitmentapp.repositories.UserRepository;
 import com.app.recruitmentapp.security.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,7 +25,11 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("UserServiceImpl Unit Tests")
@@ -37,11 +43,15 @@ class UserServiceImplTest {
     private JwtUtil jwtUtil;
     @Mock
     private TokenBlacklistService tokenBlacklistService;
+    @Mock
+    private EntityMapper entityMapper;
     @InjectMocks
     private UserServiceImpl userService;
 
     private Candidate activeCandidate;
     private Candidate inactiveCandidate;
+    private UserDTO activeUserDTO;
+    private UserDTO inactiveUserDTO;
 
     @BeforeEach
     void setUp() {
@@ -62,6 +72,9 @@ class UserServiceImplTest {
         inactiveCandidate.setPassword("encoded-pass-2");
         inactiveCandidate.setRole(Role.CANDIDATE);
         inactiveCandidate.setActive(false);
+
+        activeUserDTO = new UserDTO(1L, "Doe", "John", "active@test.com", "CANDIDATE");
+        inactiveUserDTO = new UserDTO(2L, "Smith", "Jane", "inactive@test.com", "CANDIDATE");
     }
 
     @Nested
@@ -73,14 +86,16 @@ class UserServiceImplTest {
         void shouldGetAllUsersSuccessfully() {
             List<User> mockUsers = List.of(activeCandidate, inactiveCandidate);
             when(userRepository.findAll()).thenReturn(mockUsers);
+            when(entityMapper.toUserDTOList(mockUsers)).thenReturn(List.of(activeUserDTO, inactiveUserDTO));
 
-            List<User> result = userService.getAllUsers();
+            List<UserDTO> result = userService.getAllUsers();
 
             assertNotNull(result);
             assertEquals(2, result.size());
             assertEquals("active@test.com", result.get(0).getEmail());
             assertEquals("inactive@test.com", result.get(1).getEmail());
             verify(userRepository).findAll();
+            verify(entityMapper).toUserDTOList(mockUsers);
         }
     }
 
@@ -92,8 +107,9 @@ class UserServiceImplTest {
         @DisplayName("Should return user when found")
         void shouldReturnUserWhenFound() {
             when(userRepository.findById(1L)).thenReturn(Optional.of(activeCandidate));
+            when(entityMapper.toUserDTO(activeCandidate)).thenReturn(activeUserDTO);
 
-            Optional<User> result = userService.getUserById(1L);
+            Optional<UserDTO> result = userService.getUserById(1L);
 
             assertTrue(result.isPresent());
             assertEquals(1L, result.get().getId());
@@ -106,7 +122,7 @@ class UserServiceImplTest {
         void shouldReturnEmptyWhenNotFound() {
             when(userRepository.findById(99L)).thenReturn(Optional.empty());
 
-            Optional<User> result = userService.getUserById(99L);
+            Optional<UserDTO> result = userService.getUserById(99L);
 
             assertFalse(result.isPresent());
             verify(userRepository).findById(99L);
@@ -120,23 +136,45 @@ class UserServiceImplTest {
         @Test
         @DisplayName("Should save user successfully")
         void shouldSaveUserSuccessfully() {
-            User newUser = new User();
-            newUser.setEmail("new@test.com");
-            newUser.setName("NewUser");
-            newUser.setPassword("pass");
+            UserDTO inputDTO = new UserDTO();
+            inputDTO.setEmail("new@test.com");
+            inputDTO.setName("NewUser");
 
-            when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
-                User saved = invocation.getArgument(0);
-                saved.setId(3L);
-                return saved;
-            });
+            User inputEntity = new User();
+            inputEntity.setEmail("new@test.com");
+            inputEntity.setName("NewUser");
 
-            User result = userService.saveUser(newUser);
+            User savedEntity = new User();
+            savedEntity.setId(3L);
+            savedEntity.setEmail("new@test.com");
+            savedEntity.setName("NewUser");
+
+            UserDTO resultDTO = new UserDTO();
+            resultDTO.setId(3L);
+            resultDTO.setEmail("new@test.com");
+            resultDTO.setName("NewUser");
+
+            String rawPassword = "password123";
+            String encodedPassword = "encoded-password";
+
+            when(passwordEncoder.encode(rawPassword)).thenReturn(encodedPassword);
+            when(entityMapper.toUserEntity(inputDTO)).thenReturn(inputEntity);
+            when(userRepository.save(any(User.class))).thenReturn(savedEntity);
+            when(entityMapper.toUserDTO(savedEntity)).thenReturn(resultDTO);
+
+            UserDTO result = userService.saveUser(inputDTO, rawPassword);
 
             assertNotNull(result);
             assertEquals("new@test.com", result.getEmail());
             assertEquals("NewUser", result.getName());
-            verify(userRepository).save(any(User.class));
+            verify(passwordEncoder).encode(rawPassword);
+
+            ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+            verify(userRepository).save(userCaptor.capture());
+            assertEquals(encodedPassword, userCaptor.getValue().getPassword());
+
+            verify(entityMapper).toUserEntity(inputDTO);
+            verify(entityMapper).toUserDTO(savedEntity);
         }
     }
 
@@ -147,38 +185,52 @@ class UserServiceImplTest {
         @Test
         @DisplayName("Should update user when found")
         void shouldUpdateUserWhenFound() {
-            User updatedData = new User();
+            UserDTO updatedData = new UserDTO();
             updatedData.setName("UpdatedName");
             updatedData.setFirstName("UpdatedFirst");
             updatedData.setEmail("updated@test.com");
-            updatedData.setPassword("new-encoded-pass");
-            updatedData.setRole(Role.ADMIN);
+            updatedData.setRole("ADMIN");
+
+            UserDTO resultDTO = new UserDTO();
+            resultDTO.setId(1L);
+            resultDTO.setName("UpdatedName");
+            resultDTO.setFirstName("UpdatedFirst");
+            resultDTO.setEmail("updated@test.com");
+            resultDTO.setRole("ADMIN");
 
             when(userRepository.findById(1L)).thenReturn(Optional.of(activeCandidate));
             when(userRepository.saveAndFlush(activeCandidate)).thenReturn(activeCandidate);
+            when(entityMapper.toUserDTO(activeCandidate)).thenReturn(resultDTO);
 
-            User result = userService.updateUser(1L, updatedData);
+            UserDTO result = userService.updateUser(1L, updatedData);
 
             assertNotNull(result);
             assertEquals("UpdatedName", result.getName());
             assertEquals("UpdatedFirst", result.getFirstName());
             assertEquals("updated@test.com", result.getEmail());
-            assertEquals("new-encoded-pass", result.getPassword());
-            assertEquals(Role.ADMIN, result.getRole());
+            assertEquals("ADMIN", result.getRole());
             verify(userRepository).findById(1L);
             verify(userRepository).saveAndFlush(activeCandidate);
+            verify(entityMapper).toUserDTO(activeCandidate);
         }
 
         @Test
         @DisplayName("Should update user with partial fields")
         void shouldUpdateUserWithPartialFields() {
-            User updatedData = new User();
+            UserDTO updatedData = new UserDTO();
             updatedData.setEmail("partial@test.com");
+
+            UserDTO resultDTO = new UserDTO();
+            resultDTO.setId(1L);
+            resultDTO.setEmail("partial@test.com");
+            resultDTO.setName("Doe");
+            resultDTO.setFirstName("John");
 
             when(userRepository.findById(1L)).thenReturn(Optional.of(activeCandidate));
             when(userRepository.saveAndFlush(activeCandidate)).thenReturn(activeCandidate);
+            when(entityMapper.toUserDTO(activeCandidate)).thenReturn(resultDTO);
 
-            User result = userService.updateUser(1L, updatedData);
+            UserDTO result = userService.updateUser(1L, updatedData);
 
             assertNotNull(result);
             assertEquals("partial@test.com", result.getEmail());
@@ -186,12 +238,13 @@ class UserServiceImplTest {
             assertEquals("John", result.getFirstName());
             verify(userRepository).findById(1L);
             verify(userRepository).saveAndFlush(activeCandidate);
+            verify(entityMapper).toUserDTO(activeCandidate);
         }
 
         @Test
         @DisplayName("Should throw RuntimeException when user not found")
         void shouldThrowWhenUserNotFound() {
-            User updatedData = new User();
+            UserDTO updatedData = new UserDTO();
             updatedData.setName("Any");
 
             when(userRepository.findById(99L)).thenReturn(Optional.empty());
@@ -241,15 +294,17 @@ class UserServiceImplTest {
             when(passwordEncoder.matches("rawPass", "encoded-pass")).thenReturn(true);
             when(jwtUtil.generateToken(eq("active@test.com"), eq(List.of("ROLE_CANDIDATE"))))
                     .thenReturn("generated-jwt-token");
+            when(entityMapper.toUserDTO(activeCandidate)).thenReturn(activeUserDTO);
 
             Map<String, Object> result = userService.login("active@test.com", "rawPass");
 
             assertNotNull(result);
             assertEquals("generated-jwt-token", result.get("token"));
-            assertEquals(activeCandidate, result.get("user"));
+            assertEquals(activeUserDTO, result.get("user"));
             verify(userRepository).findByEmail("active@test.com");
             verify(passwordEncoder).matches("rawPass", "encoded-pass");
             verify(jwtUtil).generateToken("active@test.com", List.of("ROLE_CANDIDATE"));
+            verify(entityMapper).toUserDTO(activeCandidate);
         }
 
         @Test

@@ -1,6 +1,6 @@
 package com.app.recruitmentapp.controllers;
 
-import com.app.recruitmentapp.entities.Recruiter;
+import com.app.recruitmentapp.dto.RecruiterDTO;
 import com.app.recruitmentapp.services.RecruiterService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -33,16 +33,16 @@ class RecruiterControllerTest {
     @InjectMocks
     private RecruiterController recruiterController;
 
-    private Recruiter testRecruiter;
+    private RecruiterDTO testRecruiterDTO;
 
     @BeforeEach
     void setUp() {
-        testRecruiter = new Recruiter();
-        testRecruiter.setId(1L);
-        testRecruiter.setEmail("recruiter@test.com");
-        testRecruiter.setName("Doe");
-        testRecruiter.setFirstName("Jane");
-        testRecruiter.setPhone("0123456789");
+        testRecruiterDTO = new RecruiterDTO();
+        testRecruiterDTO.setId(1L);
+        testRecruiterDTO.setEmail("recruiter@test.com");
+        testRecruiterDTO.setName("Doe");
+        testRecruiterDTO.setFirstName("Jane");
+        testRecruiterDTO.setPhone("0123456789");
     }
 
     @Nested
@@ -52,9 +52,9 @@ class RecruiterControllerTest {
         @Test
         @DisplayName("Should return all recruiters")
         void shouldReturnAllRecruiters() {
-            when(recruiterService.getAllRecruiters()).thenReturn(List.of(testRecruiter));
+            when(recruiterService.getAllRecruiters()).thenReturn(List.of(testRecruiterDTO));
 
-            List<Recruiter> result = recruiterController.getAllRecruiters();
+            List<RecruiterDTO> result = recruiterController.getAllRecruiters();
 
             assertNotNull(result);
             assertEquals(1, result.size());
@@ -68,9 +68,9 @@ class RecruiterControllerTest {
         @Test
         @DisplayName("Should return recruiter when found")
         void shouldReturnRecruiterWhenFound() {
-            when(recruiterService.getRecruiterById(1L)).thenReturn(Optional.of(testRecruiter));
+            when(recruiterService.getRecruiterById(1L)).thenReturn(Optional.of(testRecruiterDTO));
 
-            ResponseEntity<Recruiter> response = recruiterController.getRecruiterById(1L);
+            ResponseEntity<RecruiterDTO> response = recruiterController.getRecruiterById(1L);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
         }
@@ -80,7 +80,7 @@ class RecruiterControllerTest {
         void shouldReturn404WhenNotFound() {
             when(recruiterService.getRecruiterById(99L)).thenReturn(Optional.empty());
 
-            ResponseEntity<Recruiter> response = recruiterController.getRecruiterById(99L);
+            ResponseEntity<RecruiterDTO> response = recruiterController.getRecruiterById(99L);
 
             assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         }
@@ -98,7 +98,7 @@ class RecruiterControllerTest {
                     "name", "Doe", "firstName", "Jane", "phone", "0123456789");
 
             when(recruiterService.registerRecruiter("new@test.com", "pass123", "Doe", "Jane", "0123456789"))
-                    .thenReturn(testRecruiter);
+                    .thenReturn(testRecruiterDTO);
 
             ResponseEntity<?> response = recruiterController.registerRecruiter(request);
 
@@ -129,9 +129,9 @@ class RecruiterControllerTest {
         @DisplayName("Should add recruiter with picture successfully")
         void shouldAddRecruiterWithPictureSuccessfully() {
             MultipartFile imageFile = new MockMultipartFile("image", "test.jpg", "image/jpeg", "test".getBytes());
-            when(recruiterService.addRecruiterWithPicture(any(Recruiter.class), eq(imageFile))).thenReturn(testRecruiter);
+            when(recruiterService.addRecruiterWithPicture(any(RecruiterDTO.class), eq(imageFile))).thenReturn(testRecruiterDTO);
 
-            ResponseEntity<Recruiter> response = recruiterController.addRecruiterWithPicture(new Recruiter(), imageFile);
+            ResponseEntity<RecruiterDTO> response = recruiterController.addRecruiterWithPicture(new RecruiterDTO(), imageFile);
 
             assertEquals(HttpStatus.CREATED, response.getStatusCode());
         }
@@ -144,9 +144,9 @@ class RecruiterControllerTest {
         @Test
         @DisplayName("Should update recruiter successfully")
         void shouldUpdateRecruiterSuccessfully() {
-            when(recruiterService.updateRecruiter(1L, testRecruiter)).thenReturn(testRecruiter);
+            when(recruiterService.updateRecruiter(1L, testRecruiterDTO)).thenReturn(testRecruiterDTO);
 
-            ResponseEntity<Recruiter> response = recruiterController.updateRecruiter(1L, testRecruiter);
+            ResponseEntity<RecruiterDTO> response = recruiterController.updateRecruiter(1L, testRecruiterDTO);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
         }
@@ -154,9 +154,9 @@ class RecruiterControllerTest {
         @Test
         @DisplayName("Should return 404 when update fails")
         void shouldReturn404WhenUpdateFails() {
-            when(recruiterService.updateRecruiter(99L, testRecruiter)).thenThrow(new RuntimeException("Recruiter not found"));
+            when(recruiterService.updateRecruiter(99L, testRecruiterDTO)).thenThrow(new RuntimeException("Recruiter not found"));
 
-            ResponseEntity<Recruiter> response = recruiterController.updateRecruiter(99L, testRecruiter);
+            ResponseEntity<RecruiterDTO> response = recruiterController.updateRecruiter(99L, testRecruiterDTO);
 
             assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         }

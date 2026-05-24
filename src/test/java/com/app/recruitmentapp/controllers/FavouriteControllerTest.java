@@ -1,10 +1,6 @@
 package com.app.recruitmentapp.controllers;
 
-import com.app.recruitmentapp.entities.Favourite;
-import com.app.recruitmentapp.entities.Offer;
-import com.app.recruitmentapp.entities.User;
-import com.app.recruitmentapp.repositories.OfferRepository;
-import com.app.recruitmentapp.repositories.UserRepository;
+import com.app.recruitmentapp.dto.FavouriteDTO;
 import com.app.recruitmentapp.services.FavouriteService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -15,7 +11,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -27,12 +22,6 @@ class FavouriteControllerTest {
     @Mock
     private FavouriteService favouriteService;
 
-    @Mock
-    private UserRepository userRepository;
-
-    @Mock
-    private OfferRepository offerRepository;
-
     @InjectMocks
     private FavouriteController favouriteController;
 
@@ -43,17 +32,9 @@ class FavouriteControllerTest {
         @Test
         @DisplayName("Should save job as favourite successfully")
         void shouldSaveJobSuccessfully() {
-            User user = new User();
-            user.setId(1L);
-            Offer offer = new Offer();
-            offer.setId(1L);
-            Favourite favourite = new Favourite();
+            when(favouriteService.saveJob(1L, 1L)).thenReturn(new FavouriteDTO());
 
-            when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-            when(offerRepository.findById(1L)).thenReturn(Optional.of(offer));
-            when(favouriteService.saveJob(user, offer)).thenReturn(favourite);
-
-            Favourite result = favouriteController.favourite(1L, 1L);
+            FavouriteDTO result = favouriteController.favourite(1L, 1L);
 
             assertNotNull(result);
         }
@@ -61,20 +42,9 @@ class FavouriteControllerTest {
         @Test
         @DisplayName("Should throw when user not found")
         void shouldThrowWhenUserNotFound() {
-            when(userRepository.findById(99L)).thenThrow(new RuntimeException("User not found"));
+            when(favouriteService.saveJob(99L, 1L)).thenThrow(new RuntimeException("User not found"));
 
             assertThrows(RuntimeException.class, () -> favouriteController.favourite(99L, 1L));
-        }
-
-        @Test
-        @DisplayName("Should throw when offer not found")
-        void shouldThrowWhenOfferNotFound() {
-            User user = new User();
-            user.setId(1L);
-            when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-            when(offerRepository.findById(99L)).thenThrow(new RuntimeException("Offer not found"));
-
-            assertThrows(RuntimeException.class, () -> favouriteController.favourite(1L, 99L));
         }
     }
 
@@ -85,10 +55,9 @@ class FavouriteControllerTest {
         @Test
         @DisplayName("Should return saved jobs for user")
         void shouldReturnSavedJobs() {
-            List<Favourite> favourites = List.of(new Favourite());
-            when(favouriteService.getSavedJobs(1L)).thenReturn(favourites);
+            when(favouriteService.getSavedJobs(1L)).thenReturn(List.of(new FavouriteDTO()));
 
-            List<Favourite> result = favouriteController.getSavedJobs(1L);
+            List<FavouriteDTO> result = favouriteController.getSavedJobs(1L);
 
             assertNotNull(result);
             assertEquals(1, result.size());

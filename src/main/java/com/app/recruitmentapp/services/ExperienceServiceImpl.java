@@ -1,7 +1,9 @@
 package com.app.recruitmentapp.services;
 
+import com.app.recruitmentapp.dto.ExperienceDTO;
 import com.app.recruitmentapp.entities.Candidate;
 import com.app.recruitmentapp.entities.Experience;
+import com.app.recruitmentapp.mapper.EntityMapper;
 import com.app.recruitmentapp.repositories.CandidateRepository;
 import com.app.recruitmentapp.repositories.ExperienceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,34 +18,38 @@ public class ExperienceServiceImpl implements ExperienceService {
     private ExperienceRepository experienceRepository;
     @Autowired
     private CandidateRepository candidateRepository;
+    @Autowired
+    private EntityMapper entityMapper;
+
     @Override
-    public List<Experience> getAllExperiences() {
-        return experienceRepository.findAll();
+    public List<ExperienceDTO> getAllExperiences() {
+        return entityMapper.toExperienceDTOList(experienceRepository.findAll());
     }
 
     @Override
-    public Optional<Experience> getExperienceById(Long id) {
-        return experienceRepository.findById(id);
+    public Optional<ExperienceDTO> getExperienceById(Long id) {
+        return experienceRepository.findById(id).map(entityMapper::toExperienceDTO);
     }
 
     @Override
-    public Experience saveExperience(Experience experience, Long idCandidate) {
+    public ExperienceDTO saveExperience(ExperienceDTO experienceDTO, Long idCandidate) {
+        Experience experience = entityMapper.toExperienceEntity(experienceDTO);
         Candidate c = candidateRepository.findById(idCandidate).orElse(null);
         experience.setCandidate(c);
-        return experienceRepository.save(experience);
+        return entityMapper.toExperienceDTO(experienceRepository.save(experience));
     }
 
     @Override
-    public Experience updateExperience(Long id, Experience newExperience) {
+    public ExperienceDTO updateExperience(Long id, ExperienceDTO experienceDTO) {
         Experience ex = experienceRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Experience non trouvé"));
-        ex.setCompanyName(newExperience.getCompanyName());
-        ex.setJobTitle(newExperience.getJobTitle());
-        ex.setStartExpDate(newExperience.getStartExpDate());
-        ex.setEndExpDate(newExperience.getEndExpDate());
-        ex.setDescription(newExperience.getDescription());
+        ex.setCompanyName(experienceDTO.getCompanyName());
+        ex.setJobTitle(experienceDTO.getJobTitle());
+        ex.setStartExpDate(experienceDTO.getStartExpDate());
+        ex.setEndExpDate(experienceDTO.getEndExpDate());
+        ex.setDescription(experienceDTO.getDescription());
         experienceRepository.saveAndFlush(ex);
-        return ex;
+        return entityMapper.toExperienceDTO(ex);
     }
 
     @Override
@@ -54,5 +60,4 @@ public class ExperienceServiceImpl implements ExperienceService {
             throw new RuntimeException("Experience non trouvé");
         }
     }
-
 }

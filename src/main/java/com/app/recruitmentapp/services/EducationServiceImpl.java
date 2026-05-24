@@ -1,7 +1,9 @@
 package com.app.recruitmentapp.services;
 
+import com.app.recruitmentapp.dto.EducationDTO;
 import com.app.recruitmentapp.entities.Candidate;
 import com.app.recruitmentapp.entities.Education;
+import com.app.recruitmentapp.mapper.EntityMapper;
 import com.app.recruitmentapp.repositories.CandidateRepository;
 import com.app.recruitmentapp.repositories.EducationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,33 +18,37 @@ public class EducationServiceImpl implements EducationService {
     private EducationRepository educationRepository;
     @Autowired
     private CandidateRepository candidateRepository;
+    @Autowired
+    private EntityMapper entityMapper;
+
     @Override
-    public List<Education> getAllEducations() {
-        return educationRepository.findAll();
+    public List<EducationDTO> getAllEducations() {
+        return entityMapper.toEducationDTOList(educationRepository.findAll());
     }
 
     @Override
-    public Optional<Education> getEducationById(Long id) {
-        return educationRepository.findById(id);
+    public Optional<EducationDTO> getEducationById(Long id) {
+        return educationRepository.findById(id).map(entityMapper::toEducationDTO);
     }
 
     @Override
-    public Education saveEducation(Education education, Long idCandidate) {
+    public EducationDTO saveEducation(EducationDTO educationDTO, Long idCandidate) {
+        Education education = entityMapper.toEducationEntity(educationDTO);
         Candidate c = candidateRepository.findById(idCandidate).orElse(null);
         education.setCandidate(c);
-        return educationRepository.save(education);
+        return entityMapper.toEducationDTO(educationRepository.save(education));
     }
 
     @Override
-    public Education updateEducation(Long id, Education newEducation) {
+    public EducationDTO updateEducation(Long id, EducationDTO educationDTO) {
         Education e = educationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Education non trouvé"));
-        e.setDiploma(newEducation.getDiploma());
-        e.setUniversity(newEducation.getUniversity());
-        e.setEndDate(newEducation.getEndDate());
-        e.setDescription(newEducation.getDescription());
+        e.setDiploma(educationDTO.getDiploma());
+        e.setUniversity(educationDTO.getUniversity());
+        e.setEndDate(educationDTO.getEndDate());
+        e.setDescription(educationDTO.getDescription());
         educationRepository.saveAndFlush(e);
-        return e;
+        return entityMapper.toEducationDTO(e);
     }
 
     @Override
@@ -53,6 +59,4 @@ public class EducationServiceImpl implements EducationService {
             throw new RuntimeException("Education non trouvé");
         }
     }
-
-
 }

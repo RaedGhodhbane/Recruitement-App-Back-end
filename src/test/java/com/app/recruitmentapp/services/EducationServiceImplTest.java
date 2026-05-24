@@ -1,7 +1,9 @@
 package com.app.recruitmentapp.services;
 
+import com.app.recruitmentapp.dto.EducationDTO;
 import com.app.recruitmentapp.entities.Candidate;
 import com.app.recruitmentapp.entities.Education;
+import com.app.recruitmentapp.mapper.EntityMapper;
 import com.app.recruitmentapp.repositories.CandidateRepository;
 import com.app.recruitmentapp.repositories.EducationRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,12 +29,16 @@ class EducationServiceImplTest {
     private EducationRepository educationRepository;
     @Mock
     private CandidateRepository candidateRepository;
+    @Mock
+    private EntityMapper entityMapper;
     @InjectMocks
     private EducationServiceImpl educationService;
 
     private Education education1;
     private Education education2;
     private Candidate candidate;
+    private EducationDTO education1DTO;
+    private EducationDTO education2DTO;
 
     @BeforeEach
     void setUp() {
@@ -55,6 +61,22 @@ class EducationServiceImplTest {
         education2.setEndDate("2022-06-30");
         education2.setDescription("Licence en informatique");
         education2.setCandidate(candidate);
+
+        education1DTO = new EducationDTO();
+        education1DTO.setId(1L);
+        education1DTO.setDiploma("Master");
+        education1DTO.setUniversity("Sorbonne");
+        education1DTO.setEndDate("2024-06-30");
+        education1DTO.setDescription("Master en informatique");
+        education1DTO.setCandidateId(1L);
+
+        education2DTO = new EducationDTO();
+        education2DTO.setId(2L);
+        education2DTO.setDiploma("Bachelor");
+        education2DTO.setUniversity("Tunis");
+        education2DTO.setEndDate("2022-06-30");
+        education2DTO.setDescription("Licence en informatique");
+        education2DTO.setCandidateId(1L);
     }
 
     @Nested
@@ -66,14 +88,16 @@ class EducationServiceImplTest {
         void shouldGetAllEducationsSuccessfully() {
             List<Education> mockEducations = List.of(education1, education2);
             when(educationRepository.findAll()).thenReturn(mockEducations);
+            when(entityMapper.toEducationDTOList(mockEducations)).thenReturn(List.of(education1DTO, education2DTO));
 
-            List<Education> result = educationService.getAllEducations();
+            List<EducationDTO> result = educationService.getAllEducations();
 
             assertNotNull(result);
             assertEquals(2, result.size());
             assertEquals("Master", result.get(0).getDiploma());
             assertEquals("Bachelor", result.get(1).getDiploma());
             verify(educationRepository).findAll();
+            verify(entityMapper).toEducationDTOList(mockEducations);
         }
     }
 
@@ -85,8 +109,9 @@ class EducationServiceImplTest {
         @DisplayName("Should return education when found")
         void shouldReturnEducationWhenFound() {
             when(educationRepository.findById(1L)).thenReturn(Optional.of(education1));
+            when(entityMapper.toEducationDTO(education1)).thenReturn(education1DTO);
 
-            Optional<Education> result = educationService.getEducationById(1L);
+            Optional<EducationDTO> result = educationService.getEducationById(1L);
 
             assertTrue(result.isPresent());
             assertEquals(1L, result.get().getId());
@@ -99,7 +124,7 @@ class EducationServiceImplTest {
         void shouldReturnEmptyWhenNotFound() {
             when(educationRepository.findById(99L)).thenReturn(Optional.empty());
 
-            Optional<Education> result = educationService.getEducationById(99L);
+            Optional<EducationDTO> result = educationService.getEducationById(99L);
 
             assertFalse(result.isPresent());
             verify(educationRepository).findById(99L);
@@ -113,49 +138,80 @@ class EducationServiceImplTest {
         @Test
         @DisplayName("Should save education successfully")
         void shouldSaveEducationSuccessfully() {
-            Education newEducation = new Education();
-            newEducation.setDiploma("PhD");
-            newEducation.setUniversity("MIT");
-            newEducation.setEndDate("2027-06-30");
-            newEducation.setDescription("Doctorat en IA");
+            EducationDTO newEducationDTO = new EducationDTO();
+            newEducationDTO.setDiploma("PhD");
+            newEducationDTO.setUniversity("MIT");
+            newEducationDTO.setEndDate("2027-06-30");
+            newEducationDTO.setDescription("Doctorat en IA");
 
+            Education newEducationEntity = new Education();
+            newEducationEntity.setDiploma("PhD");
+            newEducationEntity.setUniversity("MIT");
+            newEducationEntity.setEndDate("2027-06-30");
+            newEducationEntity.setDescription("Doctorat en IA");
+
+            EducationDTO resultDTO = new EducationDTO();
+            resultDTO.setId(3L);
+            resultDTO.setDiploma("PhD");
+            resultDTO.setUniversity("MIT");
+            resultDTO.setEndDate("2027-06-30");
+            resultDTO.setDescription("Doctorat en IA");
+            resultDTO.setCandidateId(1L);
+
+            when(entityMapper.toEducationEntity(newEducationDTO)).thenReturn(newEducationEntity);
             when(candidateRepository.findById(1L)).thenReturn(Optional.of(candidate));
             when(educationRepository.save(any(Education.class))).thenAnswer(invocation -> {
                 Education saved = invocation.getArgument(0);
                 saved.setId(3L);
                 return saved;
             });
+            when(entityMapper.toEducationDTO(any(Education.class))).thenReturn(resultDTO);
 
-            Education result = educationService.saveEducation(newEducation, 1L);
+            EducationDTO result = educationService.saveEducation(newEducationDTO, 1L);
 
             assertNotNull(result);
             assertEquals("PhD", result.getDiploma());
             assertEquals("MIT", result.getUniversity());
-            assertEquals(candidate, result.getCandidate());
+            assertEquals(1L, result.getCandidateId());
+            verify(entityMapper).toEducationEntity(newEducationDTO);
             verify(candidateRepository).findById(1L);
             verify(educationRepository).save(any(Education.class));
+            verify(entityMapper).toEducationDTO(any(Education.class));
         }
 
         @Test
         @DisplayName("Should save education with null candidate when candidate not found")
         void shouldSaveEducationWithNullCandidateWhenNotFound() {
-            Education newEducation = new Education();
-            newEducation.setDiploma("PhD");
-            newEducation.setUniversity("MIT");
+            EducationDTO newEducationDTO = new EducationDTO();
+            newEducationDTO.setDiploma("PhD");
+            newEducationDTO.setUniversity("MIT");
 
+            Education newEducationEntity = new Education();
+            newEducationEntity.setDiploma("PhD");
+            newEducationEntity.setUniversity("MIT");
+
+            EducationDTO resultDTO = new EducationDTO();
+            resultDTO.setId(3L);
+            resultDTO.setDiploma("PhD");
+            resultDTO.setUniversity("MIT");
+
+            when(entityMapper.toEducationEntity(newEducationDTO)).thenReturn(newEducationEntity);
             when(candidateRepository.findById(99L)).thenReturn(Optional.empty());
             when(educationRepository.save(any(Education.class))).thenAnswer(invocation -> {
                 Education saved = invocation.getArgument(0);
                 saved.setId(3L);
                 return saved;
             });
+            when(entityMapper.toEducationDTO(any(Education.class))).thenReturn(resultDTO);
 
-            Education result = educationService.saveEducation(newEducation, 99L);
+            EducationDTO result = educationService.saveEducation(newEducationDTO, 99L);
 
             assertNotNull(result);
-            assertNull(result.getCandidate());
+            assertNull(result.getCandidateId());
+            verify(entityMapper).toEducationEntity(newEducationDTO);
             verify(candidateRepository).findById(99L);
             verify(educationRepository).save(any(Education.class));
+            verify(entityMapper).toEducationDTO(any(Education.class));
         }
     }
 
@@ -166,16 +222,25 @@ class EducationServiceImplTest {
         @Test
         @DisplayName("Should update education when found")
         void shouldUpdateEducationWhenFound() {
-            Education updatedData = new Education();
+            EducationDTO updatedData = new EducationDTO();
             updatedData.setDiploma("MBA");
             updatedData.setUniversity("HEC Paris");
             updatedData.setEndDate("2025-06-30");
             updatedData.setDescription("MBA en finance");
 
+            EducationDTO resultDTO = new EducationDTO();
+            resultDTO.setId(1L);
+            resultDTO.setDiploma("MBA");
+            resultDTO.setUniversity("HEC Paris");
+            resultDTO.setEndDate("2025-06-30");
+            resultDTO.setDescription("MBA en finance");
+            resultDTO.setCandidateId(1L);
+
             when(educationRepository.findById(1L)).thenReturn(Optional.of(education1));
             when(educationRepository.saveAndFlush(education1)).thenReturn(education1);
+            when(entityMapper.toEducationDTO(education1)).thenReturn(resultDTO);
 
-            Education result = educationService.updateEducation(1L, updatedData);
+            EducationDTO result = educationService.updateEducation(1L, updatedData);
 
             assertNotNull(result);
             assertEquals("MBA", result.getDiploma());
@@ -184,12 +249,13 @@ class EducationServiceImplTest {
             assertEquals("MBA en finance", result.getDescription());
             verify(educationRepository).findById(1L);
             verify(educationRepository).saveAndFlush(education1);
+            verify(entityMapper).toEducationDTO(education1);
         }
 
         @Test
         @DisplayName("Should throw RuntimeException when education not found")
         void shouldThrowWhenEducationNotFound() {
-            Education updatedData = new Education();
+            EducationDTO updatedData = new EducationDTO();
             updatedData.setDiploma("MBA");
 
             when(educationRepository.findById(99L)).thenReturn(Optional.empty());

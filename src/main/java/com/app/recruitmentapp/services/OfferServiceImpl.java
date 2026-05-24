@@ -1,7 +1,9 @@
 package com.app.recruitmentapp.services;
 
+import com.app.recruitmentapp.dto.OfferDTO;
 import com.app.recruitmentapp.entities.Offer;
 import com.app.recruitmentapp.entities.Recruiter;
+import com.app.recruitmentapp.mapper.EntityMapper;
 import com.app.recruitmentapp.repositories.OfferRepository;
 import com.app.recruitmentapp.repositories.RecruiterRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,43 +30,44 @@ public class OfferServiceImpl implements OfferService {
     @Autowired
     private RecruiterRepository recruiterRepository;
 
+    @Autowired
+    private EntityMapper entityMapper;
+
     @Value("${file.upload-dir}")
     private String uploadDir;
 
     @Override
-    public List<Offer> getAllOffers() {
-        return offerRepository.findAll();
+    public List<OfferDTO> getAllOffers() {
+        return entityMapper.toOfferDTOList(offerRepository.findAll());
     }
 
     @Override
-    public Optional<Offer> getOfferById(Long id) {
-        return offerRepository.findById(id);
+    public Optional<OfferDTO> getOfferById(Long id) {
+        return offerRepository.findById(id).map(entityMapper::toOfferDTO);
     }
 
     @Override
-    public Offer saveOffer(Offer offer, Long idRecruiter) {
+    public OfferDTO saveOffer(OfferDTO offerDTO, Long idRecruiter) {
+        Offer offer = entityMapper.toOfferEntity(offerDTO);
         Recruiter r = recruiterRepository.findById(idRecruiter).orElse(null);
         offer.setRecruiter(r);
-        return offerRepository.save(offer);
+        return entityMapper.toOfferDTO(offerRepository.save(offer));
     }
 
     @Override
-    public Offer updateOffer(Long id, Offer newOffer) {
+    public OfferDTO updateOffer(Long id, OfferDTO offerDTO) {
         Offer o = offerRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Offre non trouvé"));
-        o.setTitle(newOffer.getTitle());
-        o.setDescription(newOffer.getDescription());
-        o.setType(newOffer.getType());
-        o.setAddress(newOffer.getAddress());
-        o.setSalary(newOffer.getSalary());
-        o.setExperience(newOffer.getExperience());
-        o.setPublicationDate(newOffer.getPublicationDate());
-        o.setExpirationDate(newOffer.getExpirationDate());
-        o.setCandidacyList(newOffer.getCandidacyList());
-        o.setQuestionList(newOffer.getQuestionList());
-        o.setRecruiter(newOffer.getRecruiter());
+        o.setTitle(offerDTO.getTitle());
+        o.setDescription(offerDTO.getDescription());
+        o.setType(offerDTO.getType());
+        o.setAddress(offerDTO.getAddress());
+        o.setSalary(offerDTO.getSalary());
+        o.setExperience(offerDTO.getExperience());
+        o.setPublicationDate(offerDTO.getPublicationDate());
+        o.setExpirationDate(offerDTO.getExpirationDate());
         offerRepository.saveAndFlush(o);
-        return o;
+        return entityMapper.toOfferDTO(o);
     }
 
     @Override
@@ -78,17 +81,14 @@ public class OfferServiceImpl implements OfferService {
 
     @Override
     public ResponseEntity<Resource> getFile(String filename) {
-        // Il construit le chemin complet du fichier en combinant le dossier d’upload //(`uploadDir`) et le nom du fichier reçu.
         Path file = Paths.get(uploadDir).resolve(filename);
         Resource resource;
         try {
-//Il convertit le fichier en un objet `Resource` pour pouvoir être renvoyé dans la réponse HTTP
             resource = new UrlResource(file.toUri());
         } catch (MalformedURLException e) {
             return ResponseEntity.notFound().build();
         }
         if (resource.exists() || resource.isReadable()) {
-//HttpHeaders.CONTENT_DISPOSITION permet d'envoyer le fichier avec une suggestion de téléchargement.
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"").body(resource);
         } else {

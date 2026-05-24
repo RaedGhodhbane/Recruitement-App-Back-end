@@ -1,6 +1,6 @@
 package com.app.recruitmentapp.controllers;
 
-import com.app.recruitmentapp.entities.Question;
+import com.app.recruitmentapp.dto.QuestionDTO;
 import com.app.recruitmentapp.services.QuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/question")
@@ -17,27 +16,28 @@ public class QuestionController {
     private QuestionService questionService;
 
     @GetMapping("/questions")
-    public List<Question> getAllQuestions() {
+    public List<QuestionDTO> getAllQuestions() {
         return questionService.getAllQuestions();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Question> getQuestionById(@PathVariable Long id) {
-        Optional<Question> question = questionService.getQuestionById(id);
-        return question.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<QuestionDTO> getQuestionById(@PathVariable Long id) {
+        return questionService.getQuestionById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping("/{idOffer}")
-    public ResponseEntity<Question> addQuestion(@RequestBody Question question, @PathVariable Long idOffer) {
-        Question savedQuestion = questionService.saveQuestion(question, idOffer);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedQuestion);
+    public ResponseEntity<QuestionDTO> addQuestion(@RequestBody QuestionDTO questionDTO, @PathVariable Long idOffer) {
+        QuestionDTO saved = questionService.saveQuestion(questionDTO, idOffer);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Question> updateQuestion(@PathVariable Long id, @RequestBody Question question) {
+    public ResponseEntity<QuestionDTO> updateQuestion(@PathVariable Long id, @RequestBody QuestionDTO questionDTO) {
         try {
-            Question updatedQuestion = questionService.updateQuestion(id, question);
-            return ResponseEntity.ok(updatedQuestion);
+            QuestionDTO updated = questionService.updateQuestion(id, questionDTO);
+            return ResponseEntity.ok(updated);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }

@@ -1,6 +1,6 @@
 package com.app.recruitmentapp.controllers;
 
-import com.app.recruitmentapp.entities.User;
+import com.app.recruitmentapp.dto.UserDTO;
 import com.app.recruitmentapp.services.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -29,13 +29,13 @@ class UserControllerTest {
     @InjectMocks
     private UserController userController;
 
-    private User testUser;
+    private UserDTO testUserDTO;
 
     @BeforeEach
     void setUp() {
-        testUser = new User();
-        testUser.setId(1L);
-        testUser.setEmail("user@test.com");
+        testUserDTO = new UserDTO();
+        testUserDTO.setId(1L);
+        testUserDTO.setEmail("user@test.com");
     }
 
     @Nested
@@ -45,9 +45,9 @@ class UserControllerTest {
         @Test
         @DisplayName("Should return all users")
         void shouldReturnAllUsers() {
-            when(userService.getAllUsers()).thenReturn(List.of(testUser));
+            when(userService.getAllUsers()).thenReturn(List.of(testUserDTO));
 
-            List<User> result = userController.getAllUsers();
+            List<UserDTO> result = userController.getAllUsers();
 
             assertNotNull(result);
             assertEquals(1, result.size());
@@ -61,9 +61,9 @@ class UserControllerTest {
         @Test
         @DisplayName("Should return user when found")
         void shouldReturnUserWhenFound() {
-            when(userService.getUserById(1L)).thenReturn(Optional.of(testUser));
+            when(userService.getUserById(1L)).thenReturn(Optional.of(testUserDTO));
 
-            ResponseEntity<User> response = userController.getUserById(1L);
+            ResponseEntity<UserDTO> response = userController.getUserById(1L);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
         }
@@ -73,7 +73,7 @@ class UserControllerTest {
         void shouldReturn404WhenNotFound() {
             when(userService.getUserById(99L)).thenReturn(Optional.empty());
 
-            ResponseEntity<User> response = userController.getUserById(99L);
+            ResponseEntity<UserDTO> response = userController.getUserById(99L);
 
             assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         }
@@ -86,9 +86,9 @@ class UserControllerTest {
         @Test
         @DisplayName("Should add user successfully")
         void shouldAddUserSuccessfully() {
-            when(userService.saveUser(testUser)).thenReturn(testUser);
+            when(userService.saveUser(testUserDTO, "password123")).thenReturn(testUserDTO);
 
-            ResponseEntity<User> response = userController.addUser(testUser);
+            ResponseEntity<UserDTO> response = userController.addUser(testUserDTO, "password123");
 
             assertEquals(HttpStatus.CREATED, response.getStatusCode());
         }
@@ -101,9 +101,9 @@ class UserControllerTest {
         @Test
         @DisplayName("Should update user successfully")
         void shouldUpdateUserSuccessfully() {
-            when(userService.updateUser(1L, testUser)).thenReturn(testUser);
+            when(userService.updateUser(1L, testUserDTO)).thenReturn(testUserDTO);
 
-            ResponseEntity<User> response = userController.updateUser(1L, testUser);
+            ResponseEntity<UserDTO> response = userController.updateUser(1L, testUserDTO);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
         }
@@ -111,9 +111,9 @@ class UserControllerTest {
         @Test
         @DisplayName("Should return 404 when update fails")
         void shouldReturn404WhenUpdateFails() {
-            when(userService.updateUser(99L, testUser)).thenThrow(new RuntimeException("User not found"));
+            when(userService.updateUser(99L, testUserDTO)).thenThrow(new RuntimeException("User not found"));
 
-            ResponseEntity<User> response = userController.updateUser(99L, testUser);
+            ResponseEntity<UserDTO> response = userController.updateUser(99L, testUserDTO);
 
             assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         }

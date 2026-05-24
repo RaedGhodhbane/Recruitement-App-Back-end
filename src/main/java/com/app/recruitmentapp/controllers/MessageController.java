@@ -1,6 +1,6 @@
 package com.app.recruitmentapp.controllers;
 
-import com.app.recruitmentapp.entities.Message;
+import com.app.recruitmentapp.dto.MessageDTO;
 import com.app.recruitmentapp.services.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
@@ -18,24 +17,24 @@ public class MessageController {
     private MessageService messageService;
 
     @GetMapping("/messages")
-    public List<Message> getAllMessages() {
+    public List<MessageDTO> getAllMessages() {
         return messageService.getAllMessages();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Message> getMessageById(@PathVariable Long id) {
-        Optional<Message> message = messageService.getMessageById(id);
-        return message.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<MessageDTO> getMessageById(@PathVariable Long id) {
+        return messageService.getMessageById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping(path = "/{idUserSend}/{idUserReceive}")
-    public ResponseEntity<Message> sendMessageByUser(
-            @RequestBody Message message, @PathVariable Long idUserSend, @PathVariable Long idUserReceive
+    public ResponseEntity<MessageDTO> sendMessageByUser(
+            @RequestBody MessageDTO messageDTO, @PathVariable Long idUserSend, @PathVariable Long idUserReceive
     ) {
-        Message sendMessageByUser = messageService.sendMessage(message,idUserSend,idUserReceive);
-        return ResponseEntity.status(HttpStatus.CREATED).body(sendMessageByUser);
+        MessageDTO saved = messageService.sendMessage(messageDTO, idUserSend, idUserReceive);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
-
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteMessage(@PathVariable Long id) {
@@ -46,7 +45,4 @@ public class MessageController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
-
-
-
 }

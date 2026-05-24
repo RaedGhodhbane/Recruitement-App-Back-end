@@ -1,6 +1,6 @@
 package com.app.recruitmentapp.controllers;
 
-import com.app.recruitmentapp.entities.Experience;
+import com.app.recruitmentapp.dto.ExperienceDTO;
 import com.app.recruitmentapp.services.ExperienceService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -30,14 +30,14 @@ class ExperienceControllerTest {
     @InjectMocks
     private ExperienceController experienceController;
 
-    private Experience testExperience;
+    private ExperienceDTO testExperienceDTO;
 
     @BeforeEach
     void setUp() {
-        testExperience = new Experience();
-        testExperience.setId(1L);
-        testExperience.setJobTitle("Software Engineer");
-        testExperience.setCompanyName("Tech Corp");
+        testExperienceDTO = new ExperienceDTO();
+        testExperienceDTO.setId(1L);
+        testExperienceDTO.setJobTitle("Software Engineer");
+        testExperienceDTO.setCompanyName("Tech Corp");
     }
 
     @Nested
@@ -47,9 +47,9 @@ class ExperienceControllerTest {
         @Test
         @DisplayName("Should return all experiences")
         void shouldReturnAllExperiences() {
-            when(experienceService.getAllExperiences()).thenReturn(List.of(testExperience));
+            when(experienceService.getAllExperiences()).thenReturn(List.of(testExperienceDTO));
 
-            List<Experience> result = experienceController.getAllExperiences();
+            List<ExperienceDTO> result = experienceController.getAllExperiences();
 
             assertNotNull(result);
             assertEquals(1, result.size());
@@ -63,9 +63,9 @@ class ExperienceControllerTest {
         @Test
         @DisplayName("Should return experience when found")
         void shouldReturnExperienceWhenFound() {
-            when(experienceService.getExperienceById(1L)).thenReturn(Optional.of(testExperience));
+            when(experienceService.getExperienceById(1L)).thenReturn(Optional.of(testExperienceDTO));
 
-            ResponseEntity<Experience> response = experienceController.getExperienceById(1L);
+            ResponseEntity<ExperienceDTO> response = experienceController.getExperienceById(1L);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
         }
@@ -75,7 +75,7 @@ class ExperienceControllerTest {
         void shouldReturn404WhenNotFound() {
             when(experienceService.getExperienceById(99L)).thenReturn(Optional.empty());
 
-            ResponseEntity<Experience> response = experienceController.getExperienceById(99L);
+            ResponseEntity<ExperienceDTO> response = experienceController.getExperienceById(99L);
 
             assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         }
@@ -88,9 +88,9 @@ class ExperienceControllerTest {
         @Test
         @DisplayName("Should add experience successfully")
         void shouldAddExperienceSuccessfully() {
-            when(experienceService.saveExperience(testExperience, 1L)).thenReturn(testExperience);
+            when(experienceService.saveExperience(testExperienceDTO, 1L)).thenReturn(testExperienceDTO);
 
-            ResponseEntity<Experience> response = experienceController.addExperience(testExperience, 1L);
+            ResponseEntity<ExperienceDTO> response = experienceController.addExperience(testExperienceDTO, 1L);
 
             assertEquals(HttpStatus.CREATED, response.getStatusCode());
         }
@@ -103,9 +103,9 @@ class ExperienceControllerTest {
         @Test
         @DisplayName("Should update experience successfully")
         void shouldUpdateExperienceSuccessfully() {
-            when(experienceService.updateExperience(1L, testExperience)).thenReturn(testExperience);
+            when(experienceService.updateExperience(1L, testExperienceDTO)).thenReturn(testExperienceDTO);
 
-            ResponseEntity<Experience> response = experienceController.updateExperience(1L, testExperience);
+            ResponseEntity<ExperienceDTO> response = experienceController.updateExperience(1L, testExperienceDTO);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
         }
@@ -113,9 +113,9 @@ class ExperienceControllerTest {
         @Test
         @DisplayName("Should return 404 when update fails")
         void shouldReturn404WhenUpdateFails() {
-            when(experienceService.updateExperience(99L, testExperience)).thenThrow(new RuntimeException("Experience not found"));
+            when(experienceService.updateExperience(99L, testExperienceDTO)).thenThrow(new RuntimeException("Experience not found"));
 
-            ResponseEntity<Experience> response = experienceController.updateExperience(99L, testExperience);
+            ResponseEntity<ExperienceDTO> response = experienceController.updateExperience(99L, testExperienceDTO);
 
             assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         }

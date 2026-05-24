@@ -1,19 +1,18 @@
 package com.app.recruitmentapp.services;
 
-import com.app.recruitmentapp.entities.Education;
+import com.app.recruitmentapp.dto.EducationDTO;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface EducationService {
-    List<Education> getAllEducations();
+    List<EducationDTO> getAllEducations();
 
-    Optional<Education> getEducationById(Long id);
+    Optional<EducationDTO> getEducationById(Long id);
 
-    Education saveEducation(Education education, Long idCandidate);
+    EducationDTO saveEducation(EducationDTO educationDTO, Long idCandidate);
 
-    Education updateEducation(Long id, Education education);
+    EducationDTO updateEducation(Long id, EducationDTO educationDTO);
 
     void deleteEducation(Long id);
-
 }

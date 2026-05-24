@@ -1,9 +1,9 @@
 package com.app.recruitmentapp.services;
 
-import com.app.recruitmentapp.entities.Admin;
+import com.app.recruitmentapp.dto.ContactDTO;
 import com.app.recruitmentapp.entities.Contact;
 import com.app.recruitmentapp.entities.User;
-import com.app.recruitmentapp.repositories.AdminRepository;
+import com.app.recruitmentapp.mapper.EntityMapper;
 import com.app.recruitmentapp.repositories.ContactRepository;
 import com.app.recruitmentapp.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,17 +18,18 @@ public class ContactServiceImpl implements ContactService{
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private AdminRepository adminRepository;
+    private EntityMapper entityMapper;
 
     @Override
-    public List<Contact> getAllMessagesContact() {
-        return contactRepository.findAll();
+    public List<ContactDTO> getAllMessagesContact() {
+        return entityMapper.toContactDTOList(contactRepository.findAll());
     }
 
     @Override
-    public Contact sendMessageContact(Contact contact, Long idUserSend) {
+    public ContactDTO sendMessageContact(ContactDTO contactDTO, Long idUserSend) {
+        Contact contact = entityMapper.toContactEntity(contactDTO);
         User userSend = userRepository.findById(idUserSend).orElse(null);
         contact.setUserSend(userSend);
-        return contactRepository.save(contact);
+        return entityMapper.toContactDTO(contactRepository.save(contact));
     }
 }

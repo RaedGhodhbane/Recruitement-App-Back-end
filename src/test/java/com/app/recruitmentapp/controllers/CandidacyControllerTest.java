@@ -1,6 +1,6 @@
 package com.app.recruitmentapp.controllers;
 
-import com.app.recruitmentapp.entities.Candidacy;
+import com.app.recruitmentapp.dto.CandidacyDTO;
 import com.app.recruitmentapp.services.CandidacyService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,12 +30,12 @@ class CandidacyControllerTest {
     @InjectMocks
     private CandidacyController candidacyController;
 
-    private Candidacy testCandidacy;
+    private CandidacyDTO testCandidacyDTO;
 
     @BeforeEach
     void setUp() {
-        testCandidacy = new Candidacy();
-        testCandidacy.setId(1L);
+        testCandidacyDTO = new CandidacyDTO();
+        testCandidacyDTO.setId(1L);
     }
 
     @Nested
@@ -44,9 +45,9 @@ class CandidacyControllerTest {
         @Test
         @DisplayName("Should return all candidacies")
         void shouldReturnAllCandidacies() {
-            when(candidacyService.getAllCandidacies()).thenReturn(List.of(testCandidacy));
+            when(candidacyService.getAllCandidacies()).thenReturn(List.of(testCandidacyDTO));
 
-            List<Candidacy> result = candidacyController.getAllCandidacies();
+            List<CandidacyDTO> result = candidacyController.getAllCandidacies();
 
             assertNotNull(result);
             assertEquals(1, result.size());
@@ -60,9 +61,9 @@ class CandidacyControllerTest {
         @Test
         @DisplayName("Should return candidacy when found")
         void shouldReturnCandidacyWhenFound() {
-            when(candidacyService.getCandidacyById(1L)).thenReturn(Optional.of(testCandidacy));
+            when(candidacyService.getCandidacyById(1L)).thenReturn(Optional.of(testCandidacyDTO));
 
-            ResponseEntity<Candidacy> response = candidacyController.getCandidacyById(1L);
+            ResponseEntity<CandidacyDTO> response = candidacyController.getCandidacyById(1L);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
         }
@@ -72,7 +73,7 @@ class CandidacyControllerTest {
         void shouldReturn404WhenNotFound() {
             when(candidacyService.getCandidacyById(99L)).thenReturn(Optional.empty());
 
-            ResponseEntity<Candidacy> response = candidacyController.getCandidacyById(99L);
+            ResponseEntity<CandidacyDTO> response = candidacyController.getCandidacyById(99L);
 
             assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         }
@@ -85,9 +86,9 @@ class CandidacyControllerTest {
         @Test
         @DisplayName("Should add candidacy successfully")
         void shouldAddCandidacySuccessfully() {
-            when(candidacyService.saveCandidacy(testCandidacy)).thenReturn(testCandidacy);
+            when(candidacyService.saveCandidacy(testCandidacyDTO)).thenReturn(testCandidacyDTO);
 
-            ResponseEntity<Candidacy> response = candidacyController.addCandidacy(testCandidacy);
+            ResponseEntity<CandidacyDTO> response = candidacyController.addCandidacy(testCandidacyDTO);
 
             assertEquals(HttpStatus.CREATED, response.getStatusCode());
         }
@@ -100,9 +101,9 @@ class CandidacyControllerTest {
         @Test
         @DisplayName("Should update candidacy successfully")
         void shouldUpdateCandidacySuccessfully() {
-            when(candidacyService.updateCandidacy(1L, testCandidacy)).thenReturn(testCandidacy);
+            when(candidacyService.updateCandidacy(1L, testCandidacyDTO)).thenReturn(testCandidacyDTO);
 
-            ResponseEntity<Candidacy> response = candidacyController.updateCandidacy(1L, testCandidacy);
+            ResponseEntity<CandidacyDTO> response = candidacyController.updateCandidacy(1L, testCandidacyDTO);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
         }
@@ -110,9 +111,9 @@ class CandidacyControllerTest {
         @Test
         @DisplayName("Should return 404 when update fails")
         void shouldReturn404WhenUpdateFails() {
-            when(candidacyService.updateCandidacy(99L, testCandidacy)).thenThrow(new RuntimeException("Candidacy not found"));
+            when(candidacyService.updateCandidacy(99L, testCandidacyDTO)).thenThrow(new RuntimeException("Candidacy not found"));
 
-            ResponseEntity<Candidacy> response = candidacyController.updateCandidacy(99L, testCandidacy);
+            ResponseEntity<CandidacyDTO> response = candidacyController.updateCandidacy(99L, testCandidacyDTO);
 
             assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         }

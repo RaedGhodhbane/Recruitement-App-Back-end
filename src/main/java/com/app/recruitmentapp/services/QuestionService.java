@@ -1,19 +1,18 @@
 package com.app.recruitmentapp.services;
 
-import com.app.recruitmentapp.entities.Question;
-import com.app.recruitmentapp.entities.Question;
+import com.app.recruitmentapp.dto.QuestionDTO;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface QuestionService {
-    List<Question> getAllQuestions();
+    List<QuestionDTO> getAllQuestions();
 
-    Optional<Question> getQuestionById(Long id);
+    Optional<QuestionDTO> getQuestionById(Long id);
 
-    Question saveQuestion(Question question, Long idOffer);
+    QuestionDTO saveQuestion(QuestionDTO questionDTO, Long idOffer);
 
-    Question updateQuestion(Long id, Question question);
+    QuestionDTO updateQuestion(Long id, QuestionDTO questionDTO);
 
     void deleteQuestion(Long id);
 }

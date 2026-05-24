@@ -1,9 +1,10 @@
 package com.app.recruitmentapp.services;
 
+import com.app.recruitmentapp.dto.UserDTO;
 import com.app.recruitmentapp.entities.Candidate;
 import com.app.recruitmentapp.entities.Recruiter;
-import com.app.recruitmentapp.entities.Role;
 import com.app.recruitmentapp.entities.User;
+import com.app.recruitmentapp.mapper.EntityMapper;
 import com.app.recruitmentapp.repositories.UserRepository;
 import com.app.recruitmentapp.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,45 +29,45 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private TokenBlacklistService tokenBlacklistService;
 
-    private Role role;
+    @Autowired
+    private EntityMapper entityMapper;
 
     @Override
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public List<UserDTO> getAllUsers() {
+        return entityMapper.toUserDTOList(userRepository.findAll());
     }
 
     @Override
-    public Optional<User> getUserById(Long id) {
-        return userRepository.findById(id);
+    public Optional<UserDTO> getUserById(Long id) {
+        return userRepository.findById(id).map(entityMapper::toUserDTO);
     }
 
     @Override
-    public User saveUser(User user) {
-        return userRepository.save(user);
+    public UserDTO saveUser(UserDTO userDTO, String password) {
+        User user = entityMapper.toUserEntity(userDTO);
+        user.setPassword(passwordEncoder.encode(password));
+        return entityMapper.toUserDTO(userRepository.save(user));
     }
 
     @Override
-    public User updateUser(Long id, User newUser) {
+    public UserDTO updateUser(Long id, UserDTO userDTO) {
         User u = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
 
-        if (newUser.getName() != null)
-            u.setName(newUser.getName());
+        if (userDTO.getName() != null)
+            u.setName(userDTO.getName());
 
-        if (newUser.getFirstName() != null)
-            u.setFirstName(newUser.getFirstName());
+        if (userDTO.getFirstName() != null)
+            u.setFirstName(userDTO.getFirstName());
 
-        if (newUser.getEmail() != null)
-            u.setEmail(newUser.getEmail());
+        if (userDTO.getEmail() != null)
+            u.setEmail(userDTO.getEmail());
 
-        if (newUser.getPassword() != null && !newUser.getPassword().isBlank())
-            u.setPassword(newUser.getPassword());
-
-        if (newUser.getRole() != null)
-            u.setRole(newUser.getRole());
+        if (userDTO.getRole() != null)
+            u.setRole(com.app.recruitmentapp.entities.Role.valueOf(userDTO.getRole()));
 
         userRepository.saveAndFlush(u);
-        return u;
+        return entityMapper.toUserDTO(u);
     }
 
 
@@ -108,7 +109,7 @@ public class UserServiceImpl implements UserService {
 
         Map<String, Object> response = new HashMap<>();
         response.put("token", token);
-        response.put("user", user);
+        response.put("user", entityMapper.toUserDTO(user));
 
         return response;
     }
@@ -124,5 +125,4 @@ public class UserServiceImpl implements UserService {
             tokenBlacklistService.blacklistToken(token, expirationTime);
         }
     }
-
 }

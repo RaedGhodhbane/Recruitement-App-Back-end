@@ -1,8 +1,7 @@
 package com.app.recruitmentapp.services;
 
-import com.app.recruitmentapp.entities.Admin;
+import com.app.recruitmentapp.dto.AdminDTO;
 import com.app.recruitmentapp.entities.ChangePassword;
-import com.app.recruitmentapp.entities.Recruiter;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
@@ -12,15 +11,13 @@ import java.util.Optional;
 
 public interface AdminService {
 
-    List<Admin> getAllAdmins();
+    List<AdminDTO> getAllAdmins();
 
-    Optional<Admin> getAdminById(Long id);
+    Optional<AdminDTO> getAdminById(Long id);
 
-    // Admin saveAdmin(Admin admin);
-    Admin registerAdminWithPicture(String email, String rawPassword, Admin admin, MultipartFile imageFile);
+    AdminDTO registerAdminWithPicture(String email, String rawPassword, AdminDTO adminDTO, MultipartFile imageFile);
 
-
-    Admin updateAdmin(Long id, Admin admin, MultipartFile imageFile);
+    AdminDTO updateAdmin(Long id, AdminDTO adminDTO, MultipartFile imageFile);
 
     void deleteAdmin(Long id);
 
@@ -35,10 +32,4 @@ public interface AdminService {
     String changePassword(Long id, ChangePassword changePasswordRequest);
 
     ResponseEntity<Resource> getFile(String filename);
-
-
-
-
-
-
 }

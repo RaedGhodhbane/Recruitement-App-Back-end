@@ -1,7 +1,9 @@
 package com.app.recruitmentapp.services;
 
+import com.app.recruitmentapp.dto.QuestionDTO;
 import com.app.recruitmentapp.entities.Offer;
 import com.app.recruitmentapp.entities.Question;
+import com.app.recruitmentapp.mapper.EntityMapper;
 import com.app.recruitmentapp.repositories.OfferRepository;
 import com.app.recruitmentapp.repositories.QuestionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,36 +18,38 @@ public class QuestionServiceImpl implements QuestionService {
     private QuestionRepository questionRepository;
     @Autowired
     private OfferRepository offerRepository;
+    @Autowired
+    private EntityMapper entityMapper;
 
     @Override
-    public List<Question> getAllQuestions() {
-        return questionRepository.findAll();
+    public List<QuestionDTO> getAllQuestions() {
+        return entityMapper.toQuestionDTOList(questionRepository.findAll());
     }
 
     @Override
-    public Optional<Question> getQuestionById(Long id) {
-        return questionRepository.findById(id);
+    public Optional<QuestionDTO> getQuestionById(Long id) {
+        return questionRepository.findById(id).map(entityMapper::toQuestionDTO);
     }
 
     @Override
-    public Question saveQuestion(Question question, Long idOffer) {
+    public QuestionDTO saveQuestion(QuestionDTO questionDTO, Long idOffer) {
+        Question question = entityMapper.toQuestionEntity(questionDTO);
         Offer o = offerRepository.findById(idOffer).orElse(null);
         question.setOffer(o);
-        return questionRepository.save(question);
+        return entityMapper.toQuestionDTO(questionRepository.save(question));
     }
 
     @Override
-    public Question updateQuestion(Long id, Question newQuestion) {
+    public QuestionDTO updateQuestion(Long id, QuestionDTO questionDTO) {
         Question q = questionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Question non trouvé"));
-        q.setTitle(newQuestion.getTitle());
-        q.setChoice1(newQuestion.getChoice1());
-        q.setChoice2(newQuestion.getChoice2());
-        q.setChoice3(newQuestion.getChoice3());
-        q.setResponse(newQuestion.getResponse());
-        q.setOffer(newQuestion.getOffer());
+        q.setTitle(questionDTO.getTitle());
+        q.setChoice1(questionDTO.getChoice1());
+        q.setChoice2(questionDTO.getChoice2());
+        q.setChoice3(questionDTO.getChoice3());
+        q.setResponse(questionDTO.getResponse());
         questionRepository.saveAndFlush(q);
-        return q;
+        return entityMapper.toQuestionDTO(q);
     }
 
     @Override
@@ -56,5 +60,4 @@ public class QuestionServiceImpl implements QuestionService {
             throw new RuntimeException("Question non trouvé");
         }
     }
-
 }

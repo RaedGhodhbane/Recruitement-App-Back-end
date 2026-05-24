@@ -1,7 +1,9 @@
 package com.app.recruitmentapp.services;
 
+import com.app.recruitmentapp.dto.ExperienceDTO;
 import com.app.recruitmentapp.entities.Candidate;
 import com.app.recruitmentapp.entities.Experience;
+import com.app.recruitmentapp.mapper.EntityMapper;
 import com.app.recruitmentapp.repositories.CandidateRepository;
 import com.app.recruitmentapp.repositories.ExperienceRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,12 +30,16 @@ class ExperienceServiceImplTest {
     private ExperienceRepository experienceRepository;
     @Mock
     private CandidateRepository candidateRepository;
+    @Mock
+    private EntityMapper entityMapper;
     @InjectMocks
     private ExperienceServiceImpl experienceService;
 
     private Experience experience1;
     private Experience experience2;
     private Candidate candidate;
+    private ExperienceDTO experience1DTO;
+    private ExperienceDTO experience2DTO;
 
     @BeforeEach
     void setUp() {
@@ -58,6 +64,24 @@ class ExperienceServiceImplTest {
         experience2.setEndExpDate(Date.valueOf("2021-12-31"));
         experience2.setDescription("Stage été");
         experience2.setCandidate(candidate);
+
+        experience1DTO = new ExperienceDTO();
+        experience1DTO.setId(1L);
+        experience1DTO.setCompanyName("Google");
+        experience1DTO.setJobTitle("Software Engineer");
+        experience1DTO.setStartExpDate(Date.valueOf("2022-01-01"));
+        experience1DTO.setEndExpDate(Date.valueOf("2024-06-30"));
+        experience1DTO.setDescription("Développement backend");
+        experience1DTO.setCandidateId(1L);
+
+        experience2DTO = new ExperienceDTO();
+        experience2DTO.setId(2L);
+        experience2DTO.setCompanyName("Microsoft");
+        experience2DTO.setJobTitle("Intern");
+        experience2DTO.setStartExpDate(Date.valueOf("2021-06-01"));
+        experience2DTO.setEndExpDate(Date.valueOf("2021-12-31"));
+        experience2DTO.setDescription("Stage été");
+        experience2DTO.setCandidateId(1L);
     }
 
     @Nested
@@ -69,14 +93,16 @@ class ExperienceServiceImplTest {
         void shouldGetAllExperiencesSuccessfully() {
             List<Experience> mockExperiences = List.of(experience1, experience2);
             when(experienceRepository.findAll()).thenReturn(mockExperiences);
+            when(entityMapper.toExperienceDTOList(mockExperiences)).thenReturn(List.of(experience1DTO, experience2DTO));
 
-            List<Experience> result = experienceService.getAllExperiences();
+            List<ExperienceDTO> result = experienceService.getAllExperiences();
 
             assertNotNull(result);
             assertEquals(2, result.size());
             assertEquals("Google", result.get(0).getCompanyName());
             assertEquals("Microsoft", result.get(1).getCompanyName());
             verify(experienceRepository).findAll();
+            verify(entityMapper).toExperienceDTOList(mockExperiences);
         }
     }
 
@@ -88,8 +114,9 @@ class ExperienceServiceImplTest {
         @DisplayName("Should return experience when found")
         void shouldReturnExperienceWhenFound() {
             when(experienceRepository.findById(1L)).thenReturn(Optional.of(experience1));
+            when(entityMapper.toExperienceDTO(experience1)).thenReturn(experience1DTO);
 
-            Optional<Experience> result = experienceService.getExperienceById(1L);
+            Optional<ExperienceDTO> result = experienceService.getExperienceById(1L);
 
             assertTrue(result.isPresent());
             assertEquals(1L, result.get().getId());
@@ -102,7 +129,7 @@ class ExperienceServiceImplTest {
         void shouldReturnEmptyWhenNotFound() {
             when(experienceRepository.findById(99L)).thenReturn(Optional.empty());
 
-            Optional<Experience> result = experienceService.getExperienceById(99L);
+            Optional<ExperienceDTO> result = experienceService.getExperienceById(99L);
 
             assertFalse(result.isPresent());
             verify(experienceRepository).findById(99L);
@@ -116,50 +143,83 @@ class ExperienceServiceImplTest {
         @Test
         @DisplayName("Should save experience successfully")
         void shouldSaveExperienceSuccessfully() {
-            Experience newExperience = new Experience();
-            newExperience.setCompanyName("Amazon");
-            newExperience.setJobTitle("SDE");
-            newExperience.setStartExpDate(Date.valueOf("2023-01-01"));
-            newExperience.setEndExpDate(Date.valueOf("2025-06-30"));
-            newExperience.setDescription("Cloud computing");
+            ExperienceDTO newExperienceDTO = new ExperienceDTO();
+            newExperienceDTO.setCompanyName("Amazon");
+            newExperienceDTO.setJobTitle("SDE");
+            newExperienceDTO.setStartExpDate(Date.valueOf("2023-01-01"));
+            newExperienceDTO.setEndExpDate(Date.valueOf("2025-06-30"));
+            newExperienceDTO.setDescription("Cloud computing");
 
+            Experience newExperienceEntity = new Experience();
+            newExperienceEntity.setCompanyName("Amazon");
+            newExperienceEntity.setJobTitle("SDE");
+            newExperienceEntity.setStartExpDate(Date.valueOf("2023-01-01"));
+            newExperienceEntity.setEndExpDate(Date.valueOf("2025-06-30"));
+            newExperienceEntity.setDescription("Cloud computing");
+
+            ExperienceDTO resultDTO = new ExperienceDTO();
+            resultDTO.setId(3L);
+            resultDTO.setCompanyName("Amazon");
+            resultDTO.setJobTitle("SDE");
+            resultDTO.setStartExpDate(Date.valueOf("2023-01-01"));
+            resultDTO.setEndExpDate(Date.valueOf("2025-06-30"));
+            resultDTO.setDescription("Cloud computing");
+            resultDTO.setCandidateId(1L);
+
+            when(entityMapper.toExperienceEntity(newExperienceDTO)).thenReturn(newExperienceEntity);
             when(candidateRepository.findById(1L)).thenReturn(Optional.of(candidate));
             when(experienceRepository.save(any(Experience.class))).thenAnswer(invocation -> {
                 Experience saved = invocation.getArgument(0);
                 saved.setId(3L);
                 return saved;
             });
+            when(entityMapper.toExperienceDTO(any(Experience.class))).thenReturn(resultDTO);
 
-            Experience result = experienceService.saveExperience(newExperience, 1L);
+            ExperienceDTO result = experienceService.saveExperience(newExperienceDTO, 1L);
 
             assertNotNull(result);
             assertEquals("Amazon", result.getCompanyName());
             assertEquals("SDE", result.getJobTitle());
-            assertEquals(candidate, result.getCandidate());
+            assertEquals(1L, result.getCandidateId());
+            verify(entityMapper).toExperienceEntity(newExperienceDTO);
             verify(candidateRepository).findById(1L);
             verify(experienceRepository).save(any(Experience.class));
+            verify(entityMapper).toExperienceDTO(any(Experience.class));
         }
 
         @Test
         @DisplayName("Should save experience with null candidate when candidate not found")
         void shouldSaveExperienceWithNullCandidateWhenNotFound() {
-            Experience newExperience = new Experience();
-            newExperience.setCompanyName("Amazon");
-            newExperience.setJobTitle("SDE");
+            ExperienceDTO newExperienceDTO = new ExperienceDTO();
+            newExperienceDTO.setCompanyName("Amazon");
+            newExperienceDTO.setJobTitle("SDE");
 
+            Experience newExperienceEntity = new Experience();
+            newExperienceEntity.setCompanyName("Amazon");
+            newExperienceEntity.setJobTitle("SDE");
+
+            ExperienceDTO resultDTO = new ExperienceDTO();
+            resultDTO.setId(3L);
+            resultDTO.setCompanyName("Amazon");
+            resultDTO.setJobTitle("SDE");
+
+            when(entityMapper.toExperienceEntity(newExperienceDTO)).thenReturn(newExperienceEntity);
             when(candidateRepository.findById(99L)).thenReturn(Optional.empty());
             when(experienceRepository.save(any(Experience.class))).thenAnswer(invocation -> {
                 Experience saved = invocation.getArgument(0);
                 saved.setId(3L);
                 return saved;
             });
+            when(entityMapper.toExperienceDTO(any(Experience.class))).thenReturn(resultDTO);
 
-            Experience result = experienceService.saveExperience(newExperience, 99L);
+            ExperienceDTO result = experienceService.saveExperience(newExperienceDTO, 99L);
 
             assertNotNull(result);
-            assertNull(result.getCandidate());
+            assertNull(result.getCandidateId());
+            verify(entityMapper).toExperienceEntity(newExperienceDTO);
             verify(candidateRepository).findById(99L);
             verify(experienceRepository).save(any(Experience.class));
+            verify(entityMapper).toExperienceDTO(any(Experience.class));
         }
     }
 
@@ -170,17 +230,27 @@ class ExperienceServiceImplTest {
         @Test
         @DisplayName("Should update experience when found")
         void shouldUpdateExperienceWhenFound() {
-            Experience updatedData = new Experience();
+            ExperienceDTO updatedData = new ExperienceDTO();
             updatedData.setCompanyName("Apple");
             updatedData.setJobTitle("iOS Developer");
             updatedData.setStartExpDate(Date.valueOf("2023-03-01"));
             updatedData.setEndExpDate(Date.valueOf("2025-09-30"));
             updatedData.setDescription("Développement iOS");
 
+            ExperienceDTO resultDTO = new ExperienceDTO();
+            resultDTO.setId(1L);
+            resultDTO.setCompanyName("Apple");
+            resultDTO.setJobTitle("iOS Developer");
+            resultDTO.setStartExpDate(Date.valueOf("2023-03-01"));
+            resultDTO.setEndExpDate(Date.valueOf("2025-09-30"));
+            resultDTO.setDescription("Développement iOS");
+            resultDTO.setCandidateId(1L);
+
             when(experienceRepository.findById(1L)).thenReturn(Optional.of(experience1));
             when(experienceRepository.saveAndFlush(experience1)).thenReturn(experience1);
+            when(entityMapper.toExperienceDTO(experience1)).thenReturn(resultDTO);
 
-            Experience result = experienceService.updateExperience(1L, updatedData);
+            ExperienceDTO result = experienceService.updateExperience(1L, updatedData);
 
             assertNotNull(result);
             assertEquals("Apple", result.getCompanyName());
@@ -190,12 +260,13 @@ class ExperienceServiceImplTest {
             assertEquals("Développement iOS", result.getDescription());
             verify(experienceRepository).findById(1L);
             verify(experienceRepository).saveAndFlush(experience1);
+            verify(entityMapper).toExperienceDTO(experience1);
         }
 
         @Test
         @DisplayName("Should throw RuntimeException when experience not found")
         void shouldThrowWhenExperienceNotFound() {
-            Experience updatedData = new Experience();
+            ExperienceDTO updatedData = new ExperienceDTO();
             updatedData.setCompanyName("Apple");
 
             when(experienceRepository.findById(99L)).thenReturn(Optional.empty());

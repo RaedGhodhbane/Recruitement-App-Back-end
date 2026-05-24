@@ -1,12 +1,10 @@
 package com.app.recruitmentapp.services;
 
-import com.app.recruitmentapp.entities.Candidate;
+import com.app.recruitmentapp.dto.MessageDTO;
 import com.app.recruitmentapp.entities.Message;
-import com.app.recruitmentapp.entities.Recruiter;
 import com.app.recruitmentapp.entities.User;
-import com.app.recruitmentapp.repositories.CandidateRepository;
+import com.app.recruitmentapp.mapper.EntityMapper;
 import com.app.recruitmentapp.repositories.MessageRepository;
-import com.app.recruitmentapp.repositories.RecruiterRepository;
 import com.app.recruitmentapp.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,23 +20,27 @@ public class MessageServiceImpl implements MessageService{
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private EntityMapper entityMapper;
+
     @Override
-    public List<Message> getAllMessages() {
-        return messageRepository.findAll();
+    public List<MessageDTO> getAllMessages() {
+        return entityMapper.toMessageDTOList(messageRepository.findAll());
     }
 
     @Override
-    public Optional<Message> getMessageById(Long id) {
-        return messageRepository.findById(id);
+    public Optional<MessageDTO> getMessageById(Long id) {
+        return messageRepository.findById(id).map(entityMapper::toMessageDTO);
     }
 
     @Override
-    public Message sendMessage(Message message,Long idUserSend, Long idUserReceive) {
+    public MessageDTO sendMessage(MessageDTO messageDTO, Long idUserSend, Long idUserReceive) {
+        Message message = entityMapper.toMessageEntity(messageDTO);
         User userSend = userRepository.findById(idUserSend).orElse(null);
         User userReceive = userRepository.findById(idUserReceive).orElse(null);
         message.setUserSend(userSend);
         message.setUserReceive(userReceive);
-        return messageRepository.save(message);
+        return entityMapper.toMessageDTO(messageRepository.save(message));
     }
 
     @Override

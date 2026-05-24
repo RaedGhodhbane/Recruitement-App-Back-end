@@ -1,7 +1,9 @@
 package com.app.recruitmentapp.services;
 
+import com.app.recruitmentapp.dto.MessageDTO;
 import com.app.recruitmentapp.entities.Message;
 import com.app.recruitmentapp.entities.User;
+import com.app.recruitmentapp.mapper.EntityMapper;
 import com.app.recruitmentapp.repositories.MessageRepository;
 import com.app.recruitmentapp.repositories.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,6 +29,8 @@ class MessageServiceImplTest {
     private MessageRepository messageRepository;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private EntityMapper entityMapper;
     @InjectMocks
     private MessageServiceImpl messageService;
 
@@ -34,6 +38,8 @@ class MessageServiceImplTest {
     private User userReceive;
     private Message message1;
     private Message message2;
+    private MessageDTO message1DTO;
+    private MessageDTO message2DTO;
 
     @BeforeEach
     void setUp() {
@@ -60,6 +66,22 @@ class MessageServiceImplTest {
         message2.setMessage("Je postule pour le poste.");
         message2.setUserSend(userReceive);
         message2.setUserReceive(userSend);
+
+        message1DTO = new MessageDTO();
+        message1DTO.setId(1L);
+        message1DTO.setFullName("John Doe");
+        message1DTO.setSubject("Demande d'information");
+        message1DTO.setMessage("Bonjour, j'ai une question.");
+        message1DTO.setUserSendId(1L);
+        message1DTO.setUserReceiveId(2L);
+
+        message2DTO = new MessageDTO();
+        message2DTO.setId(2L);
+        message2DTO.setFullName("Jane Smith");
+        message2DTO.setSubject("Candidature");
+        message2DTO.setMessage("Je postule pour le poste.");
+        message2DTO.setUserSendId(2L);
+        message2DTO.setUserReceiveId(1L);
     }
 
     @Nested
@@ -71,14 +93,16 @@ class MessageServiceImplTest {
         void shouldGetAllMessagesSuccessfully() {
             List<Message> mockMessages = List.of(message1, message2);
             when(messageRepository.findAll()).thenReturn(mockMessages);
+            when(entityMapper.toMessageDTOList(mockMessages)).thenReturn(List.of(message1DTO, message2DTO));
 
-            List<Message> result = messageService.getAllMessages();
+            List<MessageDTO> result = messageService.getAllMessages();
 
             assertNotNull(result);
             assertEquals(2, result.size());
             assertEquals("Demande d'information", result.get(0).getSubject());
             assertEquals("Candidature", result.get(1).getSubject());
             verify(messageRepository).findAll();
+            verify(entityMapper).toMessageDTOList(mockMessages);
         }
     }
 
@@ -90,8 +114,9 @@ class MessageServiceImplTest {
         @DisplayName("Should return message when found")
         void shouldReturnMessageWhenFound() {
             when(messageRepository.findById(1L)).thenReturn(Optional.of(message1));
+            when(entityMapper.toMessageDTO(message1)).thenReturn(message1DTO);
 
-            Optional<Message> result = messageService.getMessageById(1L);
+            Optional<MessageDTO> result = messageService.getMessageById(1L);
 
             assertTrue(result.isPresent());
             assertEquals(1L, result.get().getId());
@@ -104,7 +129,7 @@ class MessageServiceImplTest {
         void shouldReturnEmptyWhenNotFound() {
             when(messageRepository.findById(99L)).thenReturn(Optional.empty());
 
-            Optional<Message> result = messageService.getMessageById(99L);
+            Optional<MessageDTO> result = messageService.getMessageById(99L);
 
             assertFalse(result.isPresent());
             verify(messageRepository).findById(99L);
@@ -118,11 +143,25 @@ class MessageServiceImplTest {
         @Test
         @DisplayName("Should send message successfully")
         void shouldSendMessageSuccessfully() {
-            Message newMessage = new Message();
-            newMessage.setFullName("Alice");
-            newMessage.setSubject("Offre d'emploi");
-            newMessage.setMessage("Je suis intéressé par votre offre.");
+            MessageDTO newMessageDTO = new MessageDTO();
+            newMessageDTO.setFullName("Alice");
+            newMessageDTO.setSubject("Offre d'emploi");
+            newMessageDTO.setMessage("Je suis interesse par votre offre.");
 
+            Message newMessageEntity = new Message();
+            newMessageEntity.setFullName("Alice");
+            newMessageEntity.setSubject("Offre d'emploi");
+            newMessageEntity.setMessage("Je suis interesse par votre offre.");
+
+            MessageDTO resultDTO = new MessageDTO();
+            resultDTO.setId(3L);
+            resultDTO.setFullName("Alice");
+            resultDTO.setSubject("Offre d'emploi");
+            resultDTO.setMessage("Je suis interesse par votre offre.");
+            resultDTO.setUserSendId(1L);
+            resultDTO.setUserReceiveId(2L);
+
+            when(entityMapper.toMessageEntity(newMessageDTO)).thenReturn(newMessageEntity);
             when(userRepository.findById(1L)).thenReturn(Optional.of(userSend));
             when(userRepository.findById(2L)).thenReturn(Optional.of(userReceive));
             when(messageRepository.save(any(Message.class))).thenAnswer(invocation -> {
@@ -130,27 +169,42 @@ class MessageServiceImplTest {
                 saved.setId(3L);
                 return saved;
             });
+            when(entityMapper.toMessageDTO(any(Message.class))).thenReturn(resultDTO);
 
-            Message result = messageService.sendMessage(newMessage, 1L, 2L);
+            MessageDTO result = messageService.sendMessage(newMessageDTO, 1L, 2L);
 
             assertNotNull(result);
             assertEquals("Alice", result.getFullName());
             assertEquals("Offre d'emploi", result.getSubject());
-            assertEquals(userSend, result.getUserSend());
-            assertEquals(userReceive, result.getUserReceive());
+            assertEquals(1L, result.getUserSendId());
+            assertEquals(2L, result.getUserReceiveId());
+            verify(entityMapper).toMessageEntity(newMessageDTO);
             verify(userRepository).findById(1L);
             verify(userRepository).findById(2L);
             verify(messageRepository).save(any(Message.class));
+            verify(entityMapper).toMessageDTO(any(Message.class));
         }
 
         @Test
         @DisplayName("Should send message with null users when not found")
         void shouldSendMessageWithNullUsersWhenNotFound() {
-            Message newMessage = new Message();
-            newMessage.setFullName("Alice");
-            newMessage.setSubject("Offre d'emploi");
-            newMessage.setMessage("Message test.");
+            MessageDTO newMessageDTO = new MessageDTO();
+            newMessageDTO.setFullName("Alice");
+            newMessageDTO.setSubject("Offre d'emploi");
+            newMessageDTO.setMessage("Message test.");
 
+            Message newMessageEntity = new Message();
+            newMessageEntity.setFullName("Alice");
+            newMessageEntity.setSubject("Offre d'emploi");
+            newMessageEntity.setMessage("Message test.");
+
+            MessageDTO resultDTO = new MessageDTO();
+            resultDTO.setId(3L);
+            resultDTO.setFullName("Alice");
+            resultDTO.setSubject("Offre d'emploi");
+            resultDTO.setMessage("Message test.");
+
+            when(entityMapper.toMessageEntity(newMessageDTO)).thenReturn(newMessageEntity);
             when(userRepository.findById(99L)).thenReturn(Optional.empty());
             when(userRepository.findById(98L)).thenReturn(Optional.empty());
             when(messageRepository.save(any(Message.class))).thenAnswer(invocation -> {
@@ -158,15 +212,18 @@ class MessageServiceImplTest {
                 saved.setId(3L);
                 return saved;
             });
+            when(entityMapper.toMessageDTO(any(Message.class))).thenReturn(resultDTO);
 
-            Message result = messageService.sendMessage(newMessage, 99L, 98L);
+            MessageDTO result = messageService.sendMessage(newMessageDTO, 99L, 98L);
 
             assertNotNull(result);
-            assertNull(result.getUserSend());
-            assertNull(result.getUserReceive());
+            assertNull(result.getUserSendId());
+            assertNull(result.getUserReceiveId());
+            verify(entityMapper).toMessageEntity(newMessageDTO);
             verify(userRepository).findById(99L);
             verify(userRepository).findById(98L);
             verify(messageRepository).save(any(Message.class));
+            verify(entityMapper).toMessageDTO(any(Message.class));
         }
     }
 

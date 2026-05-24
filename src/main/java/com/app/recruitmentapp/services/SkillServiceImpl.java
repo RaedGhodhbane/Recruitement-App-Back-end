@@ -1,7 +1,9 @@
 package com.app.recruitmentapp.services;
 
+import com.app.recruitmentapp.dto.SkillDTO;
 import com.app.recruitmentapp.entities.Candidate;
 import com.app.recruitmentapp.entities.Skill;
+import com.app.recruitmentapp.mapper.EntityMapper;
 import com.app.recruitmentapp.repositories.CandidateRepository;
 import com.app.recruitmentapp.repositories.SkillRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,32 +18,35 @@ public class SkillServiceImpl implements SkillService{
     private SkillRepository skillRepository;
     @Autowired
     private CandidateRepository candidateRepository;
+    @Autowired
+    private EntityMapper entityMapper;
+
     @Override
-    public List<Skill> getAllSkills() {
-        return skillRepository.findAll();
+    public List<SkillDTO> getAllSkills() {
+        return entityMapper.toSkillDTOList(skillRepository.findAll());
     }
 
     @Override
-    public Optional<Skill> getSkillById(Long id) {
-        return skillRepository.findById(id);
+    public Optional<SkillDTO> getSkillById(Long id) {
+        return skillRepository.findById(id).map(entityMapper::toSkillDTO);
     }
 
     @Override
-    public Skill saveSkill(Skill skill, Long idCandidate) {
+    public SkillDTO saveSkill(SkillDTO skillDTO, Long idCandidate) {
+        Skill skill = entityMapper.toSkillEntity(skillDTO);
         Candidate c = candidateRepository.findById(idCandidate).orElse(null);
         skill.setCandidate(c);
-        return skillRepository.save(skill);
+        return entityMapper.toSkillDTO(skillRepository.save(skill));
     }
 
     @Override
-    public Skill updateSkill(Long id, Skill newSkill) {
+    public SkillDTO updateSkill(Long id, SkillDTO skillDTO) {
         Skill sk = skillRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Skill non trouvé"));
-        sk.setTitle(newSkill.getTitle());
-        sk.setPercentage(newSkill.getPercentage());
-        sk.setCandidate(newSkill.getCandidate());
+        sk.setTitle(skillDTO.getTitle());
+        sk.setPercentage(skillDTO.getPercentage());
         skillRepository.saveAndFlush(sk);
-        return sk;
+        return entityMapper.toSkillDTO(sk);
     }
 
     @Override

@@ -1,19 +1,19 @@
 package com.app.recruitmentapp.services;
 
-import com.app.recruitmentapp.entities.Candidacy;
+import com.app.recruitmentapp.dto.CandidacyDTO;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface CandidacyService {
 
-    List<Candidacy> getAllCandidacies();
+    List<CandidacyDTO> getAllCandidacies();
 
-    Optional<Candidacy> getCandidacyById(Long id);
+    Optional<CandidacyDTO> getCandidacyById(Long id);
 
-    Candidacy saveCandidacy(Candidacy candidacy);
+    CandidacyDTO saveCandidacy(CandidacyDTO candidacyDTO);
 
-    Candidacy updateCandidacy(Long id, Candidacy candidacy);
+    CandidacyDTO updateCandidacy(Long id, CandidacyDTO candidacyDTO);
 
     void deleteCandidacy(Long id);
 

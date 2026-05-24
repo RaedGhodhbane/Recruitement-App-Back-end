@@ -1,7 +1,9 @@
 package com.app.recruitmentapp.services;
 
+import com.app.recruitmentapp.dto.AdminDTO;
 import com.app.recruitmentapp.entities.*;
 import com.app.recruitmentapp.exceptions.EmailAlreadyUsedException;
+import com.app.recruitmentapp.mapper.EntityMapper;
 import com.app.recruitmentapp.repositories.AdminRepository;
 import com.app.recruitmentapp.repositories.CandidateRepository;
 import com.app.recruitmentapp.repositories.RecruiterRepository;
@@ -37,95 +39,74 @@ public class AdminServiceImpl implements AdminService {
     private final AdminRepository adminRepository;
     private final CandidateRepository candidateRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EntityMapper entityMapper;
 
     @Value("${file.upload-dir}")
     private String uploadDir;
 
     @Override
-    public List<Admin> getAllAdmins() {
-        return adminRepository.findAll();
+    public List<AdminDTO> getAllAdmins() {
+        return entityMapper.toAdminDTOList(adminRepository.findAll());
     }
     @Override
-    public Optional<Admin> getAdminById(Long id) {
-        return adminRepository.findById(id);
+    public Optional<AdminDTO> getAdminById(Long id) {
+        return adminRepository.findById(id).map(entityMapper::toAdminDTO);
     }
 
-    /*
     @Override
-    public Admin saveAdmin(Admin admin) {
-        admin.setActive(true);
-        admin.setRole(Role.ADMIN);
-        return adminRepository.save(admin);
-    }
-     */
-    @Override
-    public Admin registerAdminWithPicture(String email, String rawPassword, Admin admin, MultipartFile imageFile) {
+    public AdminDTO registerAdminWithPicture(String email, String rawPassword, AdminDTO adminDTO, MultipartFile imageFile) {
         if (adminRepository.findByEmail(email).isPresent()) {
             throw new EmailAlreadyUsedException("Cet e-mail est déjà utilisé");
         }
 
-        Admin admin1 = new Admin();
+        Admin admin1 = entityMapper.toAdminEntity(adminDTO);
+        admin1.setId(null);
         admin1.setActive(false);
         admin1.setRole(Role.ADMIN);
         admin1.setEmail(email);
         admin1.setPassword(passwordEncoder.encode(rawPassword));
-
-        if (admin != null) {
-            admin1.setName(admin.getName());
-            admin1.setFirstName(admin.getFirstName());
-            admin1.setGender(admin.getGender());
-            admin1.setBirthdate(admin.getBirthdate());
-            admin1.setAddress(admin.getAddress());
-            admin1.setCity(admin.getCity());
-            admin1.setState(admin.getState());
-            admin1.setCountry(admin.getCountry());
-            admin1.setPhone(admin.getPhone());
-        }
 
         if (imageFile != null && !imageFile.isEmpty()) {
             String fileName = saveFile(imageFile);
             admin1.setImage(fileName);
         }
 
-        return adminRepository.save(admin1);
+        return entityMapper.toAdminDTO(adminRepository.save(admin1));
     }
 
     @Override
-    public Admin updateAdmin(Long id, Admin newAdmin, MultipartFile imageFile) {
+    public AdminDTO updateAdmin(Long id, AdminDTO adminDTO, MultipartFile imageFile) {
         Admin a = adminRepository.findById(id).orElseThrow();
 
-        if (newAdmin.getName() != null) {
-            a.setName(newAdmin.getName());
+        if (adminDTO.getName() != null) {
+            a.setName(adminDTO.getName());
         }
-        if (newAdmin.getFirstName() != null) {
-            a.setFirstName(newAdmin.getFirstName());
+        if (adminDTO.getFirstName() != null) {
+            a.setFirstName(adminDTO.getFirstName());
         }
-        if (newAdmin.getEmail() != null) {
-            a.setEmail(newAdmin.getEmail());
+        if (adminDTO.getEmail() != null) {
+            a.setEmail(adminDTO.getEmail());
         }
-        if (newAdmin.getPassword() != null) {
-            a.setPassword(passwordEncoder.encode(newAdmin.getPassword()));
+        if (adminDTO.getGender() != null) {
+            a.setGender(adminDTO.getGender());
         }
-        if (newAdmin.getGender() != null) {
-            a.setGender(newAdmin.getGender());
+        if (adminDTO.getBirthdate() != null) {
+            a.setBirthdate(adminDTO.getBirthdate());
         }
-        if (newAdmin.getBirthdate() != null) {
-            a.setBirthdate(newAdmin.getBirthdate());
+        if (adminDTO.getAddress() != null) {
+            a.setAddress(adminDTO.getAddress());
         }
-        if (newAdmin.getAddress() != null) {
-            a.setAddress(newAdmin.getAddress());
+        if (adminDTO.getCity() != null) {
+            a.setCity(adminDTO.getCity());
         }
-        if (newAdmin.getCity() != null) {
-            a.setCity(newAdmin.getCity());
+        if (adminDTO.getState() != null) {
+            a.setState(adminDTO.getState());
         }
-        if (newAdmin.getState() != null) {
-            a.setState(newAdmin.getState());
+        if (adminDTO.getCountry() != null) {
+            a.setCountry(adminDTO.getCountry());
         }
-        if (newAdmin.getCountry() != null) {
-            a.setCountry(newAdmin.getCountry());
-        }
-        if (newAdmin.getPhone() != null) {
-            a.setPhone(newAdmin.getPhone());
+        if (adminDTO.getPhone() != null) {
+            a.setPhone(adminDTO.getPhone());
         }
 
         if(imageFile != null && !imageFile.isEmpty()) {
@@ -133,7 +114,7 @@ public class AdminServiceImpl implements AdminService {
             a.setImage(fileName);
         }
 
-        return adminRepository.saveAndFlush(a);
+        return entityMapper.toAdminDTO(adminRepository.saveAndFlush(a));
     }
 
 

@@ -1,6 +1,6 @@
 package com.app.recruitmentapp.controllers;
 
-import com.app.recruitmentapp.entities.Question;
+import com.app.recruitmentapp.dto.QuestionDTO;
 import com.app.recruitmentapp.services.QuestionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -29,13 +29,13 @@ class QuestionControllerTest {
     @InjectMocks
     private QuestionController questionController;
 
-    private Question testQuestion;
+    private QuestionDTO testQuestionDTO;
 
     @BeforeEach
     void setUp() {
-        testQuestion = new Question();
-        testQuestion.setId(1L);
-        testQuestion.setTitle("What is the work schedule?");
+        testQuestionDTO = new QuestionDTO();
+        testQuestionDTO.setId(1L);
+        testQuestionDTO.setTitle("What is the work schedule?");
     }
 
     @Nested
@@ -45,9 +45,9 @@ class QuestionControllerTest {
         @Test
         @DisplayName("Should return all questions")
         void shouldReturnAllQuestions() {
-            when(questionService.getAllQuestions()).thenReturn(List.of(testQuestion));
+            when(questionService.getAllQuestions()).thenReturn(List.of(testQuestionDTO));
 
-            List<Question> result = questionController.getAllQuestions();
+            List<QuestionDTO> result = questionController.getAllQuestions();
 
             assertNotNull(result);
             assertEquals(1, result.size());
@@ -61,9 +61,9 @@ class QuestionControllerTest {
         @Test
         @DisplayName("Should return question when found")
         void shouldReturnQuestionWhenFound() {
-            when(questionService.getQuestionById(1L)).thenReturn(Optional.of(testQuestion));
+            when(questionService.getQuestionById(1L)).thenReturn(Optional.of(testQuestionDTO));
 
-            ResponseEntity<Question> response = questionController.getQuestionById(1L);
+            ResponseEntity<QuestionDTO> response = questionController.getQuestionById(1L);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
         }
@@ -73,7 +73,7 @@ class QuestionControllerTest {
         void shouldReturn404WhenNotFound() {
             when(questionService.getQuestionById(99L)).thenReturn(Optional.empty());
 
-            ResponseEntity<Question> response = questionController.getQuestionById(99L);
+            ResponseEntity<QuestionDTO> response = questionController.getQuestionById(99L);
 
             assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         }
@@ -86,9 +86,9 @@ class QuestionControllerTest {
         @Test
         @DisplayName("Should add question successfully")
         void shouldAddQuestionSuccessfully() {
-            when(questionService.saveQuestion(testQuestion, 1L)).thenReturn(testQuestion);
+            when(questionService.saveQuestion(testQuestionDTO, 1L)).thenReturn(testQuestionDTO);
 
-            ResponseEntity<Question> response = questionController.addQuestion(testQuestion, 1L);
+            ResponseEntity<QuestionDTO> response = questionController.addQuestion(testQuestionDTO, 1L);
 
             assertEquals(HttpStatus.CREATED, response.getStatusCode());
         }
@@ -101,9 +101,9 @@ class QuestionControllerTest {
         @Test
         @DisplayName("Should update question successfully")
         void shouldUpdateQuestionSuccessfully() {
-            when(questionService.updateQuestion(1L, testQuestion)).thenReturn(testQuestion);
+            when(questionService.updateQuestion(1L, testQuestionDTO)).thenReturn(testQuestionDTO);
 
-            ResponseEntity<Question> response = questionController.updateQuestion(1L, testQuestion);
+            ResponseEntity<QuestionDTO> response = questionController.updateQuestion(1L, testQuestionDTO);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
         }
@@ -111,9 +111,9 @@ class QuestionControllerTest {
         @Test
         @DisplayName("Should return 404 when update fails")
         void shouldReturn404WhenUpdateFails() {
-            when(questionService.updateQuestion(99L, testQuestion)).thenThrow(new RuntimeException("Question not found"));
+            when(questionService.updateQuestion(99L, testQuestionDTO)).thenThrow(new RuntimeException("Question not found"));
 
-            ResponseEntity<Question> response = questionController.updateQuestion(99L, testQuestion);
+            ResponseEntity<QuestionDTO> response = questionController.updateQuestion(99L, testQuestionDTO);
 
             assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         }

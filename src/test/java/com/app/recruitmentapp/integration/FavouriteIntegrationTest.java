@@ -1,5 +1,6 @@
 package com.app.recruitmentapp.integration;
 
+import com.app.recruitmentapp.dto.FavouriteDTO;
 import com.app.recruitmentapp.entities.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -33,15 +34,15 @@ class FavouriteIntegrationTest extends AbstractIntegrationTest {
     @Test
     @DisplayName("POST /api/saved-jobs/{userId}/{offerId} should save a job")
     void saveJob_shouldReturnFavourite() {
-        ResponseEntity<Favourite> response = restTemplate.exchange(
+        ResponseEntity<FavouriteDTO> response = restTemplate.exchange(
                 "/api/saved-jobs/" + candidate.getId() + "/" + offer.getId(),
                 HttpMethod.POST,
                 authHeader(token),
-                Favourite.class);
+                FavouriteDTO.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getOffer().getId()).isEqualTo(offer.getId());
+        assertThat(response.getBody().getOfferId()).isEqualTo(offer.getId());
     }
 
     @Test

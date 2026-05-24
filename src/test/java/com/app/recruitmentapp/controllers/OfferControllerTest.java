@@ -1,6 +1,6 @@
 package com.app.recruitmentapp.controllers;
 
-import com.app.recruitmentapp.entities.Offer;
+import com.app.recruitmentapp.dto.OfferDTO;
 import com.app.recruitmentapp.services.OfferService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -30,14 +30,14 @@ class OfferControllerTest {
     @InjectMocks
     private OfferController offerController;
 
-    private Offer testOffer;
+    private OfferDTO testOfferDTO;
 
     @BeforeEach
     void setUp() {
-        testOffer = new Offer();
-        testOffer.setId(1L);
-        testOffer.setTitle("Software Engineer");
-        testOffer.setDescription("Great opportunity");
+        testOfferDTO = new OfferDTO();
+        testOfferDTO.setId(1L);
+        testOfferDTO.setTitle("Software Engineer");
+        testOfferDTO.setDescription("Great opportunity");
     }
 
     @Nested
@@ -47,9 +47,9 @@ class OfferControllerTest {
         @Test
         @DisplayName("Should return all offers")
         void shouldReturnAllOffers() {
-            when(offerService.getAllOffers()).thenReturn(List.of(testOffer));
+            when(offerService.getAllOffers()).thenReturn(List.of(testOfferDTO));
 
-            List<Offer> result = offerController.getAllOffers();
+            List<OfferDTO> result = offerController.getAllOffers();
 
             assertNotNull(result);
             assertEquals(1, result.size());
@@ -63,9 +63,9 @@ class OfferControllerTest {
         @Test
         @DisplayName("Should return offer when found")
         void shouldReturnOfferWhenFound() {
-            when(offerService.getOfferById(1L)).thenReturn(Optional.of(testOffer));
+            when(offerService.getOfferById(1L)).thenReturn(Optional.of(testOfferDTO));
 
-            ResponseEntity<Offer> response = offerController.getOfferById(1L);
+            ResponseEntity<OfferDTO> response = offerController.getOfferById(1L);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
         }
@@ -75,7 +75,7 @@ class OfferControllerTest {
         void shouldReturn404WhenNotFound() {
             when(offerService.getOfferById(99L)).thenReturn(Optional.empty());
 
-            ResponseEntity<Offer> response = offerController.getOfferById(99L);
+            ResponseEntity<OfferDTO> response = offerController.getOfferById(99L);
 
             assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         }
@@ -88,9 +88,9 @@ class OfferControllerTest {
         @Test
         @DisplayName("Should add offer successfully")
         void shouldAddOfferSuccessfully() {
-            when(offerService.saveOffer(testOffer, 1L)).thenReturn(testOffer);
+            when(offerService.saveOffer(testOfferDTO, 1L)).thenReturn(testOfferDTO);
 
-            ResponseEntity<Offer> response = offerController.addOffer(testOffer, 1L);
+            ResponseEntity<OfferDTO> response = offerController.addOffer(testOfferDTO, 1L);
 
             assertEquals(HttpStatus.CREATED, response.getStatusCode());
         }
@@ -103,9 +103,9 @@ class OfferControllerTest {
         @Test
         @DisplayName("Should update offer successfully")
         void shouldUpdateOfferSuccessfully() {
-            when(offerService.updateOffer(1L, testOffer)).thenReturn(testOffer);
+            when(offerService.updateOffer(1L, testOfferDTO)).thenReturn(testOfferDTO);
 
-            ResponseEntity<Offer> response = offerController.updateOffer(1L, testOffer);
+            ResponseEntity<OfferDTO> response = offerController.updateOffer(1L, testOfferDTO);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
         }
@@ -113,9 +113,9 @@ class OfferControllerTest {
         @Test
         @DisplayName("Should return 404 when update fails")
         void shouldReturn404WhenUpdateFails() {
-            when(offerService.updateOffer(99L, testOffer)).thenThrow(new RuntimeException("Offer not found"));
+            when(offerService.updateOffer(99L, testOfferDTO)).thenThrow(new RuntimeException("Offer not found"));
 
-            ResponseEntity<Offer> response = offerController.updateOffer(99L, testOffer);
+            ResponseEntity<OfferDTO> response = offerController.updateOffer(99L, testOfferDTO);
 
             assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         }

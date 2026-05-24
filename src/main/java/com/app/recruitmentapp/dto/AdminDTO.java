@@ -1,0 +1,36 @@
+package com.app.recruitmentapp.dto;
+
+import java.sql.Date;
+
+public class AdminDTO extends UserDTO {
+    private boolean active;
+    private String gender;
+    private Date birthdate;
+    private String address;
+    private String city;
+    private String state;
+    private String country;
+    private String phone;
+    private String image;
+
+    public AdminDTO() {}
+
+    public boolean isActive() { return active; }
+    public void setActive(boolean active) { this.active = active; }
+    public String getGender() { return gender; }
+    public void setGender(String gender) { this.gender = gender; }
+    public Date getBirthdate() { return birthdate; }
+    public void setBirthdate(Date birthdate) { this.birthdate = birthdate; }
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
+    public String getCity() { return city; }
+    public void setCity(String city) { this.city = city; }
+    public String getState() { return state; }
+    public void setState(String state) { this.state = state; }
+    public String getCountry() { return country; }
+    public void setCountry(String country) { this.country = country; }
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
+    public String getImage() { return image; }
+    public void setImage(String image) { this.image = image; }
+}

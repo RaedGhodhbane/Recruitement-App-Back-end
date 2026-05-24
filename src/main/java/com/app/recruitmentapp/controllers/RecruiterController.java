@@ -1,7 +1,6 @@
 package com.app.recruitmentapp.controllers;
 
-import com.app.recruitmentapp.entities.Candidate;
-import com.app.recruitmentapp.entities.Recruiter;
+import com.app.recruitmentapp.dto.RecruiterDTO;
 import com.app.recruitmentapp.services.RecruiterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -22,24 +21,16 @@ public class RecruiterController {
     private RecruiterService recruiterService;
 
     @GetMapping("/recruiters")
-    public List<Recruiter> getAllRecruiters() {
+    public List<RecruiterDTO> getAllRecruiters() {
         return recruiterService.getAllRecruiters();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Recruiter> getRecruiterById(@PathVariable Long id) {
-        Optional<Recruiter> recruiter = recruiterService.getRecruiterById(id);
-        return recruiter.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<RecruiterDTO> getRecruiterById(@PathVariable Long id) {
+        return recruiterService.getRecruiterById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
-
-    /*
-    @PostMapping("/addRecruiter1")
-
-    public ResponseEntity<Recruiter> addRecruiterWithoutPicture(@RequestBody Recruiter recruiter) {
-        Recruiter savedRecruiter = recruiterService.addRecruiterWithoutPicture(recruiter);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedRecruiter);
-    }
-     */
 
     @PostMapping("/registerRecruiter")
     public ResponseEntity<?> registerRecruiter(@RequestBody Map<String, String> request) {
@@ -50,29 +41,26 @@ public class RecruiterController {
         String phone = request.get("phone");
 
         try {
-            Recruiter recruiter = recruiterService.registerRecruiter(email,password, name,firstName,phone);
-            return ResponseEntity.ok(recruiter);
+            RecruiterDTO saved = recruiterService.registerRecruiter(email, password, name, firstName, phone);
+            return ResponseEntity.ok(saved);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", e.getMessage()));
         }
     }
 
-
     @PostMapping("/addRecruiter2")
-    public ResponseEntity<Recruiter> addRecruiterWithPicture(
-            @ModelAttribute Recruiter recruiter,
+    public ResponseEntity<RecruiterDTO> addRecruiterWithPicture(
+            @ModelAttribute RecruiterDTO recruiterDTO,
             @RequestParam("imageFile") MultipartFile imageFile) {
-
-        Recruiter savedRecruiter = recruiterService.addRecruiterWithPicture(recruiter, imageFile);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedRecruiter);
+        RecruiterDTO saved = recruiterService.addRecruiterWithPicture(recruiterDTO, imageFile);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
-
     @PutMapping("/{id}")
-    public ResponseEntity<Recruiter> updateRecruiter(@PathVariable Long id, @RequestBody Recruiter recruiter) {
+    public ResponseEntity<RecruiterDTO> updateRecruiter(@PathVariable Long id, @RequestBody RecruiterDTO recruiterDTO) {
         try {
-            Recruiter updatedRecruiter = recruiterService.updateRecruiter(id, recruiter);
-            return ResponseEntity.ok(updatedRecruiter);
+            RecruiterDTO updated = recruiterService.updateRecruiter(id, recruiterDTO);
+            return ResponseEntity.ok(updated);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }

@@ -1,9 +1,11 @@
 package com.app.recruitmentapp.services;
 
+import com.app.recruitmentapp.dto.CandidateDTO;
 import com.app.recruitmentapp.entities.Candidate;
 import com.app.recruitmentapp.entities.ChangePassword;
 import com.app.recruitmentapp.entities.Role;
 import com.app.recruitmentapp.exceptions.EmailAlreadyUsedException;
+import com.app.recruitmentapp.mapper.EntityMapper;
 import com.app.recruitmentapp.repositories.CandidateRepository;
 import com.app.recruitmentapp.repositories.UserRepository;
 import com.app.recruitmentapp.security.JwtUtil;
@@ -36,12 +38,16 @@ class CandidateServiceImplTest {
     private PasswordEncoder passwordEncoder;
     @Mock
     private JwtUtil jwtUtil;
+    @Mock
+    private EntityMapper entityMapper;
     @InjectMocks
     private CandidateServiceImpl candidateService;
 
     private Candidate candidate1;
     private Candidate candidate2;
     private ChangePassword changePasswordRequest;
+    private CandidateDTO candidate1DTO;
+    private CandidateDTO candidate2DTO;
 
     @BeforeEach
     void setUp() {
@@ -73,6 +79,26 @@ class CandidateServiceImplTest {
         changePasswordRequest.setCurrentPassword("oldPass");
         changePasswordRequest.setNewPassword("newPass");
         changePasswordRequest.setConfirmPassword("newPass");
+
+        candidate1DTO = new CandidateDTO();
+        candidate1DTO.setId(1L);
+        candidate1DTO.setEmail("john@test.com");
+        candidate1DTO.setName("Doe");
+        candidate1DTO.setFirstName("John");
+        candidate1DTO.setPhone("123456789");
+        candidate1DTO.setActive(true);
+        candidate1DTO.setRole("CANDIDATE");
+        candidate1DTO.setDescription("Developer");
+
+        candidate2DTO = new CandidateDTO();
+        candidate2DTO.setId(2L);
+        candidate2DTO.setEmail("jane@test.com");
+        candidate2DTO.setName("Smith");
+        candidate2DTO.setFirstName("Jane");
+        candidate2DTO.setPhone("987654321");
+        candidate2DTO.setActive(false);
+        candidate2DTO.setRole("CANDIDATE");
+        candidate2DTO.setDescription("Designer");
     }
 
     @Nested
@@ -84,14 +110,16 @@ class CandidateServiceImplTest {
         void shouldGetAllCandidatesSuccessfully() {
             List<Candidate> mockCandidates = List.of(candidate1, candidate2);
             when(candidateRepository.findAll()).thenReturn(mockCandidates);
+            when(entityMapper.toCandidateDTOList(mockCandidates)).thenReturn(List.of(candidate1DTO, candidate2DTO));
 
-            List<Candidate> result = candidateService.getAllCandidates();
+            List<CandidateDTO> result = candidateService.getAllCandidates();
 
             assertNotNull(result);
             assertEquals(2, result.size());
             assertEquals("john@test.com", result.get(0).getEmail());
             assertEquals("jane@test.com", result.get(1).getEmail());
             verify(candidateRepository).findAll();
+            verify(entityMapper).toCandidateDTOList(mockCandidates);
         }
     }
 
@@ -103,8 +131,9 @@ class CandidateServiceImplTest {
         @DisplayName("Should return candidate when found")
         void shouldReturnCandidateWhenFound() {
             when(candidateRepository.findById(1L)).thenReturn(Optional.of(candidate1));
+            when(entityMapper.toCandidateDTO(candidate1)).thenReturn(candidate1DTO);
 
-            Optional<Candidate> result = candidateService.getCandidateById(1L);
+            Optional<CandidateDTO> result = candidateService.getCandidateById(1L);
 
             assertTrue(result.isPresent());
             assertEquals(1L, result.get().getId());
@@ -117,7 +146,7 @@ class CandidateServiceImplTest {
         void shouldReturnEmptyWhenNotFound() {
             when(candidateRepository.findById(99L)).thenReturn(Optional.empty());
 
-            Optional<Candidate> result = candidateService.getCandidateById(99L);
+            Optional<CandidateDTO> result = candidateService.getCandidateById(99L);
 
             assertFalse(result.isPresent());
             verify(candidateRepository).findById(99L);
@@ -131,6 +160,15 @@ class CandidateServiceImplTest {
         @Test
         @DisplayName("Should register candidate successfully")
         void shouldRegisterCandidateSuccessfully() {
+            CandidateDTO resultDTO = new CandidateDTO();
+            resultDTO.setId(3L);
+            resultDTO.setEmail("new@test.com");
+            resultDTO.setName("Brown");
+            resultDTO.setFirstName("Charlie");
+            resultDTO.setPhone("555123456");
+            resultDTO.setActive(false);
+            resultDTO.setRole("CANDIDATE");
+
             when(userRepository.findByEmail("new@test.com")).thenReturn(Optional.empty());
             when(passwordEncoder.encode("rawPass")).thenReturn("encoded-rawPass");
             when(candidateRepository.save(any(Candidate.class))).thenAnswer(invocation -> {
@@ -138,8 +176,9 @@ class CandidateServiceImplTest {
                 saved.setId(3L);
                 return saved;
             });
+            when(entityMapper.toCandidateDTO(any(Candidate.class))).thenReturn(resultDTO);
 
-            Candidate result = candidateService.registerCandidate(
+            CandidateDTO result = candidateService.registerCandidate(
                     "new@test.com", "rawPass", "Brown", "Charlie", "555123456");
 
             assertNotNull(result);
@@ -147,12 +186,12 @@ class CandidateServiceImplTest {
             assertEquals("Brown", result.getName());
             assertEquals("Charlie", result.getFirstName());
             assertEquals("555123456", result.getPhone());
-            assertEquals("encoded-rawPass", result.getPassword());
-            assertFalse(result.getActive());
-            assertEquals(Role.CANDIDATE, result.getRole());
+            assertFalse(result.isActive());
+            assertEquals("CANDIDATE", result.getRole());
             verify(userRepository).findByEmail("new@test.com");
             verify(passwordEncoder).encode("rawPass");
             verify(candidateRepository).save(any(Candidate.class));
+            verify(entityMapper).toCandidateDTO(any(Candidate.class));
         }
 
         @Test
@@ -178,7 +217,7 @@ class CandidateServiceImplTest {
         @Test
         @DisplayName("Should update candidate when found")
         void shouldUpdateCandidateWhenFound() {
-            Candidate updatedData = new Candidate();
+            CandidateDTO updatedData = new CandidateDTO();
             updatedData.setName("UpdatedName");
             updatedData.setFirstName("UpdatedFirst");
             updatedData.setEmail("updated@test.com");
@@ -188,10 +227,22 @@ class CandidateServiceImplTest {
             updatedData.setPhone("111222333");
             updatedData.setActive(true);
 
+            CandidateDTO resultDTO = new CandidateDTO();
+            resultDTO.setId(1L);
+            resultDTO.setName("UpdatedName");
+            resultDTO.setFirstName("UpdatedFirst");
+            resultDTO.setEmail("updated@test.com");
+            resultDTO.setDescription("Updated desc");
+            resultDTO.setAddress("New address");
+            resultDTO.setTitle("Senior");
+            resultDTO.setPhone("111222333");
+            resultDTO.setActive(true);
+
             when(candidateRepository.findById(1L)).thenReturn(Optional.of(candidate1));
             when(candidateRepository.saveAndFlush(candidate1)).thenReturn(candidate1);
+            when(entityMapper.toCandidateDTO(candidate1)).thenReturn(resultDTO);
 
-            Candidate result = candidateService.updateCandidate(1L, updatedData);
+            CandidateDTO result = candidateService.updateCandidate(1L, updatedData);
 
             assertNotNull(result);
             assertEquals("UpdatedName", result.getName());
@@ -201,15 +252,16 @@ class CandidateServiceImplTest {
             assertEquals("New address", result.getAddress());
             assertEquals("Senior", result.getTitle());
             assertEquals("111222333", result.getPhone());
-            assertTrue(result.getActive());
+            assertTrue(result.isActive());
             verify(candidateRepository).findById(1L);
             verify(candidateRepository).saveAndFlush(candidate1);
+            verify(entityMapper).toCandidateDTO(candidate1);
         }
 
         @Test
         @DisplayName("Should throw RuntimeException when candidate not found")
         void shouldThrowWhenCandidateNotFound() {
-            Candidate updatedData = new Candidate();
+            CandidateDTO updatedData = new CandidateDTO();
             updatedData.setName("Any");
 
             when(candidateRepository.findById(99L)).thenReturn(Optional.empty());
@@ -262,7 +314,7 @@ class CandidateServiceImplTest {
 
             String result = candidateService.changePassword(1L, changePasswordRequest);
 
-            assertEquals("Mot de passe changé avec succès !", result);
+            assertEquals("Mot de passe chang\u00E9 avec succ\u00E8s !", result);
             assertEquals("encoded-newPass", candidate1.getPassword());
             verify(candidateRepository).findById(1L);
             verify(passwordEncoder).matches("oldPass", "encoded-pass-1");

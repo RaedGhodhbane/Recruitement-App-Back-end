@@ -1,9 +1,5 @@
 package com.app.recruitmentapp.controllers;
-import com.app.recruitmentapp.entities.Favourite;
-import com.app.recruitmentapp.entities.Offer;
-import com.app.recruitmentapp.entities.User;
-import com.app.recruitmentapp.repositories.OfferRepository;
-import com.app.recruitmentapp.repositories.UserRepository;
+import com.app.recruitmentapp.dto.FavouriteDTO;
 import com.app.recruitmentapp.services.FavouriteService;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,24 +9,18 @@ import java.util.List;
 @RequestMapping("/api/saved-jobs")
 public class FavouriteController {
     private final FavouriteService favouriteService;
-    private final UserRepository userRepository;
-    private final OfferRepository offerRepository;
 
-    public FavouriteController(FavouriteService favouriteService, UserRepository userRepository, OfferRepository offerRepository) {
+    public FavouriteController(FavouriteService favouriteService) {
         this.favouriteService = favouriteService;
-        this.userRepository = userRepository;
-        this.offerRepository = offerRepository;
     }
 
     @PostMapping("/{userId}/{offerId}")
-    public Favourite favourite(@PathVariable Long userId, @PathVariable Long offerId) {
-        User user = userRepository.findById(userId).orElseThrow();
-        Offer offer = offerRepository.findById(offerId).orElseThrow();
-        return favouriteService.saveJob(user, offer);
+    public FavouriteDTO favourite(@PathVariable Long userId, @PathVariable Long offerId) {
+        return favouriteService.saveJob(userId, offerId);
     }
 
     @GetMapping("/{userId}")
-    public List<Favourite> getSavedJobs(@PathVariable Long userId) {
+    public List<FavouriteDTO> getSavedJobs(@PathVariable Long userId) {
         return favouriteService.getSavedJobs(userId);
     }
 

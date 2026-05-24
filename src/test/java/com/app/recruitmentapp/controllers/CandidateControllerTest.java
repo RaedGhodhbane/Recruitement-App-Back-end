@@ -1,6 +1,6 @@
 package com.app.recruitmentapp.controllers;
 
-import com.app.recruitmentapp.entities.Candidate;
+import com.app.recruitmentapp.dto.CandidateDTO;
 import com.app.recruitmentapp.entities.ChangePassword;
 import com.app.recruitmentapp.services.CandidateService;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,16 +35,16 @@ class CandidateControllerTest {
     @InjectMocks
     private CandidateController candidateController;
 
-    private Candidate testCandidate;
+    private CandidateDTO testCandidateDTO;
 
     @BeforeEach
     void setUp() {
-        testCandidate = new Candidate();
-        testCandidate.setId(1L);
-        testCandidate.setEmail("candidate@test.com");
-        testCandidate.setName("Doe");
-        testCandidate.setFirstName("John");
-        testCandidate.setPhone("0123456789");
+        testCandidateDTO = new CandidateDTO();
+        testCandidateDTO.setId(1L);
+        testCandidateDTO.setEmail("candidate@test.com");
+        testCandidateDTO.setName("Doe");
+        testCandidateDTO.setFirstName("John");
+        testCandidateDTO.setPhone("0123456789");
     }
 
     @Nested
@@ -53,9 +54,9 @@ class CandidateControllerTest {
         @Test
         @DisplayName("Should return all candidates")
         void shouldReturnAllCandidates() {
-            when(candidateService.getAllCandidates()).thenReturn(List.of(testCandidate));
+            when(candidateService.getAllCandidates()).thenReturn(List.of(testCandidateDTO));
 
-            List<Candidate> result = candidateController.getAllCandidates();
+            List<CandidateDTO> result = candidateController.getAllCandidates();
 
             assertNotNull(result);
             assertEquals(1, result.size());
@@ -69,9 +70,9 @@ class CandidateControllerTest {
         @Test
         @DisplayName("Should return candidate when found")
         void shouldReturnCandidateWhenFound() {
-            when(candidateService.getCandidateById(1L)).thenReturn(Optional.of(testCandidate));
+            when(candidateService.getCandidateById(1L)).thenReturn(Optional.of(testCandidateDTO));
 
-            ResponseEntity<Candidate> response = candidateController.getCandidateById(1L);
+            ResponseEntity<CandidateDTO> response = candidateController.getCandidateById(1L);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
             assertEquals("candidate@test.com", response.getBody().getEmail());
@@ -82,7 +83,7 @@ class CandidateControllerTest {
         void shouldReturn404WhenNotFound() {
             when(candidateService.getCandidateById(99L)).thenReturn(Optional.empty());
 
-            ResponseEntity<Candidate> response = candidateController.getCandidateById(99L);
+            ResponseEntity<CandidateDTO> response = candidateController.getCandidateById(99L);
 
             assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         }
@@ -100,7 +101,7 @@ class CandidateControllerTest {
                     "name", "Doe", "firstName", "John", "phone", "0123456789");
 
             when(candidateService.registerCandidate("new@test.com", "pass123", "Doe", "John", "0123456789"))
-                    .thenReturn(testCandidate);
+                    .thenReturn(testCandidateDTO);
 
             ResponseEntity<?> response = candidateController.registerCandidate(request);
 
@@ -131,9 +132,9 @@ class CandidateControllerTest {
         @DisplayName("Should add candidate with picture successfully")
         void shouldAddCandidateWithPictureSuccessfully() throws Exception {
             MultipartFile imageFile = new MockMultipartFile("image", "test.jpg", "image/jpeg", "test".getBytes());
-            when(candidateService.saveCandidateWithPicture(any(Candidate.class), eq(imageFile))).thenReturn(testCandidate);
+            when(candidateService.saveCandidateWithPicture(any(CandidateDTO.class), eq(imageFile))).thenReturn(testCandidateDTO);
 
-            ResponseEntity<Candidate> response = candidateController.addCandidateWithPicture(new Candidate(), imageFile);
+            ResponseEntity<CandidateDTO> response = candidateController.addCandidateWithPicture(new CandidateDTO(), imageFile);
 
             assertEquals(HttpStatus.CREATED, response.getStatusCode());
         }
@@ -146,9 +147,9 @@ class CandidateControllerTest {
         @Test
         @DisplayName("Should update candidate successfully")
         void shouldUpdateCandidateSuccessfully() {
-            when(candidateService.updateCandidate(1L, testCandidate)).thenReturn(testCandidate);
+            when(candidateService.updateCandidate(1L, testCandidateDTO)).thenReturn(testCandidateDTO);
 
-            ResponseEntity<Candidate> response = candidateController.updateCandidate(1L, testCandidate);
+            ResponseEntity<CandidateDTO> response = candidateController.updateCandidate(1L, testCandidateDTO);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
         }
@@ -156,9 +157,9 @@ class CandidateControllerTest {
         @Test
         @DisplayName("Should return 404 when update fails")
         void shouldReturn404WhenUpdateFails() {
-            when(candidateService.updateCandidate(99L, testCandidate)).thenThrow(new RuntimeException("Candidate not found"));
+            when(candidateService.updateCandidate(99L, testCandidateDTO)).thenThrow(new RuntimeException("Candidate not found"));
 
-            ResponseEntity<Candidate> response = candidateController.updateCandidate(99L, testCandidate);
+            ResponseEntity<CandidateDTO> response = candidateController.updateCandidate(99L, testCandidateDTO);
 
             assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         }

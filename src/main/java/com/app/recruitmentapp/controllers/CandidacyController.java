@@ -1,6 +1,6 @@
 package com.app.recruitmentapp.controllers;
 
-import com.app.recruitmentapp.entities.Candidacy;
+import com.app.recruitmentapp.dto.CandidacyDTO;
 import com.app.recruitmentapp.services.CandidacyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/candidacy")
@@ -17,27 +16,28 @@ public class CandidacyController {
     private CandidacyService candidacyService;
 
     @GetMapping("/candidacies")
-    public List<Candidacy> getAllCandidacies() {
+    public List<CandidacyDTO> getAllCandidacies() {
         return candidacyService.getAllCandidacies();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Candidacy> getCandidacyById(@PathVariable Long id) {
-        Optional<Candidacy> candidacy = candidacyService.getCandidacyById(id);
-        return candidacy.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<CandidacyDTO> getCandidacyById(@PathVariable Long id) {
+        return candidacyService.getCandidacyById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping()
-    public ResponseEntity<Candidacy> addCandidacy(@RequestBody Candidacy candidacy) {
-        Candidacy savedCandidacy = candidacyService.saveCandidacy(candidacy);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedCandidacy);
+    public ResponseEntity<CandidacyDTO> addCandidacy(@RequestBody CandidacyDTO candidacyDTO) {
+        CandidacyDTO saved = candidacyService.saveCandidacy(candidacyDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Candidacy> updateCandidacy(@PathVariable Long id, @RequestBody Candidacy candidacy) {
+    public ResponseEntity<CandidacyDTO> updateCandidacy(@PathVariable Long id, @RequestBody CandidacyDTO candidacyDTO) {
         try {
-            Candidacy updatedCandidacy = candidacyService.updateCandidacy(id, candidacy);
-            return ResponseEntity.ok(updatedCandidacy);
+            CandidacyDTO updated = candidacyService.updateCandidacy(id, candidacyDTO);
+            return ResponseEntity.ok(updated);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -56,19 +56,17 @@ public class CandidacyController {
     @PutMapping("/{id}/accept")
     public ResponseEntity<Void> acceptApplication(@PathVariable Long id) {
         candidacyService.acceptApplication(id);
-        return ResponseEntity.noContent().build(); // 204 No Content
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}/decline")
     public ResponseEntity<Void> declineApplication(@PathVariable Long id) {
         candidacyService.declineApplication(id);
-        return ResponseEntity.noContent().build(); // 204 No Content
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/candidacies/exists")
     public boolean existsCandidacy(@RequestParam Long offerId, @RequestParam Long candidateId) {
         return candidacyService.candidacyExists(offerId, candidateId);
     }
-
-
 }

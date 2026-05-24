@@ -1,7 +1,6 @@
 package com.app.recruitmentapp.services;
 
-import com.app.recruitmentapp.entities.Admin;
-import com.app.recruitmentapp.entities.User;
+import com.app.recruitmentapp.dto.UserDTO;
 
 import java.util.List;
 import java.util.Map;
@@ -9,13 +8,13 @@ import java.util.Optional;
 
 public interface UserService {
 
-    List<User> getAllUsers();
+    List<UserDTO> getAllUsers();
 
-    Optional<User> getUserById(Long id);
+    Optional<UserDTO> getUserById(Long id);
 
-    User saveUser(User user);
+    UserDTO saveUser(UserDTO userDTO, String password);
 
-    User updateUser(Long id, User user);
+    UserDTO updateUser(Long id, UserDTO userDTO);
 
     void deleteUser(Long id);
 

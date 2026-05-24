@@ -1,6 +1,6 @@
 package com.app.recruitmentapp.controllers;
 
-import com.app.recruitmentapp.entities.Skill;
+import com.app.recruitmentapp.dto.SkillDTO;
 import com.app.recruitmentapp.services.SkillService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/skill")
@@ -19,27 +18,28 @@ public class SkillController {
     private SkillService skillService;
 
     @GetMapping("/skills")
-    public List<Skill> getAllSkills() {
+    public List<SkillDTO> getAllSkills() {
         return skillService.getAllSkills();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Skill> getSkillById(@PathVariable Long id) {
-        Optional<Skill> skill = skillService.getSkillById(id);
-        return skill.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<SkillDTO> getSkillById(@PathVariable Long id) {
+        return skillService.getSkillById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping("/{idCandidate}")
-    public ResponseEntity<Skill> addSkill(@RequestBody Skill skill, @PathVariable Long idCandidate) {
-        Skill savedSkill = skillService.saveSkill(skill,idCandidate);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedSkill);
+    public ResponseEntity<SkillDTO> addSkill(@RequestBody SkillDTO skillDTO, @PathVariable Long idCandidate) {
+        SkillDTO saved = skillService.saveSkill(skillDTO, idCandidate);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Skill> updateSkill(@PathVariable Long id, @RequestBody Skill skill) {
+    public ResponseEntity<SkillDTO> updateSkill(@PathVariable Long id, @RequestBody SkillDTO skillDTO) {
         try {
-            Skill updatedSkill = skillService.updateSkill(id, skill);
-            return ResponseEntity.ok(updatedSkill);
+            SkillDTO updated = skillService.updateSkill(id, skillDTO);
+            return ResponseEntity.ok(updated);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }

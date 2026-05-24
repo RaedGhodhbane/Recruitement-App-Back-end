@@ -1,7 +1,9 @@
 package com.app.recruitmentapp.services;
 
+import com.app.recruitmentapp.dto.SkillDTO;
 import com.app.recruitmentapp.entities.Candidate;
 import com.app.recruitmentapp.entities.Skill;
+import com.app.recruitmentapp.mapper.EntityMapper;
 import com.app.recruitmentapp.repositories.CandidateRepository;
 import com.app.recruitmentapp.repositories.SkillRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,12 +29,16 @@ class SkillServiceImplTest {
     private SkillRepository skillRepository;
     @Mock
     private CandidateRepository candidateRepository;
+    @Mock
+    private EntityMapper entityMapper;
     @InjectMocks
     private SkillServiceImpl skillService;
 
     private Candidate candidate;
     private Skill skill1;
     private Skill skill2;
+    private SkillDTO skill1DTO;
+    private SkillDTO skill2DTO;
 
     @BeforeEach
     void setUp() {
@@ -51,6 +57,18 @@ class SkillServiceImplTest {
         skill2.setTitle("Python");
         skill2.setPercentage("75");
         skill2.setCandidate(candidate);
+
+        skill1DTO = new SkillDTO();
+        skill1DTO.setId(1L);
+        skill1DTO.setTitle("Java");
+        skill1DTO.setPercentage("90");
+        skill1DTO.setCandidateId(1L);
+
+        skill2DTO = new SkillDTO();
+        skill2DTO.setId(2L);
+        skill2DTO.setTitle("Python");
+        skill2DTO.setPercentage("75");
+        skill2DTO.setCandidateId(1L);
     }
 
     @Nested
@@ -62,14 +80,16 @@ class SkillServiceImplTest {
         void shouldGetAllSkillsSuccessfully() {
             List<Skill> mockSkills = List.of(skill1, skill2);
             when(skillRepository.findAll()).thenReturn(mockSkills);
+            when(entityMapper.toSkillDTOList(mockSkills)).thenReturn(List.of(skill1DTO, skill2DTO));
 
-            List<Skill> result = skillService.getAllSkills();
+            List<SkillDTO> result = skillService.getAllSkills();
 
             assertNotNull(result);
             assertEquals(2, result.size());
             assertEquals("Java", result.get(0).getTitle());
             assertEquals("Python", result.get(1).getTitle());
             verify(skillRepository).findAll();
+            verify(entityMapper).toSkillDTOList(mockSkills);
         }
     }
 
@@ -81,8 +101,9 @@ class SkillServiceImplTest {
         @DisplayName("Should return skill when found")
         void shouldReturnSkillWhenFound() {
             when(skillRepository.findById(1L)).thenReturn(Optional.of(skill1));
+            when(entityMapper.toSkillDTO(skill1)).thenReturn(skill1DTO);
 
-            Optional<Skill> result = skillService.getSkillById(1L);
+            Optional<SkillDTO> result = skillService.getSkillById(1L);
 
             assertTrue(result.isPresent());
             assertEquals(1L, result.get().getId());
@@ -95,7 +116,7 @@ class SkillServiceImplTest {
         void shouldReturnEmptyWhenNotFound() {
             when(skillRepository.findById(99L)).thenReturn(Optional.empty());
 
-            Optional<Skill> result = skillService.getSkillById(99L);
+            Optional<SkillDTO> result = skillService.getSkillById(99L);
 
             assertFalse(result.isPresent());
             verify(skillRepository).findById(99L);
@@ -109,47 +130,74 @@ class SkillServiceImplTest {
         @Test
         @DisplayName("Should save skill successfully")
         void shouldSaveSkillSuccessfully() {
-            Skill newSkill = new Skill();
-            newSkill.setTitle("Spring Boot");
-            newSkill.setPercentage("85");
+            SkillDTO newSkillDTO = new SkillDTO();
+            newSkillDTO.setTitle("Spring Boot");
+            newSkillDTO.setPercentage("85");
 
+            Skill newSkillEntity = new Skill();
+            newSkillEntity.setTitle("Spring Boot");
+            newSkillEntity.setPercentage("85");
+
+            SkillDTO resultDTO = new SkillDTO();
+            resultDTO.setId(3L);
+            resultDTO.setTitle("Spring Boot");
+            resultDTO.setPercentage("85");
+            resultDTO.setCandidateId(1L);
+
+            when(entityMapper.toSkillEntity(newSkillDTO)).thenReturn(newSkillEntity);
             when(candidateRepository.findById(1L)).thenReturn(Optional.of(candidate));
             when(skillRepository.save(any(Skill.class))).thenAnswer(invocation -> {
                 Skill saved = invocation.getArgument(0);
                 saved.setId(3L);
                 return saved;
             });
+            when(entityMapper.toSkillDTO(any(Skill.class))).thenReturn(resultDTO);
 
-            Skill result = skillService.saveSkill(newSkill, 1L);
+            SkillDTO result = skillService.saveSkill(newSkillDTO, 1L);
 
             assertNotNull(result);
             assertEquals("Spring Boot", result.getTitle());
             assertEquals("85", result.getPercentage());
-            assertEquals(candidate, result.getCandidate());
+            assertEquals(1L, result.getCandidateId());
+            verify(entityMapper).toSkillEntity(newSkillDTO);
             verify(candidateRepository).findById(1L);
             verify(skillRepository).save(any(Skill.class));
+            verify(entityMapper).toSkillDTO(any(Skill.class));
         }
 
         @Test
         @DisplayName("Should save skill with null candidate when candidate not found")
         void shouldSaveSkillWithNullCandidateWhenNotFound() {
-            Skill newSkill = new Skill();
-            newSkill.setTitle("Spring Boot");
-            newSkill.setPercentage("85");
+            SkillDTO newSkillDTO = new SkillDTO();
+            newSkillDTO.setTitle("Spring Boot");
+            newSkillDTO.setPercentage("85");
 
+            Skill newSkillEntity = new Skill();
+            newSkillEntity.setTitle("Spring Boot");
+            newSkillEntity.setPercentage("85");
+
+            SkillDTO resultDTO = new SkillDTO();
+            resultDTO.setId(3L);
+            resultDTO.setTitle("Spring Boot");
+            resultDTO.setPercentage("85");
+
+            when(entityMapper.toSkillEntity(newSkillDTO)).thenReturn(newSkillEntity);
             when(candidateRepository.findById(99L)).thenReturn(Optional.empty());
             when(skillRepository.save(any(Skill.class))).thenAnswer(invocation -> {
                 Skill saved = invocation.getArgument(0);
                 saved.setId(3L);
                 return saved;
             });
+            when(entityMapper.toSkillDTO(any(Skill.class))).thenReturn(resultDTO);
 
-            Skill result = skillService.saveSkill(newSkill, 99L);
+            SkillDTO result = skillService.saveSkill(newSkillDTO, 99L);
 
             assertNotNull(result);
-            assertNull(result.getCandidate());
+            assertNull(result.getCandidateId());
+            verify(entityMapper).toSkillEntity(newSkillDTO);
             verify(candidateRepository).findById(99L);
             verify(skillRepository).save(any(Skill.class));
+            verify(entityMapper).toSkillDTO(any(Skill.class));
         }
     }
 
@@ -160,28 +208,35 @@ class SkillServiceImplTest {
         @Test
         @DisplayName("Should update skill when found")
         void shouldUpdateSkillWhenFound() {
-            Skill updatedData = new Skill();
+            SkillDTO updatedData = new SkillDTO();
             updatedData.setTitle("Kubernetes");
             updatedData.setPercentage("95");
-            updatedData.setCandidate(candidate);
+
+            SkillDTO resultDTO = new SkillDTO();
+            resultDTO.setId(1L);
+            resultDTO.setTitle("Kubernetes");
+            resultDTO.setPercentage("95");
+            resultDTO.setCandidateId(1L);
 
             when(skillRepository.findById(1L)).thenReturn(Optional.of(skill1));
             when(skillRepository.saveAndFlush(skill1)).thenReturn(skill1);
+            when(entityMapper.toSkillDTO(skill1)).thenReturn(resultDTO);
 
-            Skill result = skillService.updateSkill(1L, updatedData);
+            SkillDTO result = skillService.updateSkill(1L, updatedData);
 
             assertNotNull(result);
             assertEquals("Kubernetes", result.getTitle());
             assertEquals("95", result.getPercentage());
-            assertEquals(candidate, result.getCandidate());
+            assertEquals(1L, result.getCandidateId());
             verify(skillRepository).findById(1L);
             verify(skillRepository).saveAndFlush(skill1);
+            verify(entityMapper).toSkillDTO(skill1);
         }
 
         @Test
         @DisplayName("Should throw RuntimeException when skill not found")
         void shouldThrowWhenSkillNotFound() {
-            Skill updatedData = new Skill();
+            SkillDTO updatedData = new SkillDTO();
             updatedData.setTitle("Kubernetes");
 
             when(skillRepository.findById(99L)).thenReturn(Optional.empty());

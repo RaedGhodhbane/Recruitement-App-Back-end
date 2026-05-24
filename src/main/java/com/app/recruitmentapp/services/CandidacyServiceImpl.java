@@ -1,7 +1,9 @@
 package com.app.recruitmentapp.services;
 
+import com.app.recruitmentapp.dto.CandidacyDTO;
 import com.app.recruitmentapp.entities.Candidacy;
 import com.app.recruitmentapp.entities.Status;
+import com.app.recruitmentapp.mapper.EntityMapper;
 import com.app.recruitmentapp.repositories.CandidacyRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
@@ -13,36 +15,37 @@ import java.util.Optional;
 public class CandidacyServiceImpl implements CandidacyService {
 
     private final CandidacyRepository candidacyRepository;
+    private final EntityMapper entityMapper;
 
-    public CandidacyServiceImpl(CandidacyRepository candidacyRepository) {
+    public CandidacyServiceImpl(CandidacyRepository candidacyRepository, EntityMapper entityMapper) {
         this.candidacyRepository = candidacyRepository;
+        this.entityMapper = entityMapper;
     }
 
     @Override
-    public List<Candidacy> getAllCandidacies() {
-        return candidacyRepository.findAll();
+    public List<CandidacyDTO> getAllCandidacies() {
+        return entityMapper.toCandidacyDTOList(candidacyRepository.findAll());
     }
 
     @Override
-    public Optional<Candidacy> getCandidacyById(Long id) {
-        return candidacyRepository.findById(id);
+    public Optional<CandidacyDTO> getCandidacyById(Long id) {
+        return candidacyRepository.findById(id).map(entityMapper::toCandidacyDTO);
     }
 
     @Override
-    public Candidacy saveCandidacy(Candidacy candidacy) {
-        return candidacyRepository.save(candidacy);
+    public CandidacyDTO saveCandidacy(CandidacyDTO candidacyDTO) {
+        Candidacy candidacy = entityMapper.toCandidacyEntity(candidacyDTO);
+        return entityMapper.toCandidacyDTO(candidacyRepository.save(candidacy));
     }
 
     @Override
-    public Candidacy updateCandidacy(Long id, Candidacy newCandidacy) {
+    public CandidacyDTO updateCandidacy(Long id, CandidacyDTO candidacyDTO) {
         Candidacy c = candidacyRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Candidacy not found with id " + id));
-        c.setSubmissionDate(newCandidacy.getSubmissionDate());
-        c.setStatus(newCandidacy.getStatus());
-        c.setScore(newCandidacy.getScore());
-        c.setCandidate(newCandidacy.getCandidate());
-        c.setOffer(newCandidacy.getOffer());
-        return candidacyRepository.save(c);
+        c.setSubmissionDate(candidacyDTO.getSubmissionDate());
+        if (candidacyDTO.getStatus() != null) c.setStatus(Status.valueOf(candidacyDTO.getStatus()));
+        c.setScore(candidacyDTO.getScore());
+        return entityMapper.toCandidacyDTO(candidacyRepository.save(c));
     }
 
     @Override
@@ -72,5 +75,4 @@ public class CandidacyServiceImpl implements CandidacyService {
     public boolean candidacyExists(Long offerId, Long candidateId) {
         return candidacyRepository.existsByOfferIdAndCandidateId(offerId, candidateId);
     }
-
 }

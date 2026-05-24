@@ -1,8 +1,8 @@
 package com.app.recruitmentapp.controllers;
 
-import com.app.recruitmentapp.entities.Admin;
+import com.app.recruitmentapp.dto.AdminDTO;
+import com.app.recruitmentapp.dto.ContactDTO;
 import com.app.recruitmentapp.entities.ChangePassword;
-import com.app.recruitmentapp.entities.Contact;
 import com.app.recruitmentapp.services.AdminService;
 import com.app.recruitmentapp.services.ContactService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +15,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/admin")
@@ -28,44 +27,37 @@ public class AdminController {
     private ContactService contactService;
 
     @GetMapping("/admins")
-    public List<Admin> getAllAdmins() {
+    public List<AdminDTO> getAllAdmins() {
         return adminService.getAllAdmins();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Admin> getAdminById(@PathVariable Long id) {
-        Optional<Admin> admin = adminService.getAdminById(id);
-        return admin.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<AdminDTO> getAdminById(@PathVariable Long id) {
+        return adminService.getAdminById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
-
-    /*
-    @PostMapping()
-    public ResponseEntity<Admin> addAdmin(@RequestBody Admin admin) {
-        Admin savedAdmin = adminService.saveAdmin(admin);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedAdmin);
-    }
-     */
 
     @PostMapping("/registerAdmin")
     public ResponseEntity<?> registerAdminWithPicture(@RequestParam Map<String, String> request,
-                                                      @ModelAttribute Admin admin,
-                                                      @RequestParam("imageFile") MultipartFile imageFile) {
+                                                       @ModelAttribute AdminDTO adminDTO,
+                                                       @RequestParam("imageFile") MultipartFile imageFile) {
         String email = request.get("email");
         String password = request.get("password");
 
         try {
-            Admin admin1 = adminService.registerAdminWithPicture(email, password, admin, imageFile);
-            return ResponseEntity.ok(admin1);
+            AdminDTO saved = adminService.registerAdminWithPicture(email, password, adminDTO, imageFile);
+            return ResponseEntity.ok(saved);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", e.getMessage()));
         }
     }
 
     @PutMapping("/updateadmin/{id}")
-    public ResponseEntity<Admin> updateAdmin(@PathVariable Long id, @ModelAttribute Admin admin, @RequestParam("imageFile") MultipartFile imageFile) {
+    public ResponseEntity<AdminDTO> updateAdmin(@PathVariable Long id, @ModelAttribute AdminDTO adminDTO, @RequestParam("imageFile") MultipartFile imageFile) {
         try {
-            Admin updatedadmin = adminService.updateAdmin(id, admin, imageFile);
-            return ResponseEntity.ok(updatedadmin);
+            AdminDTO updated = adminService.updateAdmin(id, adminDTO, imageFile);
+            return ResponseEntity.ok(updated);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -126,9 +118,7 @@ public class AdminController {
     }
 
     @GetMapping("/contact/messages")
-    public List<Contact> getAllMessagesContact() {
+    public List<ContactDTO> getAllMessagesContact() {
         return contactService.getAllMessagesContact();
     }
-
 }
-

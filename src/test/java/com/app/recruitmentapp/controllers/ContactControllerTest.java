@@ -1,6 +1,6 @@
 package com.app.recruitmentapp.controllers;
 
-import com.app.recruitmentapp.entities.Contact;
+import com.app.recruitmentapp.dto.ContactDTO;
 import com.app.recruitmentapp.services.ContactService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -32,11 +32,11 @@ class ContactControllerTest {
         @Test
         @DisplayName("Should send contact message successfully")
         void shouldSendMessageSuccessfully() {
-            Contact contact = new Contact();
-            Contact savedContact = new Contact();
-            when(contactService.sendMessageContact(contact, 1L)).thenReturn(savedContact);
+            ContactDTO contactDTO = new ContactDTO();
+            ContactDTO savedDTO = new ContactDTO();
+            when(contactService.sendMessageContact(contactDTO, 1L)).thenReturn(savedDTO);
 
-            ResponseEntity<Contact> response = contactController.sendMessageByUser(contact, 1L);
+            ResponseEntity<ContactDTO> response = contactController.sendMessageByUser(contactDTO, 1L);
 
             assertEquals(HttpStatus.CREATED, response.getStatusCode());
             assertNotNull(response.getBody());

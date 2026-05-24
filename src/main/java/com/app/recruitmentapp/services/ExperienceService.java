@@ -1,18 +1,18 @@
 package com.app.recruitmentapp.services;
 
-import com.app.recruitmentapp.entities.Experience;
+import com.app.recruitmentapp.dto.ExperienceDTO;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface ExperienceService {
-    List<Experience> getAllExperiences();
+    List<ExperienceDTO> getAllExperiences();
 
-    Optional<Experience> getExperienceById(Long id);
+    Optional<ExperienceDTO> getExperienceById(Long id);
 
-    Experience saveExperience(Experience experience, Long idCandidate);
+    ExperienceDTO saveExperience(ExperienceDTO experienceDTO, Long idCandidate);
 
-    Experience updateExperience(Long id, Experience experience);
+    ExperienceDTO updateExperience(Long id, ExperienceDTO experienceDTO);
 
     void deleteExperience(Long id);
 }

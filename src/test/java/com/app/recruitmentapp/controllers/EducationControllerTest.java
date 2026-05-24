@@ -1,6 +1,6 @@
 package com.app.recruitmentapp.controllers;
 
-import com.app.recruitmentapp.entities.Education;
+import com.app.recruitmentapp.dto.EducationDTO;
 import com.app.recruitmentapp.services.EducationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -30,14 +30,14 @@ class EducationControllerTest {
     @InjectMocks
     private EducationController educationController;
 
-    private Education testEducation;
+    private EducationDTO testEducationDTO;
 
     @BeforeEach
     void setUp() {
-        testEducation = new Education();
-        testEducation.setId(1L);
-        testEducation.setDiploma("Master");
-        testEducation.setUniversity("University");
+        testEducationDTO = new EducationDTO();
+        testEducationDTO.setId(1L);
+        testEducationDTO.setDiploma("Master");
+        testEducationDTO.setUniversity("University");
     }
 
     @Nested
@@ -47,9 +47,9 @@ class EducationControllerTest {
         @Test
         @DisplayName("Should return all educations")
         void shouldReturnAllEducations() {
-            when(educationService.getAllEducations()).thenReturn(List.of(testEducation));
+            when(educationService.getAllEducations()).thenReturn(List.of(testEducationDTO));
 
-            List<Education> result = educationController.getAllEducations();
+            List<EducationDTO> result = educationController.getAllEducations();
 
             assertNotNull(result);
             assertEquals(1, result.size());
@@ -63,9 +63,9 @@ class EducationControllerTest {
         @Test
         @DisplayName("Should return education when found")
         void shouldReturnEducationWhenFound() {
-            when(educationService.getEducationById(1L)).thenReturn(Optional.of(testEducation));
+            when(educationService.getEducationById(1L)).thenReturn(Optional.of(testEducationDTO));
 
-            ResponseEntity<Education> response = educationController.getEducationById(1L);
+            ResponseEntity<EducationDTO> response = educationController.getEducationById(1L);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
         }
@@ -75,7 +75,7 @@ class EducationControllerTest {
         void shouldReturn404WhenNotFound() {
             when(educationService.getEducationById(99L)).thenReturn(Optional.empty());
 
-            ResponseEntity<Education> response = educationController.getEducationById(99L);
+            ResponseEntity<EducationDTO> response = educationController.getEducationById(99L);
 
             assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         }
@@ -88,9 +88,9 @@ class EducationControllerTest {
         @Test
         @DisplayName("Should add education successfully")
         void shouldAddEducationSuccessfully() {
-            when(educationService.saveEducation(testEducation, 1L)).thenReturn(testEducation);
+            when(educationService.saveEducation(testEducationDTO, 1L)).thenReturn(testEducationDTO);
 
-            ResponseEntity<Education> response = educationController.addEducation(testEducation, 1L);
+            ResponseEntity<EducationDTO> response = educationController.addEducation(testEducationDTO, 1L);
 
             assertEquals(HttpStatus.CREATED, response.getStatusCode());
         }
@@ -103,9 +103,9 @@ class EducationControllerTest {
         @Test
         @DisplayName("Should update education successfully")
         void shouldUpdateEducationSuccessfully() {
-            when(educationService.updateEducation(1L, testEducation)).thenReturn(testEducation);
+            when(educationService.updateEducation(1L, testEducationDTO)).thenReturn(testEducationDTO);
 
-            ResponseEntity<Education> response = educationController.updateEducation(1L, testEducation);
+            ResponseEntity<EducationDTO> response = educationController.updateEducation(1L, testEducationDTO);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
         }
@@ -113,9 +113,9 @@ class EducationControllerTest {
         @Test
         @DisplayName("Should return 404 when update fails")
         void shouldReturn404WhenUpdateFails() {
-            when(educationService.updateEducation(99L, testEducation)).thenThrow(new RuntimeException("Education not found"));
+            when(educationService.updateEducation(99L, testEducationDTO)).thenThrow(new RuntimeException("Education not found"));
 
-            ResponseEntity<Education> response = educationController.updateEducation(99L, testEducation);
+            ResponseEntity<EducationDTO> response = educationController.updateEducation(99L, testEducationDTO);
 
             assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         }

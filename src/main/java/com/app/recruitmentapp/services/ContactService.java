@@ -1,11 +1,11 @@
 package com.app.recruitmentapp.services;
 
-import com.app.recruitmentapp.entities.Contact;
+import com.app.recruitmentapp.dto.ContactDTO;
 
 import java.util.List;
 
 public interface ContactService {
-    List<Contact> getAllMessagesContact();
+    List<ContactDTO> getAllMessagesContact();
 
-    Contact sendMessageContact(Contact contact, Long idUserSend);
+    ContactDTO sendMessageContact(ContactDTO contactDTO, Long idUserSend);
 }

@@ -1,6 +1,6 @@
 package com.app.recruitmentapp.controllers;
 
-import com.app.recruitmentapp.entities.Skill;
+import com.app.recruitmentapp.dto.SkillDTO;
 import com.app.recruitmentapp.services.SkillService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -30,13 +30,13 @@ class SkillControllerTest {
     @InjectMocks
     private SkillController skillController;
 
-    private Skill testSkill;
+    private SkillDTO testSkillDTO;
 
     @BeforeEach
     void setUp() {
-        testSkill = new Skill();
-        testSkill.setId(1L);
-        testSkill.setTitle("Java");
+        testSkillDTO = new SkillDTO();
+        testSkillDTO.setId(1L);
+        testSkillDTO.setTitle("Java");
     }
 
     @Nested
@@ -46,9 +46,9 @@ class SkillControllerTest {
         @Test
         @DisplayName("Should return all skills")
         void shouldReturnAllSkills() {
-            when(skillService.getAllSkills()).thenReturn(List.of(testSkill));
+            when(skillService.getAllSkills()).thenReturn(List.of(testSkillDTO));
 
-            List<Skill> result = skillController.getAllSkills();
+            List<SkillDTO> result = skillController.getAllSkills();
 
             assertNotNull(result);
             assertEquals(1, result.size());
@@ -62,9 +62,9 @@ class SkillControllerTest {
         @Test
         @DisplayName("Should return skill when found")
         void shouldReturnSkillWhenFound() {
-            when(skillService.getSkillById(1L)).thenReturn(Optional.of(testSkill));
+            when(skillService.getSkillById(1L)).thenReturn(Optional.of(testSkillDTO));
 
-            ResponseEntity<Skill> response = skillController.getSkillById(1L);
+            ResponseEntity<SkillDTO> response = skillController.getSkillById(1L);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
         }
@@ -74,7 +74,7 @@ class SkillControllerTest {
         void shouldReturn404WhenNotFound() {
             when(skillService.getSkillById(99L)).thenReturn(Optional.empty());
 
-            ResponseEntity<Skill> response = skillController.getSkillById(99L);
+            ResponseEntity<SkillDTO> response = skillController.getSkillById(99L);
 
             assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         }
@@ -87,9 +87,9 @@ class SkillControllerTest {
         @Test
         @DisplayName("Should add skill successfully")
         void shouldAddSkillSuccessfully() {
-            when(skillService.saveSkill(testSkill, 1L)).thenReturn(testSkill);
+            when(skillService.saveSkill(testSkillDTO, 1L)).thenReturn(testSkillDTO);
 
-            ResponseEntity<Skill> response = skillController.addSkill(testSkill, 1L);
+            ResponseEntity<SkillDTO> response = skillController.addSkill(testSkillDTO, 1L);
 
             assertEquals(HttpStatus.CREATED, response.getStatusCode());
         }
@@ -102,9 +102,9 @@ class SkillControllerTest {
         @Test
         @DisplayName("Should update skill successfully")
         void shouldUpdateSkillSuccessfully() {
-            when(skillService.updateSkill(1L, testSkill)).thenReturn(testSkill);
+            when(skillService.updateSkill(1L, testSkillDTO)).thenReturn(testSkillDTO);
 
-            ResponseEntity<Skill> response = skillController.updateSkill(1L, testSkill);
+            ResponseEntity<SkillDTO> response = skillController.updateSkill(1L, testSkillDTO);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
         }
@@ -112,9 +112,9 @@ class SkillControllerTest {
         @Test
         @DisplayName("Should return 404 when update fails")
         void shouldReturn404WhenUpdateFails() {
-            when(skillService.updateSkill(99L, testSkill)).thenThrow(new RuntimeException("Skill not found"));
+            when(skillService.updateSkill(99L, testSkillDTO)).thenThrow(new RuntimeException("Skill not found"));
 
-            ResponseEntity<Skill> response = skillController.updateSkill(99L, testSkill);
+            ResponseEntity<SkillDTO> response = skillController.updateSkill(99L, testSkillDTO);
 
             assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         }

@@ -1,8 +1,8 @@
 package com.app.recruitmentapp.controllers;
 
-import com.app.recruitmentapp.entities.Admin;
+import com.app.recruitmentapp.dto.AdminDTO;
+import com.app.recruitmentapp.dto.ContactDTO;
 import com.app.recruitmentapp.entities.ChangePassword;
-import com.app.recruitmentapp.entities.Contact;
 import com.app.recruitmentapp.services.AdminService;
 import com.app.recruitmentapp.services.ContactService;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,18 +40,18 @@ class AdminControllerTest {
     @InjectMocks
     private AdminController adminController;
 
-    private Admin testAdmin;
+    private AdminDTO testAdminDTO;
 
     @BeforeEach
     void setUp() {
-        testAdmin = new Admin();
-        testAdmin.setId(1L);
-        testAdmin.setEmail("admin@test.com");
-        testAdmin.setName("Ghodhbane");
-        testAdmin.setFirstName("Raed");
-        testAdmin.setCity("Paris");
-        testAdmin.setCountry("France");
-        testAdmin.setActive(true);
+        testAdminDTO = new AdminDTO();
+        testAdminDTO.setId(1L);
+        testAdminDTO.setEmail("admin@test.com");
+        testAdminDTO.setName("Ghodhbane");
+        testAdminDTO.setFirstName("Raed");
+        testAdminDTO.setCity("Paris");
+        testAdminDTO.setCountry("France");
+        testAdminDTO.setActive(true);
     }
 
     @Nested
@@ -60,13 +61,13 @@ class AdminControllerTest {
         @Test
         @DisplayName("Should return all admins successfully")
         void shouldGetAllAdminsSuccessfully() {
-            Admin admin2 = new Admin();
+            AdminDTO admin2 = new AdminDTO();
             admin2.setId(2L);
             admin2.setEmail("admin2@test.com");
-            List<Admin> mockAdmins = List.of(testAdmin, admin2);
+            List<AdminDTO> mockAdmins = List.of(testAdminDTO, admin2);
             when(adminService.getAllAdmins()).thenReturn(mockAdmins);
 
-            List<Admin> result = adminController.getAllAdmins();
+            List<AdminDTO> result = adminController.getAllAdmins();
 
             assertNotNull(result);
             assertEquals(2, result.size());
@@ -81,9 +82,9 @@ class AdminControllerTest {
         @Test
         @DisplayName("Should return admin when found")
         void shouldReturnAdminWhenFound() {
-            when(adminService.getAdminById(1L)).thenReturn(Optional.of(testAdmin));
+            when(adminService.getAdminById(1L)).thenReturn(Optional.of(testAdminDTO));
 
-            ResponseEntity<Admin> response = adminController.getAdminById(1L);
+            ResponseEntity<AdminDTO> response = adminController.getAdminById(1L);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
             assertNotNull(response.getBody());
@@ -95,7 +96,7 @@ class AdminControllerTest {
         void shouldReturn404WhenNotFound() {
             when(adminService.getAdminById(99L)).thenReturn(Optional.empty());
 
-            ResponseEntity<Admin> response = adminController.getAdminById(99L);
+            ResponseEntity<AdminDTO> response = adminController.getAdminById(99L);
 
             assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         }
@@ -111,10 +112,10 @@ class AdminControllerTest {
             Map<String, String> request = Map.of("email", "newadmin@test.com", "password", "password123");
             MultipartFile imageFile = new MockMultipartFile("image", "test.jpg", "image/jpeg", "test".getBytes());
 
-            when(adminService.registerAdminWithPicture(eq("newadmin@test.com"), eq("password123"), any(Admin.class), eq(imageFile)))
-                    .thenReturn(testAdmin);
+            when(adminService.registerAdminWithPicture(eq("newadmin@test.com"), eq("password123"), any(AdminDTO.class), eq(imageFile)))
+                    .thenReturn(testAdminDTO);
 
-            ResponseEntity<?> response = adminController.registerAdminWithPicture(request, new Admin(), imageFile);
+            ResponseEntity<?> response = adminController.registerAdminWithPicture(request, new AdminDTO(), imageFile);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
             assertNotNull(response.getBody());
@@ -126,10 +127,10 @@ class AdminControllerTest {
             Map<String, String> request = Map.of("email", "existing@test.com", "password", "password123");
             MultipartFile imageFile = new MockMultipartFile("image", "test.jpg", "image/jpeg", "test".getBytes());
 
-            when(adminService.registerAdminWithPicture(anyString(), anyString(), any(Admin.class), any(MultipartFile.class)))
+            when(adminService.registerAdminWithPicture(anyString(), anyString(), any(AdminDTO.class), any(MultipartFile.class)))
                     .thenThrow(new RuntimeException("Email already used"));
 
-            ResponseEntity<?> response = adminController.registerAdminWithPicture(request, new Admin(), imageFile);
+            ResponseEntity<?> response = adminController.registerAdminWithPicture(request, new AdminDTO(), imageFile);
 
             assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
             assertTrue(response.getBody().toString().contains("Email already used"));
@@ -144,9 +145,9 @@ class AdminControllerTest {
         @DisplayName("Should update admin successfully")
         void shouldUpdateAdminSuccessfully() {
             MultipartFile imageFile = new MockMultipartFile("image", "test.jpg", "image/jpeg", "test".getBytes());
-            when(adminService.updateAdmin(eq(1L), any(Admin.class), eq(imageFile))).thenReturn(testAdmin);
+            when(adminService.updateAdmin(eq(1L), any(AdminDTO.class), eq(imageFile))).thenReturn(testAdminDTO);
 
-            ResponseEntity<Admin> response = adminController.updateAdmin(1L, new Admin(), imageFile);
+            ResponseEntity<AdminDTO> response = adminController.updateAdmin(1L, new AdminDTO(), imageFile);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
         }
@@ -155,10 +156,10 @@ class AdminControllerTest {
         @DisplayName("Should return 404 when update fails")
         void shouldReturn404WhenUpdateFails() {
             MultipartFile imageFile = new MockMultipartFile("image", "test.jpg", "image/jpeg", "test".getBytes());
-            when(adminService.updateAdmin(anyLong(), any(Admin.class), any(MultipartFile.class)))
+            when(adminService.updateAdmin(anyLong(), any(AdminDTO.class), any(MultipartFile.class)))
                     .thenThrow(new RuntimeException("Admin not found"));
 
-            ResponseEntity<Admin> response = adminController.updateAdmin(99L, new Admin(), imageFile);
+            ResponseEntity<AdminDTO> response = adminController.updateAdmin(99L, new AdminDTO(), imageFile);
 
             assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         }
@@ -314,11 +315,11 @@ class AdminControllerTest {
         @Test
         @DisplayName("Should return all contact messages")
         void shouldReturnAllContactMessages() {
-            Contact contact1 = new Contact();
-            Contact contact2 = new Contact();
+            ContactDTO contact1 = new ContactDTO();
+            ContactDTO contact2 = new ContactDTO();
             when(contactService.getAllMessagesContact()).thenReturn(List.of(contact1, contact2));
 
-            List<Contact> result = adminController.getAllMessagesContact();
+            List<ContactDTO> result = adminController.getAllMessagesContact();
 
             assertNotNull(result);
             assertEquals(2, result.size());

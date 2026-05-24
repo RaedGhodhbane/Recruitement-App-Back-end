@@ -1,6 +1,6 @@
 package com.app.recruitmentapp.controllers;
 
-import com.app.recruitmentapp.entities.Candidate;
+import com.app.recruitmentapp.dto.CandidateDTO;
 import com.app.recruitmentapp.entities.ChangePassword;
 import com.app.recruitmentapp.services.CandidateService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,25 +21,16 @@ public class CandidateController {
     private CandidateService candidateService;
 
     @GetMapping("/candidates")
-    public List<Candidate> getAllCandidates() {
+    public List<CandidateDTO> getAllCandidates() {
         return candidateService.getAllCandidates();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Candidate> getCandidateById(@PathVariable Long id) {
-        Optional<Candidate> candidate = candidateService.getCandidateById(id);
-        return candidate.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<CandidateDTO> getCandidateById(@PathVariable Long id) {
+        return candidateService.getCandidateById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
-
-
-    /*
-    @PostMapping("/addCandidate1")
-    public ResponseEntity<Candidate> addCandidateWithoutPicture(@RequestBody Candidate candidate) {
-        Candidate savedCandidate = candidateService.saveCandidateWithoutPicture(candidate);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedCandidate);
-    }
-
-     */
 
     @PostMapping("/registerCandidate")
     public ResponseEntity<?> registerCandidate(@RequestBody Map<String, String> request) {
@@ -50,28 +41,27 @@ public class CandidateController {
         String phone = request.get("phone");
 
         try {
-            Candidate candidate = candidateService.registerCandidate(email,password, name,firstName,phone);
-            return ResponseEntity.ok(candidate);
+            CandidateDTO saved = candidateService.registerCandidate(email, password, name, firstName, phone);
+            return ResponseEntity.ok(saved);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", e.getMessage()));
         }
     }
 
     @PostMapping("/addCandidate2")
-    public ResponseEntity<Candidate> addCandidateWithPicture(
-            @ModelAttribute Candidate candidate,
+    public ResponseEntity<CandidateDTO> addCandidateWithPicture(
+            @ModelAttribute CandidateDTO candidateDTO,
             @RequestParam("imageFile") MultipartFile imageFile) {
-
-        Candidate savedCandidate = candidateService.saveCandidateWithPicture(candidate, imageFile);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedCandidate);
+        CandidateDTO saved = candidateService.saveCandidateWithPicture(candidateDTO, imageFile);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<Candidate> updateCandidate(@PathVariable Long id, @RequestBody Candidate candidate) {
+    public ResponseEntity<CandidateDTO> updateCandidate(@PathVariable Long id, @RequestBody CandidateDTO candidateDTO) {
         try {
             System.out.println("x");
-            Candidate updatedCandidate = candidateService.updateCandidate(id, candidate);
-            return ResponseEntity.ok(updatedCandidate);
+            CandidateDTO updated = candidateService.updateCandidate(id, candidateDTO);
+            return ResponseEntity.ok(updated);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -130,5 +120,4 @@ public class CandidateController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.singletonMap("erreur",e.getMessage()));
         }
     }
-
 }

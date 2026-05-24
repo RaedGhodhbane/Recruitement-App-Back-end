@@ -1,6 +1,6 @@
 package com.app.recruitmentapp.controllers;
 
-import com.app.recruitmentapp.entities.Message;
+import com.app.recruitmentapp.dto.MessageDTO;
 import com.app.recruitmentapp.services.MessageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -29,13 +29,13 @@ class MessageControllerTest {
     @InjectMocks
     private MessageController messageController;
 
-    private Message testMessage;
+    private MessageDTO testMessageDTO;
 
     @BeforeEach
     void setUp() {
-        testMessage = new Message();
-        testMessage.setId(1L);
-        testMessage.setMessage("Hello");
+        testMessageDTO = new MessageDTO();
+        testMessageDTO.setId(1L);
+        testMessageDTO.setMessage("Hello");
     }
 
     @Nested
@@ -45,9 +45,9 @@ class MessageControllerTest {
         @Test
         @DisplayName("Should return all messages")
         void shouldReturnAllMessages() {
-            when(messageService.getAllMessages()).thenReturn(List.of(testMessage));
+            when(messageService.getAllMessages()).thenReturn(List.of(testMessageDTO));
 
-            List<Message> result = messageController.getAllMessages();
+            List<MessageDTO> result = messageController.getAllMessages();
 
             assertNotNull(result);
             assertEquals(1, result.size());
@@ -61,9 +61,9 @@ class MessageControllerTest {
         @Test
         @DisplayName("Should return message when found")
         void shouldReturnMessageWhenFound() {
-            when(messageService.getMessageById(1L)).thenReturn(Optional.of(testMessage));
+            when(messageService.getMessageById(1L)).thenReturn(Optional.of(testMessageDTO));
 
-            ResponseEntity<Message> response = messageController.getMessageById(1L);
+            ResponseEntity<MessageDTO> response = messageController.getMessageById(1L);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
         }
@@ -73,7 +73,7 @@ class MessageControllerTest {
         void shouldReturn404WhenNotFound() {
             when(messageService.getMessageById(99L)).thenReturn(Optional.empty());
 
-            ResponseEntity<Message> response = messageController.getMessageById(99L);
+            ResponseEntity<MessageDTO> response = messageController.getMessageById(99L);
 
             assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         }
@@ -86,11 +86,11 @@ class MessageControllerTest {
         @Test
         @DisplayName("Should send message successfully")
         void shouldSendMessageSuccessfully() {
-            Message savedMessage = new Message();
-            savedMessage.setId(1L);
-            when(messageService.sendMessage(testMessage, 1L, 2L)).thenReturn(savedMessage);
+            MessageDTO savedDTO = new MessageDTO();
+            savedDTO.setId(1L);
+            when(messageService.sendMessage(testMessageDTO, 1L, 2L)).thenReturn(savedDTO);
 
-            ResponseEntity<Message> response = messageController.sendMessageByUser(testMessage, 1L, 2L);
+            ResponseEntity<MessageDTO> response = messageController.sendMessageByUser(testMessageDTO, 1L, 2L);
 
             assertEquals(HttpStatus.CREATED, response.getStatusCode());
         }

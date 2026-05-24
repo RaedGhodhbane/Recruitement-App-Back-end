@@ -1,7 +1,9 @@
 package com.app.recruitmentapp.services;
 
+import com.app.recruitmentapp.dto.QuestionDTO;
 import com.app.recruitmentapp.entities.Offer;
 import com.app.recruitmentapp.entities.Question;
+import com.app.recruitmentapp.mapper.EntityMapper;
 import com.app.recruitmentapp.repositories.OfferRepository;
 import com.app.recruitmentapp.repositories.QuestionRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,12 +29,16 @@ class QuestionServiceImplTest {
     private QuestionRepository questionRepository;
     @Mock
     private OfferRepository offerRepository;
+    @Mock
+    private EntityMapper entityMapper;
     @InjectMocks
     private QuestionServiceImpl questionService;
 
     private Offer offer;
     private Question question1;
     private Question question2;
+    private QuestionDTO question1DTO;
+    private QuestionDTO question2DTO;
 
     @BeforeEach
     void setUp() {
@@ -42,7 +48,7 @@ class QuestionServiceImplTest {
 
         question1 = new Question();
         question1.setId(1L);
-        question1.setTitle("Quel est votre langage préféré ?");
+        question1.setTitle("Quel est votre langage prefere ?");
         question1.setChoice1("Java");
         question1.setChoice2("Python");
         question1.setChoice3("JavaScript");
@@ -51,12 +57,30 @@ class QuestionServiceImplTest {
 
         question2 = new Question();
         question2.setId(2L);
-        question2.setTitle("Années d'expérience ?");
+        question2.setTitle("Annees d'experience ?");
         question2.setChoice1("1-2");
         question2.setChoice2("3-5");
         question2.setChoice3("5+");
         question2.setResponse("3-5");
         question2.setOffer(offer);
+
+        question1DTO = new QuestionDTO();
+        question1DTO.setId(1L);
+        question1DTO.setTitle("Quel est votre langage prefere ?");
+        question1DTO.setChoice1("Java");
+        question1DTO.setChoice2("Python");
+        question1DTO.setChoice3("JavaScript");
+        question1DTO.setResponse("Java");
+        question1DTO.setOfferId(1L);
+
+        question2DTO = new QuestionDTO();
+        question2DTO.setId(2L);
+        question2DTO.setTitle("Annees d'experience ?");
+        question2DTO.setChoice1("1-2");
+        question2DTO.setChoice2("3-5");
+        question2DTO.setChoice3("5+");
+        question2DTO.setResponse("3-5");
+        question2DTO.setOfferId(1L);
     }
 
     @Nested
@@ -68,14 +92,16 @@ class QuestionServiceImplTest {
         void shouldGetAllQuestionsSuccessfully() {
             List<Question> mockQuestions = List.of(question1, question2);
             when(questionRepository.findAll()).thenReturn(mockQuestions);
+            when(entityMapper.toQuestionDTOList(mockQuestions)).thenReturn(List.of(question1DTO, question2DTO));
 
-            List<Question> result = questionService.getAllQuestions();
+            List<QuestionDTO> result = questionService.getAllQuestions();
 
             assertNotNull(result);
             assertEquals(2, result.size());
-            assertEquals("Quel est votre langage préféré ?", result.get(0).getTitle());
-            assertEquals("Années d'expérience ?", result.get(1).getTitle());
+            assertEquals("Quel est votre langage prefere ?", result.get(0).getTitle());
+            assertEquals("Annees d'experience ?", result.get(1).getTitle());
             verify(questionRepository).findAll();
+            verify(entityMapper).toQuestionDTOList(mockQuestions);
         }
     }
 
@@ -87,8 +113,9 @@ class QuestionServiceImplTest {
         @DisplayName("Should return question when found")
         void shouldReturnQuestionWhenFound() {
             when(questionRepository.findById(1L)).thenReturn(Optional.of(question1));
+            when(entityMapper.toQuestionDTO(question1)).thenReturn(question1DTO);
 
-            Optional<Question> result = questionService.getQuestionById(1L);
+            Optional<QuestionDTO> result = questionService.getQuestionById(1L);
 
             assertTrue(result.isPresent());
             assertEquals(1L, result.get().getId());
@@ -101,7 +128,7 @@ class QuestionServiceImplTest {
         void shouldReturnEmptyWhenNotFound() {
             when(questionRepository.findById(99L)).thenReturn(Optional.empty());
 
-            Optional<Question> result = questionService.getQuestionById(99L);
+            Optional<QuestionDTO> result = questionService.getQuestionById(99L);
 
             assertFalse(result.isPresent());
             verify(questionRepository).findById(99L);
@@ -115,50 +142,83 @@ class QuestionServiceImplTest {
         @Test
         @DisplayName("Should save question successfully")
         void shouldSaveQuestionSuccessfully() {
-            Question newQuestion = new Question();
-            newQuestion.setTitle("Base de données préférée ?");
-            newQuestion.setChoice1("MySQL");
-            newQuestion.setChoice2("PostgreSQL");
-            newQuestion.setChoice3("MongoDB");
-            newQuestion.setResponse("PostgreSQL");
+            QuestionDTO newQuestionDTO = new QuestionDTO();
+            newQuestionDTO.setTitle("Base de donnees preferee ?");
+            newQuestionDTO.setChoice1("MySQL");
+            newQuestionDTO.setChoice2("PostgreSQL");
+            newQuestionDTO.setChoice3("MongoDB");
+            newQuestionDTO.setResponse("PostgreSQL");
 
+            Question newQuestionEntity = new Question();
+            newQuestionEntity.setTitle("Base de donnees preferee ?");
+            newQuestionEntity.setChoice1("MySQL");
+            newQuestionEntity.setChoice2("PostgreSQL");
+            newQuestionEntity.setChoice3("MongoDB");
+            newQuestionEntity.setResponse("PostgreSQL");
+
+            QuestionDTO resultDTO = new QuestionDTO();
+            resultDTO.setId(3L);
+            resultDTO.setTitle("Base de donnees preferee ?");
+            resultDTO.setChoice1("MySQL");
+            resultDTO.setChoice2("PostgreSQL");
+            resultDTO.setChoice3("MongoDB");
+            resultDTO.setResponse("PostgreSQL");
+            resultDTO.setOfferId(1L);
+
+            when(entityMapper.toQuestionEntity(newQuestionDTO)).thenReturn(newQuestionEntity);
             when(offerRepository.findById(1L)).thenReturn(Optional.of(offer));
             when(questionRepository.save(any(Question.class))).thenAnswer(invocation -> {
                 Question saved = invocation.getArgument(0);
                 saved.setId(3L);
                 return saved;
             });
+            when(entityMapper.toQuestionDTO(any(Question.class))).thenReturn(resultDTO);
 
-            Question result = questionService.saveQuestion(newQuestion, 1L);
+            QuestionDTO result = questionService.saveQuestion(newQuestionDTO, 1L);
 
             assertNotNull(result);
-            assertEquals("Base de données préférée ?", result.getTitle());
+            assertEquals("Base de donnees preferee ?", result.getTitle());
             assertEquals("PostgreSQL", result.getResponse());
-            assertEquals(offer, result.getOffer());
+            assertEquals(1L, result.getOfferId());
+            verify(entityMapper).toQuestionEntity(newQuestionDTO);
             verify(offerRepository).findById(1L);
             verify(questionRepository).save(any(Question.class));
+            verify(entityMapper).toQuestionDTO(any(Question.class));
         }
 
         @Test
         @DisplayName("Should save question with null offer when offer not found")
         void shouldSaveQuestionWithNullOfferWhenNotFound() {
-            Question newQuestion = new Question();
-            newQuestion.setTitle("Base de données préférée ?");
-            newQuestion.setResponse("PostgreSQL");
+            QuestionDTO newQuestionDTO = new QuestionDTO();
+            newQuestionDTO.setTitle("Base de donnees preferee ?");
+            newQuestionDTO.setResponse("PostgreSQL");
 
+            Question newQuestionEntity = new Question();
+            newQuestionEntity.setTitle("Base de donnees preferee ?");
+            newQuestionEntity.setResponse("PostgreSQL");
+
+            QuestionDTO resultDTO = new QuestionDTO();
+            resultDTO.setId(3L);
+            resultDTO.setTitle("Base de donnees preferee ?");
+            resultDTO.setResponse("PostgreSQL");
+
+            when(entityMapper.toQuestionEntity(newQuestionDTO)).thenReturn(newQuestionEntity);
             when(offerRepository.findById(99L)).thenReturn(Optional.empty());
             when(questionRepository.save(any(Question.class))).thenAnswer(invocation -> {
                 Question saved = invocation.getArgument(0);
                 saved.setId(3L);
                 return saved;
             });
+            when(entityMapper.toQuestionDTO(any(Question.class))).thenReturn(resultDTO);
 
-            Question result = questionService.saveQuestion(newQuestion, 99L);
+            QuestionDTO result = questionService.saveQuestion(newQuestionDTO, 99L);
 
             assertNotNull(result);
-            assertNull(result.getOffer());
+            assertNull(result.getOfferId());
+            verify(entityMapper).toQuestionEntity(newQuestionDTO);
             verify(offerRepository).findById(99L);
             verify(questionRepository).save(any(Question.class));
+            verify(entityMapper).toQuestionDTO(any(Question.class));
         }
     }
 
@@ -169,35 +229,45 @@ class QuestionServiceImplTest {
         @Test
         @DisplayName("Should update question when found")
         void shouldUpdateQuestionWhenFound() {
-            Question updatedData = new Question();
-            updatedData.setTitle("Framework préféré ?");
+            QuestionDTO updatedData = new QuestionDTO();
+            updatedData.setTitle("Framework prefere ?");
             updatedData.setChoice1("Spring");
             updatedData.setChoice2("Django");
             updatedData.setChoice3("Express");
             updatedData.setResponse("Spring");
-            updatedData.setOffer(offer);
+
+            QuestionDTO resultDTO = new QuestionDTO();
+            resultDTO.setId(1L);
+            resultDTO.setTitle("Framework prefere ?");
+            resultDTO.setChoice1("Spring");
+            resultDTO.setChoice2("Django");
+            resultDTO.setChoice3("Express");
+            resultDTO.setResponse("Spring");
+            resultDTO.setOfferId(1L);
 
             when(questionRepository.findById(1L)).thenReturn(Optional.of(question1));
             when(questionRepository.saveAndFlush(question1)).thenReturn(question1);
+            when(entityMapper.toQuestionDTO(question1)).thenReturn(resultDTO);
 
-            Question result = questionService.updateQuestion(1L, updatedData);
+            QuestionDTO result = questionService.updateQuestion(1L, updatedData);
 
             assertNotNull(result);
-            assertEquals("Framework préféré ?", result.getTitle());
+            assertEquals("Framework prefere ?", result.getTitle());
             assertEquals("Spring", result.getChoice1());
             assertEquals("Django", result.getChoice2());
             assertEquals("Express", result.getChoice3());
             assertEquals("Spring", result.getResponse());
-            assertEquals(offer, result.getOffer());
+            assertEquals(1L, result.getOfferId());
             verify(questionRepository).findById(1L);
             verify(questionRepository).saveAndFlush(question1);
+            verify(entityMapper).toQuestionDTO(question1);
         }
 
         @Test
         @DisplayName("Should throw RuntimeException when question not found")
         void shouldThrowWhenQuestionNotFound() {
-            Question updatedData = new Question();
-            updatedData.setTitle("Framework préféré ?");
+            QuestionDTO updatedData = new QuestionDTO();
+            updatedData.setTitle("Framework prefere ?");
 
             when(questionRepository.findById(99L)).thenReturn(Optional.empty());
 

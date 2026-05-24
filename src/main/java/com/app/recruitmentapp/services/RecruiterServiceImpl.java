@@ -1,9 +1,10 @@
 package com.app.recruitmentapp.services;
 
-import com.app.recruitmentapp.entities.Candidate;
+import com.app.recruitmentapp.dto.RecruiterDTO;
 import com.app.recruitmentapp.entities.Recruiter;
 import com.app.recruitmentapp.entities.Role;
 import com.app.recruitmentapp.exceptions.EmailAlreadyUsedException;
+import com.app.recruitmentapp.mapper.EntityMapper;
 import com.app.recruitmentapp.repositories.RecruiterRepository;
 import com.app.recruitmentapp.repositories.UserRepository;
 import org.apache.commons.io.FilenameUtils;
@@ -38,29 +39,24 @@ public class RecruiterServiceImpl implements RecruiterService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private EntityMapper entityMapper;
+
     @Value("${file.upload-dir}")
     private String uploadDir;
 
     @Override
-    public List<Recruiter> getAllRecruiters() {
-        return recruiterRepository.findAll();
+    public List<RecruiterDTO> getAllRecruiters() {
+        return entityMapper.toRecruiterDTOList(recruiterRepository.findAll());
     }
 
     @Override
-    public Optional<Recruiter> getRecruiterById(Long id) {
-        return recruiterRepository.findById(id);
+    public Optional<RecruiterDTO> getRecruiterById(Long id) {
+        return recruiterRepository.findById(id).map(entityMapper::toRecruiterDTO);
     }
-
-    /*@Override
-    public Recruiter addRecruiterWithoutPicture(Recruiter recruiter) {
-        recruiter.setActive(false);
-        recruiter.setRole(Role.RECRUITER);
-        return recruiterRepository.save(recruiter);
-    }
-     */
 
     @Override
-    public Recruiter registerRecruiter(String email, String rawPassword
+    public RecruiterDTO registerRecruiter(String email, String rawPassword
             , String name, String firstName, String phone) {
 
         if (userRepository.findByEmail(email).isPresent()) {
@@ -76,11 +72,12 @@ public class RecruiterServiceImpl implements RecruiterService {
         recruiter.setFirstName(firstName);
         recruiter.setPhone(phone);
 
-        return recruiterRepository.save(recruiter);
+        return entityMapper.toRecruiterDTO(recruiterRepository.save(recruiter));
     }
 
     @Override
-    public Recruiter addRecruiterWithPicture(Recruiter recruiter, MultipartFile imageFile) {
+    public RecruiterDTO addRecruiterWithPicture(RecruiterDTO recruiterDTO, MultipartFile imageFile) {
+        Recruiter recruiter = entityMapper.toRecruiterEntity(recruiterDTO);
         recruiter.setActive(false);
         recruiter.setRole(Role.RECRUITER);
         if (imageFile != null && !imageFile.isEmpty()) {
@@ -96,57 +93,55 @@ public class RecruiterServiceImpl implements RecruiterService {
                 e.printStackTrace();
             }
         }
-        return recruiterRepository.save(recruiter);
+        return entityMapper.toRecruiterDTO(recruiterRepository.save(recruiter));
     }
 
 
     @Override
-    public Recruiter updateRecruiter(Long id, Recruiter newRecruiter) {
+    public RecruiterDTO updateRecruiter(Long id, RecruiterDTO recruiterDTO) {
          Recruiter r = recruiterRepository.findById(id)
                  .orElseThrow(() -> new RuntimeException("Recruteur non trouvé"));
-        if (newRecruiter.getName() != null) {
-            r.setName(newRecruiter.getName());
+        if (recruiterDTO.getName() != null) {
+            r.setName(recruiterDTO.getName());
         }
 
-        if (newRecruiter.getFirstName() != null) {
-            r.setFirstName(newRecruiter.getFirstName());
+        if (recruiterDTO.getFirstName() != null) {
+            r.setFirstName(recruiterDTO.getFirstName());
         }
 
-
-
-        if (newRecruiter.getAddress() != null) {
-            r.setAddress(newRecruiter.getAddress());
+        if (recruiterDTO.getAddress() != null) {
+            r.setAddress(recruiterDTO.getAddress());
         }
 
-        if (newRecruiter.getEmail() != null) {
-            r.setEmail(newRecruiter.getEmail());
+        if (recruiterDTO.getEmail() != null) {
+            r.setEmail(recruiterDTO.getEmail());
         }
 
-        if (newRecruiter.getRole() != null) {
-            r.setRole(newRecruiter.getRole());
+        if (recruiterDTO.getRole() != null) {
+            r.setRole(Role.valueOf(recruiterDTO.getRole()));
         }
 
-        if (newRecruiter.getCreationDate() != null) {
-            r.setCreationDate(newRecruiter.getCreationDate());
+        if (recruiterDTO.getCreationDate() != null) {
+            r.setCreationDate(recruiterDTO.getCreationDate());
         }
 
-        if (newRecruiter.getCompanyName() != null) {
-            r.setCompanyName(newRecruiter.getCompanyName());
+        if (recruiterDTO.getCompanyName() != null) {
+            r.setCompanyName(recruiterDTO.getCompanyName());
         }
 
-        if (newRecruiter.getPhone() != null) {
-            r.setPhone(newRecruiter.getPhone());
+        if (recruiterDTO.getPhone() != null) {
+            r.setPhone(recruiterDTO.getPhone());
         }
 
-        if (newRecruiter.getWebsite() != null) {
-            r.setWebsite(newRecruiter.getWebsite());
+        if (recruiterDTO.getWebsite() != null) {
+            r.setWebsite(recruiterDTO.getWebsite());
         }
 
-        if (newRecruiter.getDescription() != null) {
-            r.setDescription(newRecruiter.getDescription());
+        if (recruiterDTO.getDescription() != null) {
+            r.setDescription(recruiterDTO.getDescription());
         }
          recruiterRepository.saveAndFlush(r);
-         return r;
+         return entityMapper.toRecruiterDTO(r);
     }
     @Override
     public void deleteRecruiter(Long id) {
@@ -159,22 +154,18 @@ public class RecruiterServiceImpl implements RecruiterService {
 
     @Override
     public ResponseEntity<Resource> getFile(String filename) {
-        // Il construit le chemin complet du fichier en combinant le dossier d’upload //(`uploadDir`) et le nom du fichier reçu.
         Path file = Paths.get(uploadDir).resolve(filename);
         Resource resource;
         try {
-//Il convertit le fichier en un objet `Resource` pour pouvoir être renvoyé dans la réponse HTTP
             resource = new UrlResource(file.toUri());
         } catch (MalformedURLException e) {
             return ResponseEntity.notFound().build();
         }
         if (resource.exists() || resource.isReadable()) {
-//HttpHeaders.CONTENT_DISPOSITION permet d'envoyer le fichier avec une suggestion de téléchargement.
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() +"\"").body(resource);
         } else {
             return ResponseEntity.notFound().build();
         }
     }
-
 }

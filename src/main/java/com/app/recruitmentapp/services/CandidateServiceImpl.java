@@ -1,9 +1,11 @@
 package com.app.recruitmentapp.services;
 
+import com.app.recruitmentapp.dto.CandidateDTO;
 import com.app.recruitmentapp.entities.Candidate;
 import com.app.recruitmentapp.entities.ChangePassword;
 import com.app.recruitmentapp.entities.Role;
 import com.app.recruitmentapp.exceptions.EmailAlreadyUsedException;
+import com.app.recruitmentapp.mapper.EntityMapper;
 import com.app.recruitmentapp.repositories.CandidateRepository;
 import com.app.recruitmentapp.repositories.UserRepository;
 import com.app.recruitmentapp.security.JwtUtil;
@@ -13,9 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-//import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,6 +36,8 @@ public class CandidateServiceImpl implements CandidateService {
     private CandidateRepository candidateRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private EntityMapper entityMapper;
 
     @Value("${file.upload-dir}")
     private String uploadDir;
@@ -48,17 +50,18 @@ public class CandidateServiceImpl implements CandidateService {
     private JwtUtil jwtUtil;
 
     @Override
-    public List<Candidate> getAllCandidates() {
-        return candidateRepository.findAll();
+    public List<CandidateDTO> getAllCandidates() {
+        return entityMapper.toCandidateDTOList(candidateRepository.findAll());
     }
 
     @Override
-    public Optional<Candidate> getCandidateById(Long id) {
-        return candidateRepository.findById(id);
+    public Optional<CandidateDTO> getCandidateById(Long id) {
+        return candidateRepository.findById(id).map(entityMapper::toCandidateDTO);
     }
 
     @Override
-    public Candidate saveCandidateWithPicture(Candidate candidate, MultipartFile imageFile) {
+    public CandidateDTO saveCandidateWithPicture(CandidateDTO candidateDTO, MultipartFile imageFile) {
+        Candidate candidate = entityMapper.toCandidateEntity(candidateDTO);
         candidate.setActive(false);
         candidate.setRole(Role.CANDIDATE);
         if (imageFile != null && !imageFile.isEmpty()) {
@@ -76,11 +79,11 @@ public class CandidateServiceImpl implements CandidateService {
                 e.printStackTrace();
             }
         }
-        return candidateRepository.save(candidate);
+        return entityMapper.toCandidateDTO(candidateRepository.save(candidate));
     }
 
     @Override
-    public Candidate registerCandidate(String email, String rawPassword
+    public CandidateDTO registerCandidate(String email, String rawPassword
             , String name, String firstName, String phone) {
 
         if (userRepository.findByEmail(email).isPresent()) {
@@ -96,44 +99,30 @@ public class CandidateServiceImpl implements CandidateService {
         candidate.setFirstName(firstName);
         candidate.setPhone(phone);
 
-        return candidateRepository.save(candidate);
+        return entityMapper.toCandidateDTO(candidateRepository.save(candidate));
     }
-   /*
-   @Override
-    public Candidate saveCandidateWithoutPicture(Candidate candidate) {
-        candidate.setActive(false);
-        candidate.setRole(Role.CANDIDATE);
-        String hashedPassword = passwordEncoder.encode(candidate.getPassword());
-        candidate.setPassword(hashedPassword);
-        return candidateRepository.save(candidate);
-    }
-
-    */
 
     @Override
-    public Candidate updateCandidate(Long id, Candidate newCandidate) {
+    public CandidateDTO updateCandidate(Long id, CandidateDTO candidateDTO) {
         Candidate c = candidateRepository.findById(id).orElse(null);
 
-        c.setName(newCandidate.getName());
-        c.setFirstName(newCandidate.getFirstName());
-        c.setEmail(newCandidate.getEmail());
-      // c.setPassword(newCandidate.getPassword());
-        if (newCandidate.getRole() != null) {
-            c.setRole(newCandidate.getRole());
+        c.setName(candidateDTO.getName());
+        c.setFirstName(candidateDTO.getFirstName());
+        c.setEmail(candidateDTO.getEmail());
+        if (candidateDTO.getRole() != null) {
+            c.setRole(Role.valueOf(candidateDTO.getRole()));
         }
-        c.setCv(newCandidate.getCv());
-        c.setDescription(newCandidate.getDescription());
-        c.setAddress(newCandidate.getAddress());
-        c.setTitle(newCandidate.getTitle());
-        c.setCandidacyList(newCandidate.getCandidacyList());
-        c.setExperienceList(newCandidate.getExperienceList());
-        c.setActive(newCandidate.getActive());
-        c.setPhone(newCandidate.getPhone());
-        c.setDateOfBirth(newCandidate.getDateOfBirth());
-        c.setGender(newCandidate.getGender());
+        c.setCv(candidateDTO.getCv());
+        c.setDescription(candidateDTO.getDescription());
+        c.setAddress(candidateDTO.getAddress());
+        c.setTitle(candidateDTO.getTitle());
+        c.setActive(candidateDTO.isActive());
+        c.setPhone(candidateDTO.getPhone());
+        c.setDateOfBirth(candidateDTO.getDateOfBirth());
+        c.setGender(candidateDTO.getGender());
         candidateRepository.saveAndFlush(c);
 
-        return c;
+        return entityMapper.toCandidateDTO(c);
     }
 
     @Override
@@ -151,14 +140,11 @@ public class CandidateServiceImpl implements CandidateService {
         Candidate candidate = candidateRepository.findById(candidateId)
                 .orElseThrow(() -> new RuntimeException("Candidate not found"));
 
-        // Construire un nom de fichier unique par exemple
         String filename = "cv_" + candidateId + ".pdf";
 
-        // Sauvegarder le fichier sur disque
         File dest = new File(CV_FOLDER + filename);
         cvFile.transferTo(dest);
 
-        // Enregistrer le chemin dans l'entité
         candidate.setCvPath(dest.getAbsolutePath());
         candidateRepository.save(candidate);
     }
@@ -175,18 +161,6 @@ public class CandidateServiceImpl implements CandidateService {
         Path path = Paths.get(candidate.getCvPath());
         return Files.readAllBytes(path);
     }
-
-   /*@Override
-    public Candidate login(String email, String rawPassword) {
-        Candidate candidate = candidateRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
-        if (!passwordEncoder.matches(rawPassword, candidate.getPassword())) {
-            throw new RuntimeException("Mot de passe incorrect");
-        }
-        return candidate;
-    }
-
-    */
 
     @Override
     public ResponseEntity<Resource> getFile(String filename) {

@@ -1,18 +1,18 @@
 package com.app.recruitmentapp.services;
 
-import com.app.recruitmentapp.entities.Skill;
+import com.app.recruitmentapp.dto.SkillDTO;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface SkillService {
-    List<Skill> getAllSkills();
+    List<SkillDTO> getAllSkills();
 
-    Optional<Skill> getSkillById(Long id);
+    Optional<SkillDTO> getSkillById(Long id);
 
-    Skill saveSkill(Skill skill, Long idCandidate);
+    SkillDTO saveSkill(SkillDTO skillDTO, Long idCandidate);
 
-    Skill updateSkill(Long id, Skill skill);
+    SkillDTO updateSkill(Long id, SkillDTO skillDTO);
 
     void deleteSkill(Long id);
 }

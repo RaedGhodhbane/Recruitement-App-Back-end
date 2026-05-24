@@ -1,30 +1,25 @@
 package com.app.recruitmentapp.services;
 
-import com.app.recruitmentapp.entities.Candidate;
+import com.app.recruitmentapp.dto.CandidateDTO;
 import com.app.recruitmentapp.entities.ChangePassword;
-import org.apache.coyote.Response;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public interface CandidateService {
-    List<Candidate> getAllCandidates();
+    List<CandidateDTO> getAllCandidates();
 
-    Optional<Candidate> getCandidateById(Long id);
+    Optional<CandidateDTO> getCandidateById(Long id);
 
-    //Candidate saveCandidateWithoutPicture(Candidate candidate);
+    CandidateDTO registerCandidate(String email, String rawPassword, String name, String firstName, String phone);
 
-    Candidate registerCandidate(String email, String rawPassword, String name, String firstName, String phone);
+    CandidateDTO saveCandidateWithPicture(CandidateDTO candidateDTO, MultipartFile imageFile);
 
-
-    Candidate saveCandidateWithPicture(Candidate candidate, MultipartFile imageFile);
-
-    Candidate updateCandidate(Long id, Candidate candidate);
+    CandidateDTO updateCandidate(Long id, CandidateDTO candidateDTO);
 
     void deleteCandidate(Long id);
 
@@ -35,8 +30,4 @@ public interface CandidateService {
     ResponseEntity<Resource> getFile(String filename);
 
     String changePassword(Long id, ChangePassword changePasswordRequest);
-
-
-
-
 }

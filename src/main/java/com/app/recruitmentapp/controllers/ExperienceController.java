@@ -1,6 +1,6 @@
 package com.app.recruitmentapp.controllers;
 
-import com.app.recruitmentapp.entities.Experience;
+import com.app.recruitmentapp.dto.ExperienceDTO;
 import com.app.recruitmentapp.services.ExperienceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/experience")
@@ -19,27 +18,28 @@ public class ExperienceController {
     private ExperienceService experienceService;
 
     @GetMapping("/experiences")
-    public List<Experience> getAllExperiences() {
+    public List<ExperienceDTO> getAllExperiences() {
         return experienceService.getAllExperiences();
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<Experience> getExperienceById(@PathVariable Long id) {
-        Optional<Experience> experience = experienceService.getExperienceById(id);
-        return experience.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<ExperienceDTO> getExperienceById(@PathVariable Long id) {
+        return experienceService.getExperienceById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping("/{idCandidate}")
-    public ResponseEntity<Experience> addExperience(@RequestBody Experience experience, @PathVariable Long idCandidate) {
-        Experience savedExperience = experienceService.saveExperience(experience,idCandidate);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedExperience);
+    public ResponseEntity<ExperienceDTO> addExperience(@RequestBody ExperienceDTO experienceDTO, @PathVariable Long idCandidate) {
+        ExperienceDTO saved = experienceService.saveExperience(experienceDTO, idCandidate);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Experience> updateExperience(@PathVariable Long id, @RequestBody Experience experience) {
+    public ResponseEntity<ExperienceDTO> updateExperience(@PathVariable Long id, @RequestBody ExperienceDTO experienceDTO) {
         try {
-            Experience updatedExperience = experienceService.updateExperience(id, experience);
-            return ResponseEntity.ok(updatedExperience);
+            ExperienceDTO updated = experienceService.updateExperience(id, experienceDTO);
+            return ResponseEntity.ok(updated);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -54,5 +54,4 @@ public class ExperienceController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
-
 }
