@@ -15,7 +15,7 @@ import java.util.List;
 @Table(name = "candidacy")
 public class Candidacy {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(name = "submission_date")
     private Date submissionDate;

@@ -16,7 +16,7 @@ import java.sql.Date;
 @Builder
 public class Experience {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String companyName;
     private String jobTitle;
