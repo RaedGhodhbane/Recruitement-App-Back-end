@@ -46,6 +46,7 @@ public class OfferController {
     }
 
     @Operation(summary = "Modifier une offre", description = "Met à jour une offre existante")
+    @PreAuthorize("hasRole('RECRUITER')")
     @PutMapping("/{id}")
     public ResponseEntity<OfferDTO> updateOffer(@PathVariable Long id, @RequestBody OfferDTO offerDTO) {
         try {
@@ -57,6 +58,7 @@ public class OfferController {
     }
 
     @Operation(summary = "Supprimer une offre", description = "Supprime une offre par son ID")
+    @PreAuthorize("hasRole('RECRUITER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteOffer(@PathVariable Long id) {
         try {

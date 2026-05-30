@@ -11,6 +11,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.*;
@@ -55,6 +56,7 @@ public class CandidateController {
     }
 
     @Operation(summary = "Ajouter candidat avec photo", description = "Ajoute un candidat avec une image de profil")
+    @PreAuthorize("hasRole('CANDIDATE')")
     @PostMapping("/addCandidate2")
     public ResponseEntity<CandidateDTO> addCandidateWithPicture(
             @ModelAttribute CandidateDTO candidateDTO,
@@ -64,6 +66,7 @@ public class CandidateController {
     }
 
     @Operation(summary = "Modifier un candidat", description = "Met à jour un candidat existant")
+    @PreAuthorize("hasRole('CANDIDATE')")
     @PutMapping("/update/{id}")
     public ResponseEntity<CandidateDTO> updateCandidate(@PathVariable Long id, @RequestBody CandidateDTO candidateDTO) {
         try {
@@ -76,6 +79,7 @@ public class CandidateController {
     }
 
     @Operation(summary = "Supprimer un candidat", description = "Supprime un candidat par son ID")
+    @PreAuthorize("hasRole('CANDIDATE')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteCandidate(@PathVariable Long id) {
         try {
@@ -87,6 +91,7 @@ public class CandidateController {
     }
 
     @Operation(summary = "Upload CV", description = "Télécharge un fichier CV pour un candidat")
+    @PreAuthorize("hasRole('CANDIDATE')")
     @PostMapping("/{id}/cv")
     public ResponseEntity<String> createCV(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
         try {
@@ -120,6 +125,7 @@ public class CandidateController {
     }
 
     @Operation(summary = "Changer mot de passe", description = "Change le mot de passe d'un candidat")
+    @PreAuthorize("hasRole('CANDIDATE')")
     @PutMapping("/{id}/change-password")
     public ResponseEntity<Map<String,String>> changePassword(
             @PathVariable Long id,

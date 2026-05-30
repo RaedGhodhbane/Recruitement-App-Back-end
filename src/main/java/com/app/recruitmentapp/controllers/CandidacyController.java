@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,12 +20,14 @@ public class CandidacyController {
     private CandidacyService candidacyService;
 
     @Operation(summary = "Liste des candidatures", description = "Retourne toutes les candidatures")
+    @PreAuthorize("hasRole('RECRUITER')")
     @GetMapping("/candidacies")
     public List<CandidacyDTO> getAllCandidacies() {
         return candidacyService.getAllCandidacies();
     }
 
     @Operation(summary = "Détail d'une candidature", description = "Retourne une candidature par son ID")
+    @PreAuthorize("hasAnyRole('CANDIDATE', 'RECRUITER')")
     @GetMapping("/{id}")
     public ResponseEntity<CandidacyDTO> getCandidacyById(@PathVariable Long id) {
         return candidacyService.getCandidacyById(id)
@@ -33,6 +36,7 @@ public class CandidacyController {
     }
 
     @Operation(summary = "Postuler", description = "Soumet une nouvelle candidature")
+    @PreAuthorize("hasRole('CANDIDATE')")
     @PostMapping()
     public ResponseEntity<CandidacyDTO> addCandidacy(@RequestBody CandidacyDTO candidacyDTO) {
         CandidacyDTO saved = candidacyService.saveCandidacy(candidacyDTO);
@@ -40,6 +44,7 @@ public class CandidacyController {
     }
 
     @Operation(summary = "Modifier une candidature", description = "Met à jour une candidature existante")
+    @PreAuthorize("hasRole('CANDIDATE')")
     @PutMapping("/{id}")
     public ResponseEntity<CandidacyDTO> updateCandidacy(@PathVariable Long id, @RequestBody CandidacyDTO candidacyDTO) {
         try {
@@ -51,6 +56,7 @@ public class CandidacyController {
     }
 
     @Operation(summary = "Supprimer une candidature", description = "Supprime une candidature par son ID")
+    @PreAuthorize("hasRole('CANDIDATE')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteCandidacy(@PathVariable Long id) {
         try {
@@ -62,6 +68,7 @@ public class CandidacyController {
     }
 
     @Operation(summary = "Accepter candidature", description = "Accepte une candidature")
+    @PreAuthorize("hasRole('RECRUITER')")
     @PutMapping("/{id}/accept")
     public ResponseEntity<Void> acceptApplication(@PathVariable Long id) {
         candidacyService.acceptApplication(id);
@@ -69,6 +76,7 @@ public class CandidacyController {
     }
 
     @Operation(summary = "Refuser candidature", description = "Refuse une candidature")
+    @PreAuthorize("hasRole('RECRUITER')")
     @PutMapping("/{id}/decline")
     public ResponseEntity<Void> declineApplication(@PathVariable Long id) {
         candidacyService.declineApplication(id);
@@ -76,6 +84,7 @@ public class CandidacyController {
     }
 
     @Operation(summary = "Vérifier candidature", description = "Vérifie si une candidature existe déjà")
+    @PreAuthorize("hasRole('CANDIDATE')")
     @GetMapping("/candidacies/exists")
     public boolean existsCandidacy(@RequestParam Long offerId, @RequestParam Long candidateId) {
         return candidacyService.candidacyExists(offerId, candidateId);

@@ -7,12 +7,14 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Contact", description = "Formulaire de contact")
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping("/contact")
+@PreAuthorize("isAuthenticated()")
 public class ContactController {
     @Autowired
     private ContactService contactService;

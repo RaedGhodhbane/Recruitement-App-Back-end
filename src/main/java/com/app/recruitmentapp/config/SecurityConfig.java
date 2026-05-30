@@ -2,12 +2,13 @@ package com.app.recruitmentapp.config;
 
 import com.app.recruitmentapp.security.JwtAuthenticationFilter;
 import com.app.recruitmentapp.security.JwtLogoutHandler;
-import jakarta.servlet.http.HttpServletResponse;
+import com.app.recruitmentapp.security.JwtAuthenticationFilter;
+import com.app.recruitmentapp.security.JwtLogoutHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -45,12 +46,12 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/candidate/registerCandidate").permitAll()
-                        .requestMatchers("/candidate/**").permitAll()
-                        .requestMatchers("/recruiter/**").permitAll()
-                        .requestMatchers("/offer/**").permitAll()
-                        .requestMatchers("/admin/**").permitAll()
+                        .requestMatchers("/recruiter/registerRecruiter").permitAll()
+                        .requestMatchers("/admin/registerAdmin").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
-
+                        .requestMatchers(HttpMethod.GET, "/offer/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/candidate/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/recruiter/**").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .cors(Customizer.withDefaults())

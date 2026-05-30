@@ -39,7 +39,7 @@ class CandidacyIntegrationTest extends AbstractIntegrationTest {
         ResponseEntity<List> response = restTemplate.exchange(
                 "/candidacy/candidacies",
                 HttpMethod.GET,
-                authHeader(candidateToken),
+                authHeader(recruiterToken),
                 List.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);

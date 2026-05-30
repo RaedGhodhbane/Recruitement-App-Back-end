@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,6 +34,7 @@ public class QuestionController {
     }
 
     @Operation(summary = "Ajouter une question", description = "Ajoute une question à une offre")
+    @PreAuthorize("hasRole('RECRUITER')")
     @PostMapping("/{idOffer}")
     public ResponseEntity<QuestionDTO> addQuestion(@RequestBody QuestionDTO questionDTO, @PathVariable Long idOffer) {
         QuestionDTO saved = questionService.saveQuestion(questionDTO, idOffer);
@@ -40,6 +42,7 @@ public class QuestionController {
     }
 
     @Operation(summary = "Modifier une question", description = "Met à jour une question existante")
+    @PreAuthorize("hasRole('RECRUITER')")
     @PutMapping("/{id}")
     public ResponseEntity<QuestionDTO> updateQuestion(@PathVariable Long id, @RequestBody QuestionDTO questionDTO) {
         try {
@@ -51,6 +54,7 @@ public class QuestionController {
     }
 
     @Operation(summary = "Supprimer une question", description = "Supprime une question par son ID")
+    @PreAuthorize("hasRole('RECRUITER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteQuestion(@PathVariable Long id) {
         try {

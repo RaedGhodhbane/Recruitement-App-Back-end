@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -54,6 +55,7 @@ public class RecruiterController {
     }
 
     @Operation(summary = "Ajouter recruteur avec photo", description = "Ajoute un recruteur avec une image de profil")
+    @PreAuthorize("hasRole('RECRUITER')")
     @PostMapping("/addRecruiter2")
     public ResponseEntity<RecruiterDTO> addRecruiterWithPicture(
             @ModelAttribute RecruiterDTO recruiterDTO,
@@ -63,6 +65,7 @@ public class RecruiterController {
     }
 
     @Operation(summary = "Modifier un recruteur", description = "Met à jour un recruteur existant")
+    @PreAuthorize("hasRole('RECRUITER')")
     @PutMapping("/{id}")
     public ResponseEntity<RecruiterDTO> updateRecruiter(@PathVariable Long id, @RequestBody RecruiterDTO recruiterDTO) {
         try {
@@ -74,6 +77,7 @@ public class RecruiterController {
     }
 
     @Operation(summary = "Supprimer un recruteur", description = "Supprime un recruteur par son ID")
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteRecruiter(@PathVariable Long id) {
         try {

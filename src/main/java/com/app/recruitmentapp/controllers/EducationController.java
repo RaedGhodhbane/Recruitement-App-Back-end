@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
@@ -17,6 +18,7 @@ import java.util.Map;
 @CrossOrigin("http://localhost:4200")
 @RestController
 @RequestMapping("/education")
+@PreAuthorize("hasRole('CANDIDATE')")
 public class EducationController {
     @Autowired
     private EducationService educationService;

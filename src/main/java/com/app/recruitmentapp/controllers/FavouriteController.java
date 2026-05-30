@@ -3,6 +3,7 @@ import com.app.recruitmentapp.dto.FavouriteDTO;
 import com.app.recruitmentapp.services.FavouriteService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.List;
 @Tag(name = "Favoris", description = "Gestion des offres sauvegardées")
 @RestController
 @RequestMapping("/api/saved-jobs")
+@PreAuthorize("isAuthenticated()")
 public class FavouriteController {
     private final FavouriteService favouriteService;
 

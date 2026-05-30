@@ -100,6 +100,7 @@ class OfferIntegrationTest extends AbstractIntegrationTest {
     @DisplayName("PUT /offer/{id} should update offer")
     void updateOffer_shouldReturn200() {
         Recruiter recruiter = createRecruiter("update_offer@test.com");
+        String token = generateToken("update_offer@test.com", "RECRUITER");
         Offer saved = offerRepository.save(Offer.builder()
                 .title("Old Title")
                 .description("Old description")
@@ -109,7 +110,8 @@ class OfferIntegrationTest extends AbstractIntegrationTest {
         Offer updates = new Offer();
         updates.setTitle("New Title");
 
-        restTemplate.put("/offer/" + saved.getId(), updates);
+        restTemplate.exchange("/offer/" + saved.getId(), HttpMethod.PUT,
+                authEntity(updates, token), Offer.class);
 
         Offer updated = offerRepository.findById(saved.getId()).orElseThrow();
         assertThat(updated.getTitle()).isEqualTo("New Title");
@@ -119,6 +121,7 @@ class OfferIntegrationTest extends AbstractIntegrationTest {
     @DisplayName("DELETE /offer/{id} should delete offer")
     void deleteOffer_shouldReturn200() {
         Recruiter recruiter = createRecruiter("delete_offer@test.com");
+        String token = generateToken("delete_offer@test.com", "RECRUITER");
         Offer saved = offerRepository.save(Offer.builder()
                 .title("To Delete")
                 .description("Will be deleted")
@@ -128,7 +131,7 @@ class OfferIntegrationTest extends AbstractIntegrationTest {
         ResponseEntity<String> response = restTemplate.exchange(
                 "/offer/" + saved.getId(),
                 HttpMethod.DELETE,
-                null,
+                authHeader(token),
                 String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -139,10 +142,13 @@ class OfferIntegrationTest extends AbstractIntegrationTest {
     @Test
     @DisplayName("DELETE /offer/{id} should return 404 when not found")
     void deleteOffer_whenNotFound_shouldReturn404() {
+        Recruiter recruiter = createRecruiter("notfound_offer@test.com");
+        String token = generateToken("notfound_offer@test.com", "RECRUITER");
+
         ResponseEntity<String> response = restTemplate.exchange(
                 "/offer/9999",
                 HttpMethod.DELETE,
-                null,
+                authHeader(token),
                 String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);

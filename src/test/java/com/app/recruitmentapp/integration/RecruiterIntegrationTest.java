@@ -1,8 +1,10 @@
 package com.app.recruitmentapp.integration;
 
+import com.app.recruitmentapp.entities.Admin;
 import com.app.recruitmentapp.entities.Recruiter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -90,11 +92,14 @@ class RecruiterIntegrationTest extends AbstractIntegrationTest {
     @DisplayName("PUT /recruiter/{id} should update recruiter")
     void updateRecruiter_shouldReturn200() {
         Recruiter saved = createRecruiter("update_recruiter@test.com");
+        String token = generateToken("update_recruiter@test.com", "RECRUITER");
+
         Recruiter updates = new Recruiter();
         updates.setName("Updated");
         updates.setCompanyName("New Corp");
 
-        restTemplate.put("/recruiter/" + saved.getId(), updates);
+        restTemplate.exchange("/recruiter/" + saved.getId(),
+                HttpMethod.PUT, authEntity(updates, token), Recruiter.class);
 
         Recruiter updated = recruiterRepository.findById(saved.getId()).orElseThrow();
         assertThat(updated.getName()).isEqualTo("Updated");
@@ -104,12 +109,14 @@ class RecruiterIntegrationTest extends AbstractIntegrationTest {
     @Test
     @DisplayName("DELETE /recruiter/{id} should delete recruiter")
     void deleteRecruiter_shouldReturn200() {
+        Admin admin = createAdmin("delete_admin_recruiter@test.com");
+        String token = generateToken("delete_admin_recruiter@test.com", "ADMIN");
         Recruiter saved = createRecruiter("delete_recruiter@test.com");
 
         ResponseEntity<String> response = restTemplate.exchange(
                 "/recruiter/" + saved.getId(),
-                org.springframework.http.HttpMethod.DELETE,
-                null,
+                HttpMethod.DELETE,
+                authHeader(token),
                 String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -119,10 +126,13 @@ class RecruiterIntegrationTest extends AbstractIntegrationTest {
     @Test
     @DisplayName("DELETE /recruiter/{id} should return 404 when not found")
     void deleteRecruiter_whenNotFound_shouldReturn404() {
+        Admin admin = createAdmin("notfound_admin@test.com");
+        String token = generateToken("notfound_admin@test.com", "ADMIN");
+
         ResponseEntity<String> response = restTemplate.exchange(
                 "/recruiter/9999",
-                org.springframework.http.HttpMethod.DELETE,
-                null,
+                HttpMethod.DELETE,
+                authHeader(token),
                 String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);

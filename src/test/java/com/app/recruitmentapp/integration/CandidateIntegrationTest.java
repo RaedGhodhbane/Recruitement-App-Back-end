@@ -3,6 +3,7 @@ package com.app.recruitmentapp.integration;
 import com.app.recruitmentapp.entities.Candidate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -90,22 +91,18 @@ class CandidateIntegrationTest extends AbstractIntegrationTest {
     @DisplayName("PUT /candidate/update/{id} should update candidate")
     void updateCandidate_shouldReturn200() {
         Candidate saved = createCandidate("update@test.com");
+        String token = generateToken("update@test.com", "CANDIDATE");
         Long candidateId = saved.getId();
 
-        // Send full candidate JSON as body
         Map<String, Object> body = new java.util.HashMap<>();
         body.put("name", "Updated");
         body.put("firstName", "Name");
         body.put("email", "update@test.com");
 
-        org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
-        headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
-        org.springframework.http.HttpEntity<Map<String, Object>> entity = new org.springframework.http.HttpEntity<>(body, headers);
-
         ResponseEntity<Candidate> response = restTemplate.exchange(
                 "/candidate/update/" + candidateId,
-                org.springframework.http.HttpMethod.PUT,
-                entity,
+                HttpMethod.PUT,
+                authEntity(body, token),
                 Candidate.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -117,11 +114,12 @@ class CandidateIntegrationTest extends AbstractIntegrationTest {
     @DisplayName("DELETE /candidate/{id} should delete candidate")
     void deleteCandidate_shouldReturn200() {
         Candidate saved = createCandidate("delete@test.com");
+        String token = generateToken("delete@test.com", "CANDIDATE");
 
         ResponseEntity<String> response = restTemplate.exchange(
                 "/candidate/" + saved.getId(),
-                org.springframework.http.HttpMethod.DELETE,
-                null,
+                HttpMethod.DELETE,
+                authHeader(token),
                 String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -131,10 +129,13 @@ class CandidateIntegrationTest extends AbstractIntegrationTest {
     @Test
     @DisplayName("DELETE /candidate/{id} should return 404 when not found")
     void deleteCandidate_whenNotFound_shouldReturn404() {
+        Candidate candidate = createCandidate("notfound@test.com");
+        String token = generateToken("notfound@test.com", "CANDIDATE");
+
         ResponseEntity<String> response = restTemplate.exchange(
                 "/candidate/9999",
-                org.springframework.http.HttpMethod.DELETE,
-                null,
+                HttpMethod.DELETE,
+                authHeader(token),
                 String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);

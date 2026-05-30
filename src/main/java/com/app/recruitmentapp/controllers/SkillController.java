@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
@@ -16,6 +17,7 @@ import java.util.Map;
 @Tag(name = "Compétences", description = "Gestion des compétences des candidats")
 @RestController
 @RequestMapping("/skill")
+@PreAuthorize("hasRole('CANDIDATE')")
 public class SkillController {
     @Autowired
     private SkillService skillService;
