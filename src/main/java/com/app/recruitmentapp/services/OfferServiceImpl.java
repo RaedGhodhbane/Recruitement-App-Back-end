@@ -7,6 +7,7 @@ import com.app.recruitmentapp.mapper.EntityMapper;
 import com.app.recruitmentapp.exceptions.ResourceNotFoundException;
 import com.app.recruitmentapp.repositories.OfferRepository;
 import com.app.recruitmentapp.repositories.RecruiterRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -23,6 +24,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 public class OfferServiceImpl implements OfferService {
     @Autowired
@@ -106,6 +108,6 @@ public class OfferServiceImpl implements OfferService {
     public void deleteOfferExpired() {
         LocalDate aujourdHui = LocalDate.now();
         offerRepository.deleteByExpirationDateBefore(aujourdHui);
-        System.out.println("Offer expired at" + aujourdHui);
+        log.info("Offer expired at {}", aujourdHui);
     }
 }

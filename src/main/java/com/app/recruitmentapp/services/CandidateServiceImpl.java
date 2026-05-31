@@ -17,6 +17,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,6 +31,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
 
+@Slf4j
 @Service
 public class CandidateServiceImpl implements CandidateService {
 
@@ -72,12 +74,12 @@ public class CandidateServiceImpl implements CandidateService {
 
             try {
                 Path rootLocation = Paths.get(uploadDir);
-                System.out.println(rootLocation.toAbsolutePath());
+                log.debug("Root location: {}", rootLocation.toAbsolutePath());
                 Files.copy(imageFile.getInputStream(), rootLocation.resolve(finalFileName));
 
                 candidate.setImage(finalFileName);
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("Error copying file", e);
             }
         }
         return entityMapper.toCandidateDTO(candidateRepository.save(candidate));
@@ -130,7 +132,7 @@ public class CandidateServiceImpl implements CandidateService {
     @Override
     public void deleteCandidate(Long id) {
         if (candidateRepository.existsById(id)) {
-            System.out.println("Bien");
+            log.info("Candidate deleted: {}", id);
             candidateRepository.deleteById(id);
         } else {
             throw new ResourceNotFoundException("Candidat non trouvé");

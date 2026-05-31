@@ -3,6 +3,7 @@ package com.app.recruitmentapp.security;
 import com.app.recruitmentapp.services.TokenBlacklistService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Component;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
+@Slf4j
 @Component
 public class JwtLogoutHandler implements LogoutHandler {
 
@@ -29,7 +31,7 @@ public class JwtLogoutHandler implements LogoutHandler {
         String token = jwtUtil.extractToken(request);
         if (token != null) {
             String email = jwtUtil.extractEmail(token);
-            System.out.println("Déconnexion de l'utilisateur : " + email);
+            log.info("Déconnexion de l'utilisateur : {}", email);
             LocalDateTime expiration = jwtUtil.extractExpiration(token).toInstant()
                     .atZone(ZoneId.systemDefault())
                     .toLocalDateTime();

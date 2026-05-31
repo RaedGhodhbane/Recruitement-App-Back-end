@@ -9,6 +9,7 @@ import com.app.recruitmentapp.exceptions.ResourceNotFoundException;
 import com.app.recruitmentapp.mapper.EntityMapper;
 import com.app.recruitmentapp.repositories.UserRepository;
 import com.app.recruitmentapp.security.JwtUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 
+@Slf4j
 @Service
 public class UserServiceImpl implements UserService {
     @Autowired
@@ -118,7 +120,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void logout(String token) {
-        System.out.println("Logout - JWT token reçu : " + token);
+        log.info("Logout - JWT token reçu : {}", token);
         if (token != null) {
             Date expiration = jwtUtil.extractExpiration(token);
             LocalDateTime expirationTime = expiration.toInstant()
