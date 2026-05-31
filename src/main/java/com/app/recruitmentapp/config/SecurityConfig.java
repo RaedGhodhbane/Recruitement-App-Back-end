@@ -20,6 +20,12 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
+
 import java.util.List;
 
 @Configuration
@@ -27,12 +33,31 @@ import java.util.List;
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
+    private static final Logger log = LoggerFactory.getLogger(SecurityConfig.class);
+
+    @Autowired
+    private Environment environment;
+
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
     @Autowired
     private JwtLogoutHandler jwtLogoutHandler;
     @Autowired
     private LoginRateLimiter loginRateLimiter;
+
+    @PostConstruct
+    void warnHttps() {
+        if (environment.acceptsProfiles(Profiles.of("dev", "default"))) {
+            log.warn("""
+                    ╔══════════════════════════════════════════════════════════════╗
+                    ║  ATTENTION : Mode développement sans HTTPS                  ║
+                    ║  Les mots de passe transitent en clair dans les requêtes.   ║
+                    ║  Activez le profil 'prod' avec HTTPS pour la production.    ║
+                    ╚══════════════════════════════════════════════════════════════╝
+                    """);
+        }
+    }
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -55,6 +80,12 @@ public class SecurityConfig {
                 .addFilterBefore(loginRateLimiter, JwtAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .cors(Customizer.withDefaults())
+                .headers(headers -> headers
+                        .httpStrictTransportSecurity(hsts -> hsts
+                                .includeSubDomains(true)
+                                .maxAgeInSeconds(31536000))
+                        .contentTypeOptions(customizer -> {})
+                        .frameOptions(frame -> frame.deny()))
                 .build();
     }
 
