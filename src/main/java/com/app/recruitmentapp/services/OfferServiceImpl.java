@@ -4,6 +4,7 @@ import com.app.recruitmentapp.dto.OfferDTO;
 import com.app.recruitmentapp.entities.Offer;
 import com.app.recruitmentapp.entities.Recruiter;
 import com.app.recruitmentapp.mapper.EntityMapper;
+import com.app.recruitmentapp.exceptions.ResourceNotFoundException;
 import com.app.recruitmentapp.repositories.OfferRepository;
 import com.app.recruitmentapp.repositories.RecruiterRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +58,7 @@ public class OfferServiceImpl implements OfferService {
     @Override
     public OfferDTO updateOffer(Long id, OfferDTO offerDTO) {
         Offer o = offerRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Offre non trouvé"));
+                .orElseThrow(() -> new ResourceNotFoundException("Offre non trouvé"));
         o.setTitle(offerDTO.getTitle());
         o.setDescription(offerDTO.getDescription());
         o.setType(offerDTO.getType());
@@ -75,7 +76,7 @@ public class OfferServiceImpl implements OfferService {
         if (offerRepository.existsById(id)) {
             offerRepository.deleteById(id);
         } else {
-            throw new RuntimeException("Offre non trouvé");
+            throw new ResourceNotFoundException("Offre non trouvé");
         }
     }
 

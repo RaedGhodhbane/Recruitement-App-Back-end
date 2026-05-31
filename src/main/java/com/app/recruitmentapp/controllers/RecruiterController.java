@@ -39,19 +39,13 @@ public class RecruiterController {
 
     @Operation(summary = "Inscription recruteur", description = "Inscrit un nouveau recruteur")
     @PostMapping("/registerRecruiter")
-    public ResponseEntity<?> registerRecruiter(@RequestBody Map<String, String> request) {
+    public RecruiterDTO registerRecruiter(@RequestBody Map<String, String> request) {
         String email = request.get("email");
         String password = request.get("password");
         String name = request.get("name");
         String firstName = request.get("firstName");
         String phone = request.get("phone");
-
-        try {
-            RecruiterDTO saved = recruiterService.registerRecruiter(email, password, name, firstName, phone);
-            return ResponseEntity.ok(saved);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", e.getMessage()));
-        }
+        return recruiterService.registerRecruiter(email, password, name, firstName, phone);
     }
 
     @Operation(summary = "Ajouter recruteur avec photo", description = "Ajoute un recruteur avec une image de profil")
@@ -67,25 +61,16 @@ public class RecruiterController {
     @Operation(summary = "Modifier un recruteur", description = "Met à jour un recruteur existant")
     @PreAuthorize("hasRole('RECRUITER')")
     @PutMapping("/{id}")
-    public ResponseEntity<RecruiterDTO> updateRecruiter(@PathVariable Long id, @RequestBody RecruiterDTO recruiterDTO) {
-        try {
-            RecruiterDTO updated = recruiterService.updateRecruiter(id, recruiterDTO);
-            return ResponseEntity.ok(updated);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+    public RecruiterDTO updateRecruiter(@PathVariable Long id, @RequestBody RecruiterDTO recruiterDTO) {
+        return recruiterService.updateRecruiter(id, recruiterDTO);
     }
 
     @Operation(summary = "Supprimer un recruteur", description = "Supprime un recruteur par son ID")
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteRecruiter(@PathVariable Long id) {
-        try {
-            recruiterService.deleteRecruiter(id);
-            return ResponseEntity.ok("Recruiter deleted successfully");
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+    public ResponseEntity<Void> deleteRecruiter(@PathVariable Long id) {
+        recruiterService.deleteRecruiter(id);
+        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "Fichier recruteur", description = "Retourne un fichier attaché à un recruteur")

@@ -4,6 +4,7 @@ import com.app.recruitmentapp.dto.MessageDTO;
 import com.app.recruitmentapp.entities.Message;
 import com.app.recruitmentapp.entities.User;
 import com.app.recruitmentapp.mapper.EntityMapper;
+import com.app.recruitmentapp.exceptions.ResourceNotFoundException;
 import com.app.recruitmentapp.repositories.MessageRepository;
 import com.app.recruitmentapp.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +49,7 @@ public class MessageServiceImpl implements MessageService{
         if (messageRepository.existsById(id)) {
             messageRepository.deleteById(id);
         } else {
-            throw new RuntimeException("Message non trouvé");
+            throw new ResourceNotFoundException("Message non trouvé");
         }
     }
 }

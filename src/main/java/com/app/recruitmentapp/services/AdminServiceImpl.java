@@ -3,6 +3,7 @@ package com.app.recruitmentapp.services;
 import com.app.recruitmentapp.dto.AdminDTO;
 import com.app.recruitmentapp.entities.*;
 import com.app.recruitmentapp.exceptions.EmailAlreadyUsedException;
+import com.app.recruitmentapp.exceptions.ResourceNotFoundException;
 import com.app.recruitmentapp.mapper.EntityMapper;
 import com.app.recruitmentapp.repositories.AdminRepository;
 import com.app.recruitmentapp.repositories.CandidateRepository;
@@ -143,7 +144,7 @@ public class AdminServiceImpl implements AdminService {
         if (adminRepository.existsById(id)) {
             adminRepository.deleteById(id);
         } else {
-            throw new RuntimeException("Admin non trouvé");
+            throw new ResourceNotFoundException("Admin non trouvé");
         }
     }
 
@@ -154,7 +155,7 @@ public class AdminServiceImpl implements AdminService {
             recruiter.setActive(true);
             recruiterRepository.save(recruiter);
         }, () -> {
-            throw new RuntimeException("Recruteur non trouvé avec l'ID: " + recruiterId);
+            throw new ResourceNotFoundException("Recruteur non trouvé avec l'ID: " + recruiterId);
         });
     }
 
@@ -165,7 +166,7 @@ public class AdminServiceImpl implements AdminService {
             recruiter.setActive(false);
             recruiterRepository.save(recruiter);
         }, () -> {
-            throw new RuntimeException("Recruteur non trouvé avec l'ID: " + recruiterId);
+            throw new ResourceNotFoundException("Recruteur non trouvé avec l'ID: " + recruiterId);
         });
     }
 
@@ -176,7 +177,7 @@ public class AdminServiceImpl implements AdminService {
             candidate.setActive(true);
             candidateRepository.save(candidate);
         }, () -> {
-            throw new RuntimeException("Candidat non trouvé avec l'ID: " + candidateId);
+            throw new ResourceNotFoundException("Candidat non trouvé avec l'ID: " + candidateId);
         });
     }
 
@@ -187,14 +188,14 @@ public class AdminServiceImpl implements AdminService {
             candidate.setActive(false);
             candidateRepository.save(candidate);
         }, () -> {
-            throw new RuntimeException("Candidat non trouvé avec l'ID: " + candidateId);
+            throw new ResourceNotFoundException("Candidat non trouvé avec l'ID: " + candidateId);
         });
     }
 
     @Override
     public String changePassword(Long adminId, ChangePassword changePasswordRequest) {
         Admin admin = adminRepository.findById(adminId)
-                .orElseThrow(() -> new RuntimeException("Admin non trouvé"));
+                .orElseThrow(() -> new ResourceNotFoundException("Admin non trouvé"));
 
         if (!passwordEncoder.matches(changePasswordRequest.getCurrentPassword(), admin.getPassword())) {
             throw new IllegalArgumentException("Ancien mot de passe incorrect !");

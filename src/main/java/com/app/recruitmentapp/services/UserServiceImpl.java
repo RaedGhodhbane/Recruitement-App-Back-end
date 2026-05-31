@@ -4,6 +4,8 @@ import com.app.recruitmentapp.dto.UserDTO;
 import com.app.recruitmentapp.entities.Candidate;
 import com.app.recruitmentapp.entities.Recruiter;
 import com.app.recruitmentapp.entities.User;
+import com.app.recruitmentapp.exceptions.AuthenticationFailedException;
+import com.app.recruitmentapp.exceptions.ResourceNotFoundException;
 import com.app.recruitmentapp.mapper.EntityMapper;
 import com.app.recruitmentapp.repositories.UserRepository;
 import com.app.recruitmentapp.security.JwtUtil;
@@ -52,7 +54,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO updateUser(Long id, UserDTO userDTO) {
         User u = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur non trouvé"));
 
         if (userDTO.getName() != null)
             u.setName(userDTO.getName());
@@ -76,28 +78,28 @@ public class UserServiceImpl implements UserService {
         if (userRepository.existsById(id)) {
             userRepository.deleteById(id);
         } else {
-            throw new RuntimeException("Utilisateur non trouvé");
+            throw new ResourceNotFoundException("Utilisateur non trouvé");
         }
     }
 
     public Map<String, Object> login(String email, String rawPassword) {
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+                .orElseThrow(() -> new AuthenticationFailedException("Utilisateur non trouvé"));
 
         if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
-            throw new RuntimeException("Mot de passe incorrect");
+            throw new AuthenticationFailedException("Mot de passe incorrect");
         }
 
         if (user instanceof Candidate candidate) {
             if (!candidate.isActive()) {
-                throw new RuntimeException("Compte désactivé. Veuillez contacter l'administrateur.");
+                throw new AuthenticationFailedException("Compte désactivé. Veuillez contacter l'administrateur.");
             }
         }
 
         if (user instanceof Recruiter recruiter) {
             if (!recruiter.isActive()) {
-                throw new RuntimeException("Compte désactivé. Veuillez contacter l'administrateur.");
+                throw new AuthenticationFailedException("Compte désactivé. Veuillez contacter l'administrateur.");
             }
         }
 

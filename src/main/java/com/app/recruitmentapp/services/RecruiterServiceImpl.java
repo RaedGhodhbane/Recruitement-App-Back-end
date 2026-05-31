@@ -4,6 +4,7 @@ import com.app.recruitmentapp.dto.RecruiterDTO;
 import com.app.recruitmentapp.entities.Recruiter;
 import com.app.recruitmentapp.entities.Role;
 import com.app.recruitmentapp.exceptions.EmailAlreadyUsedException;
+import com.app.recruitmentapp.exceptions.ResourceNotFoundException;
 import com.app.recruitmentapp.mapper.EntityMapper;
 import com.app.recruitmentapp.repositories.RecruiterRepository;
 import com.app.recruitmentapp.repositories.UserRepository;
@@ -100,7 +101,7 @@ public class RecruiterServiceImpl implements RecruiterService {
     @Override
     public RecruiterDTO updateRecruiter(Long id, RecruiterDTO recruiterDTO) {
          Recruiter r = recruiterRepository.findById(id)
-                 .orElseThrow(() -> new RuntimeException("Recruteur non trouvé"));
+                 .orElseThrow(() -> new ResourceNotFoundException("Recruteur non trouvé"));
         if (recruiterDTO.getName() != null) {
             r.setName(recruiterDTO.getName());
         }
@@ -148,7 +149,7 @@ public class RecruiterServiceImpl implements RecruiterService {
         if (recruiterRepository.existsById(id)) {
             recruiterRepository.deleteById(id);
         } else {
-            throw new RuntimeException("Recruteur non trouvé");
+            throw new ResourceNotFoundException("Recruteur non trouvé");
         }
     }
 

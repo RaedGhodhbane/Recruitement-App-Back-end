@@ -15,7 +15,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -48,40 +47,27 @@ public class AdminController {
     @Operation(summary = "Inscription admin", description = "Inscrit un nouvel administrateur avec photo")
     @PreAuthorize("permitAll()")
     @PostMapping("/registerAdmin")
-    public ResponseEntity<?> registerAdminWithPicture(@RequestParam Map<String, String> request,
-                                                       @ModelAttribute AdminDTO adminDTO,
-                                                       @RequestParam("imageFile") MultipartFile imageFile) {
+    public ResponseEntity<AdminDTO> registerAdminWithPicture(@RequestParam Map<String, String> request,
+                                                              @ModelAttribute AdminDTO adminDTO,
+                                                              @RequestParam("imageFile") MultipartFile imageFile) {
         String email = request.get("email");
         String password = request.get("password");
-
-        try {
-            AdminDTO saved = adminService.registerAdminWithPicture(email, password, adminDTO, imageFile);
-            return ResponseEntity.ok(saved);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", e.getMessage()));
-        }
+        AdminDTO saved = adminService.registerAdminWithPicture(email, password, adminDTO, imageFile);
+        return ResponseEntity.ok(saved);
     }
 
     @Operation(summary = "Modifier un admin", description = "Met à jour un administrateur existant")
     @PutMapping("/updateadmin/{id}")
     public ResponseEntity<AdminDTO> updateAdmin(@PathVariable Long id, @ModelAttribute AdminDTO adminDTO, @RequestParam("imageFile") MultipartFile imageFile) {
-        try {
-            AdminDTO updated = adminService.updateAdmin(id, adminDTO, imageFile);
-            return ResponseEntity.ok(updated);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        AdminDTO updated = adminService.updateAdmin(id, adminDTO, imageFile);
+        return ResponseEntity.ok(updated);
     }
 
     @Operation(summary = "Supprimer un admin", description = "Supprime un administrateur par son ID")
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteAdmin(@PathVariable Long id) {
-        try {
-            adminService.deleteAdmin(id);
-            return ResponseEntity.ok("Admin deleted successfully");
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+    public ResponseEntity<Void> deleteAdmin(@PathVariable Long id) {
+        adminService.deleteAdmin(id);
+        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "Activer recruteur", description = "Active le compte d'un recruteur")
@@ -114,17 +100,10 @@ public class AdminController {
 
     @Operation(summary = "Changer mot de passe", description = "Change le mot de passe d'un administrateur")
     @PutMapping("/{id}/change-password")
-    public ResponseEntity<Map<String, String>> changePassword(
+    public String changePassword(
             @PathVariable Long id,
             @RequestBody ChangePassword changePasswordRequest) {
-        try {
-            String message = adminService.changePassword(id, changePasswordRequest);
-            return ResponseEntity.ok().body(Collections.singletonMap("message", message));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Collections.singletonMap("erreur", e.getMessage()));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.singletonMap("erreur", e.getMessage()));
-        }
+        return adminService.changePassword(id, changePasswordRequest);
     }
 
     @Operation(summary = "Fichier admin", description = "Retourne un fichier attaché à un administrateur")

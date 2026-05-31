@@ -5,6 +5,7 @@ import com.app.recruitmentapp.entities.Candidate;
 import com.app.recruitmentapp.entities.ChangePassword;
 import com.app.recruitmentapp.entities.Role;
 import com.app.recruitmentapp.exceptions.EmailAlreadyUsedException;
+import com.app.recruitmentapp.exceptions.ResourceNotFoundException;
 import com.app.recruitmentapp.mapper.EntityMapper;
 import com.app.recruitmentapp.repositories.CandidateRepository;
 import com.app.recruitmentapp.repositories.UserRepository;
@@ -105,7 +106,7 @@ public class CandidateServiceImpl implements CandidateService {
     @Override
     public CandidateDTO updateCandidate(Long id, CandidateDTO candidateDTO) {
         Candidate c = candidateRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Candidate not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Candidate not found"));
 
         c.setName(candidateDTO.getName());
         c.setFirstName(candidateDTO.getFirstName());
@@ -132,14 +133,14 @@ public class CandidateServiceImpl implements CandidateService {
             System.out.println("Bien");
             candidateRepository.deleteById(id);
         } else {
-            throw new RuntimeException("Candidat non trouvé");
+            throw new ResourceNotFoundException("Candidat non trouvé");
         }
     }
 
     @Override
     public void createCV(Long candidateId, MultipartFile cvFile) throws IOException {
         Candidate candidate = candidateRepository.findById(candidateId)
-                .orElseThrow(() -> new RuntimeException("Candidate not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Candidate not found"));
 
         String filename = "cv_" + candidateId + ".pdf";
 
@@ -153,10 +154,10 @@ public class CandidateServiceImpl implements CandidateService {
     @Override
     public byte[] downloadCVPDF(Long candidateId) throws IOException {
         Candidate candidate = candidateRepository.findById(candidateId)
-                .orElseThrow(() -> new RuntimeException("Candidate not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Candidate not found"));
 
         if (candidate.getCvPath() == null) {
-            throw new RuntimeException("CV not found for candidate");
+            throw new ResourceNotFoundException("CV not found for candidate");
         }
 
         Path path = Paths.get(candidate.getCvPath());
@@ -182,7 +183,7 @@ public class CandidateServiceImpl implements CandidateService {
     @Override
     public String changePassword(Long candidateId, ChangePassword changePasswordRequest) {
         Candidate candidate = candidateRepository.findById(candidateId)
-                .orElseThrow(() -> new RuntimeException("Candidat non trouvé"));
+                .orElseThrow(() -> new ResourceNotFoundException("Candidat non trouvé"));
 
         if (!passwordEncoder.matches(changePasswordRequest.getCurrentPassword(), candidate.getPassword())) {
             throw new IllegalArgumentException("Ancien mot de passe incorrect !");

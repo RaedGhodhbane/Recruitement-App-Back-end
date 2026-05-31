@@ -44,24 +44,15 @@ public class QuestionController {
     @Operation(summary = "Modifier une question", description = "Met à jour une question existante")
     @PreAuthorize("hasRole('RECRUITER')")
     @PutMapping("/{id}")
-    public ResponseEntity<QuestionDTO> updateQuestion(@PathVariable Long id, @RequestBody QuestionDTO questionDTO) {
-        try {
-            QuestionDTO updated = questionService.updateQuestion(id, questionDTO);
-            return ResponseEntity.ok(updated);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+    public QuestionDTO updateQuestion(@PathVariable Long id, @RequestBody QuestionDTO questionDTO) {
+        return questionService.updateQuestion(id, questionDTO);
     }
 
     @Operation(summary = "Supprimer une question", description = "Supprime une question par son ID")
     @PreAuthorize("hasRole('RECRUITER')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteQuestion(@PathVariable Long id) {
-        try {
-            questionService.deleteQuestion(id);
-            return ResponseEntity.ok("Question deleted successfully");
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+    public ResponseEntity<Void> deleteQuestion(@PathVariable Long id) {
+        questionService.deleteQuestion(id);
+        return ResponseEntity.ok().build();
     }
 }

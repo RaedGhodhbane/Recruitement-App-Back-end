@@ -4,6 +4,7 @@ import com.app.recruitmentapp.dto.QuestionDTO;
 import com.app.recruitmentapp.entities.Offer;
 import com.app.recruitmentapp.entities.Question;
 import com.app.recruitmentapp.mapper.EntityMapper;
+import com.app.recruitmentapp.exceptions.ResourceNotFoundException;
 import com.app.recruitmentapp.repositories.OfferRepository;
 import com.app.recruitmentapp.repositories.QuestionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +43,7 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     public QuestionDTO updateQuestion(Long id, QuestionDTO questionDTO) {
         Question q = questionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Question non trouvé"));
+                .orElseThrow(() -> new ResourceNotFoundException("Question non trouvé"));
         q.setTitle(questionDTO.getTitle());
         q.setChoice1(questionDTO.getChoice1());
         q.setChoice2(questionDTO.getChoice2());
@@ -57,7 +58,7 @@ public class QuestionServiceImpl implements QuestionService {
         if (questionRepository.existsById(id)) {
             questionRepository.deleteById(id);
         } else {
-            throw new RuntimeException("Question non trouvé");
+            throw new ResourceNotFoundException("Question non trouvé");
         }
     }
 }

@@ -46,12 +46,8 @@ public class MessageController {
 
     @Operation(summary = "Supprimer un message", description = "Supprime un message par son ID")
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteMessage(@PathVariable Long id) {
-        try {
-            messageService.deleteMessage(id);
-            return ResponseEntity.ok("Message deleted successfully");
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+    public ResponseEntity<Void> deleteMessage(@PathVariable Long id) {
+        messageService.deleteMessage(id);
+        return ResponseEntity.ok().build();
     }
 }
