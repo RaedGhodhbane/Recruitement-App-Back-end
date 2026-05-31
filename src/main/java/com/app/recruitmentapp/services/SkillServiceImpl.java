@@ -4,6 +4,7 @@ import com.app.recruitmentapp.dto.SkillDTO;
 import com.app.recruitmentapp.entities.Candidate;
 import com.app.recruitmentapp.entities.Skill;
 import com.app.recruitmentapp.mapper.EntityMapper;
+import com.app.recruitmentapp.exceptions.ResourceNotFoundException;
 import com.app.recruitmentapp.repositories.CandidateRepository;
 import com.app.recruitmentapp.repositories.SkillRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +43,7 @@ public class SkillServiceImpl implements SkillService{
     @Override
     public SkillDTO updateSkill(Long id, SkillDTO skillDTO) {
         Skill sk = skillRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Skill non trouvé"));
+                .orElseThrow(() -> new ResourceNotFoundException("Skill non trouvé"));
         sk.setTitle(skillDTO.getTitle());
         sk.setPercentage(skillDTO.getPercentage());
         skillRepository.saveAndFlush(sk);
@@ -54,7 +55,7 @@ public class SkillServiceImpl implements SkillService{
         if (skillRepository.existsById(id)) {
             skillRepository.deleteById(id);
         } else {
-            throw new RuntimeException("Skill non trouvé");
+            throw new ResourceNotFoundException("Skill non trouvé");
         }
     }
 }

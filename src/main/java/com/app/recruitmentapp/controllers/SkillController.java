@@ -10,9 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 @Tag(name = "Compétences", description = "Gestion des compétences des candidats")
 @RestController
@@ -45,23 +43,14 @@ public class SkillController {
 
     @Operation(summary = "Modifier une compétence", description = "Met à jour une compétence existante")
     @PutMapping("/{id}")
-    public ResponseEntity<SkillDTO> updateSkill(@PathVariable Long id, @RequestBody SkillDTO skillDTO) {
-        try {
-            SkillDTO updated = skillService.updateSkill(id, skillDTO);
-            return ResponseEntity.ok(updated);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+    public SkillDTO updateSkill(@PathVariable Long id, @RequestBody SkillDTO skillDTO) {
+        return skillService.updateSkill(id, skillDTO);
     }
 
     @Operation(summary = "Supprimer une compétence", description = "Supprime une compétence par son ID")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Map<String,String>> deleteSkill(@PathVariable Long id) {
-        try {
-            skillService.deleteSkill(id);
-            return ResponseEntity.ok(Collections.singletonMap("message", "Skill deleted successfully"));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+    public ResponseEntity<Void> deleteSkill(@PathVariable Long id) {
+        skillService.deleteSkill(id);
+        return ResponseEntity.ok().build();
     }
 }

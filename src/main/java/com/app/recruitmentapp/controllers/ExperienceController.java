@@ -10,9 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 @Tag(name = "Expériences", description = "Gestion des expériences professionnelles des candidats")
 @RestController
@@ -45,23 +43,14 @@ public class ExperienceController {
 
     @Operation(summary = "Modifier une expérience", description = "Met à jour une expérience existante")
     @PutMapping("/{id}")
-    public ResponseEntity<ExperienceDTO> updateExperience(@PathVariable Long id, @RequestBody ExperienceDTO experienceDTO) {
-        try {
-            ExperienceDTO updated = experienceService.updateExperience(id, experienceDTO);
-            return ResponseEntity.ok(updated);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+    public ExperienceDTO updateExperience(@PathVariable Long id, @RequestBody ExperienceDTO experienceDTO) {
+        return experienceService.updateExperience(id, experienceDTO);
     }
 
     @Operation(summary = "Supprimer une expérience", description = "Supprime une expérience par son ID")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Map<String,String>> deleteExperience(@PathVariable Long id) {
-        try {
-            experienceService.deleteExperience(id);
-            return ResponseEntity.ok(Collections.singletonMap("message","Experience deleted successfully"));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+    public ResponseEntity<Void> deleteExperience(@PathVariable Long id) {
+        experienceService.deleteExperience(id);
+        return ResponseEntity.ok().build();
     }
 }

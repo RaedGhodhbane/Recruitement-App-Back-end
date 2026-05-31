@@ -5,6 +5,7 @@ import com.app.recruitmentapp.entities.Favourite;
 import com.app.recruitmentapp.entities.Offer;
 import com.app.recruitmentapp.entities.User;
 import com.app.recruitmentapp.mapper.EntityMapper;
+import com.app.recruitmentapp.exceptions.DuplicateResourceException;
 import com.app.recruitmentapp.repositories.FavouriteRepository;
 import com.app.recruitmentapp.repositories.OfferRepository;
 import com.app.recruitmentapp.repositories.UserRepository;
@@ -31,7 +32,7 @@ public class FavouriteServiceImpl implements FavouriteService{
         User user = userRepository.findById(userId).orElseThrow();
         Offer offer = offerRepository.findById(offerId).orElseThrow();
         if (favouriteRepository.existsByUserIdAndOfferId(user.getId(), offer.getId())) {
-            throw new RuntimeException("Job déjà sauvegardé !");
+            throw new DuplicateResourceException("Job déjà sauvegardé !");
         }
         Favourite savedJob = new Favourite();
         savedJob.setUser(user);

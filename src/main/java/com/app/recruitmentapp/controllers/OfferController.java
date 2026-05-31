@@ -48,25 +48,16 @@ public class OfferController {
     @Operation(summary = "Modifier une offre", description = "Met à jour une offre existante")
     @PreAuthorize("hasRole('RECRUITER')")
     @PutMapping("/{id}")
-    public ResponseEntity<OfferDTO> updateOffer(@PathVariable Long id, @RequestBody OfferDTO offerDTO) {
-        try {
-            OfferDTO updated = offerService.updateOffer(id, offerDTO);
-            return ResponseEntity.ok(updated);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+    public OfferDTO updateOffer(@PathVariable Long id, @RequestBody OfferDTO offerDTO) {
+        return offerService.updateOffer(id, offerDTO);
     }
 
     @Operation(summary = "Supprimer une offre", description = "Supprime une offre par son ID")
     @PreAuthorize("hasRole('RECRUITER')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteOffer(@PathVariable Long id) {
-        try {
-            offerService.deleteOffer(id);
-            return ResponseEntity.ok("Offer deleted successfully");
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+    public ResponseEntity<Void> deleteOffer(@PathVariable Long id) {
+        offerService.deleteOffer(id);
+        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "Télécharger un fichier", description = "Retourne un fichier attaché à une offre")

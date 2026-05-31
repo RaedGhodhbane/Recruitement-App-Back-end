@@ -4,6 +4,7 @@ import com.app.recruitmentapp.dto.ExperienceDTO;
 import com.app.recruitmentapp.entities.Candidate;
 import com.app.recruitmentapp.entities.Experience;
 import com.app.recruitmentapp.mapper.EntityMapper;
+import com.app.recruitmentapp.exceptions.ResourceNotFoundException;
 import com.app.recruitmentapp.repositories.CandidateRepository;
 import com.app.recruitmentapp.repositories.ExperienceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +43,7 @@ public class ExperienceServiceImpl implements ExperienceService {
     @Override
     public ExperienceDTO updateExperience(Long id, ExperienceDTO experienceDTO) {
         Experience ex = experienceRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Experience non trouvé"));
+                .orElseThrow(() -> new ResourceNotFoundException("Experience non trouvé"));
         ex.setCompanyName(experienceDTO.getCompanyName());
         ex.setJobTitle(experienceDTO.getJobTitle());
         ex.setStartExpDate(experienceDTO.getStartExpDate());
@@ -57,7 +58,7 @@ public class ExperienceServiceImpl implements ExperienceService {
         if (experienceRepository.existsById(id)) {
             experienceRepository.deleteById(id);
         } else {
-            throw new RuntimeException("Experience non trouvé");
+            throw new ResourceNotFoundException("Experience non trouvé");
         }
     }
 }

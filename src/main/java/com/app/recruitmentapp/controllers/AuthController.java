@@ -6,7 +6,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,24 +27,19 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody Map<String, String> request) {
         String email = request.get("email");
         String password = request.get("password");
-
-        try {
-            Map<String, Object> result = userService.login(email, password);
-            return ResponseEntity.ok(result);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", e.getMessage()));
-        }
+        Map<String, Object> result = userService.login(email, password);
+        return ResponseEntity.ok(result);
     }
 
     @Operation(summary = "Déconnecter un utilisateur", description = "Invalide le token JWT de l'utilisateur")
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(HttpServletRequest request) {
+    public ResponseEntity<Map<String, String>> logout(HttpServletRequest request) {
         String token = jwtUtil.extractToken(request);
         if (token != null) {
             userService.logout(token);
-            return ResponseEntity.ok(Map.of("message", "Déconnexion réussie").toString());
+            return ResponseEntity.ok(Map.of("message", "Déconnexion réussie"));
         }
-        return ResponseEntity.badRequest().body("Token manquant");
+        return ResponseEntity.badRequest().body(Map.of("error", "Token manquant"));
     }
 
 }

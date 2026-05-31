@@ -46,25 +46,16 @@ public class CandidacyController {
     @Operation(summary = "Modifier une candidature", description = "Met à jour une candidature existante")
     @PreAuthorize("hasRole('CANDIDATE')")
     @PutMapping("/{id}")
-    public ResponseEntity<CandidacyDTO> updateCandidacy(@PathVariable Long id, @RequestBody CandidacyDTO candidacyDTO) {
-        try {
-            CandidacyDTO updated = candidacyService.updateCandidacy(id, candidacyDTO);
-            return ResponseEntity.ok(updated);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+    public CandidacyDTO updateCandidacy(@PathVariable Long id, @RequestBody CandidacyDTO candidacyDTO) {
+        return candidacyService.updateCandidacy(id, candidacyDTO);
     }
 
     @Operation(summary = "Supprimer une candidature", description = "Supprime une candidature par son ID")
     @PreAuthorize("hasRole('CANDIDATE')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteCandidacy(@PathVariable Long id) {
-        try {
-            candidacyService.deleteCandidacy(id);
-            return ResponseEntity.ok("Candidacy deleted successfully");
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+    public ResponseEntity<Void> deleteCandidacy(@PathVariable Long id) {
+        candidacyService.deleteCandidacy(id);
+        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "Accepter candidature", description = "Accepte une candidature")

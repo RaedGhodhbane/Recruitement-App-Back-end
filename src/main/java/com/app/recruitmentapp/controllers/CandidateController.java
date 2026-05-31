@@ -14,7 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 @Tag(name = "Candidats", description = "Gestion des candidats")
 @CrossOrigin("*")
@@ -40,19 +41,10 @@ public class CandidateController {
 
     @Operation(summary = "Inscription candidat", description = "Inscrit un nouveau candidat")
     @PostMapping("/registerCandidate")
-    public ResponseEntity<?> registerCandidate(@RequestBody Map<String, String> request) {
-        String email = request.get("email");
-        String password = request.get("password");
-        String name = request.get("name");
-        String firstName = request.get("firstName");
-        String phone = request.get("phone");
-
-        try {
-            CandidateDTO saved = candidateService.registerCandidate(email, password, name, firstName, phone);
-            return ResponseEntity.ok(saved);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", e.getMessage()));
-        }
+    public CandidateDTO registerCandidate(@RequestBody Map<String, String> request) {
+        return candidateService.registerCandidate(
+                request.get("email"), request.get("password"),
+                request.get("name"), request.get("firstName"), request.get("phone"));
     }
 
     @Operation(summary = "Ajouter candidat avec photo", description = "Ajoute un candidat avec une image de profil")
@@ -68,52 +60,34 @@ public class CandidateController {
     @Operation(summary = "Modifier un candidat", description = "Met à jour un candidat existant")
     @PreAuthorize("hasRole('CANDIDATE')")
     @PutMapping("/update/{id}")
-    public ResponseEntity<CandidateDTO> updateCandidate(@PathVariable Long id, @RequestBody CandidateDTO candidateDTO) {
-        try {
-            System.out.println("x");
-            CandidateDTO updated = candidateService.updateCandidate(id, candidateDTO);
-            return ResponseEntity.ok(updated);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+    public CandidateDTO updateCandidate(@PathVariable Long id, @RequestBody CandidateDTO candidateDTO) {
+        return candidateService.updateCandidate(id, candidateDTO);
     }
 
     @Operation(summary = "Supprimer un candidat", description = "Supprime un candidat par son ID")
     @PreAuthorize("hasRole('CANDIDATE')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteCandidate(@PathVariable Long id) {
-        try {
-            candidateService.deleteCandidate(id);
-            return ResponseEntity.ok("Candidate deleted successfully");
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+    public ResponseEntity<Void> deleteCandidate(@PathVariable Long id) {
+        candidateService.deleteCandidate(id);
+        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "Upload CV", description = "Télécharge un fichier CV pour un candidat")
     @PreAuthorize("hasRole('CANDIDATE')")
     @PostMapping("/{id}/cv")
-    public ResponseEntity<String> createCV(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
-        try {
-            candidateService.createCV(id, file);
-            return ResponseEntity.ok("CV uploaded successfully");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error uploading CV: " + e.getMessage());
-        }
+    public ResponseEntity<Void> createCV(@PathVariable Long id, @RequestParam("file") MultipartFile file) throws java.io.IOException {
+        candidateService.createCV(id, file);
+        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "Télécharger CV", description = "Télécharge le CV d'un candidat au format PDF")
     @GetMapping("/{id}/cv")
-    public ResponseEntity<byte[]> downloadCVPDF(@PathVariable Long id) {
-        try {
-            byte[] cvData = candidateService.downloadCVPDF(id);
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=cv_" + id + ".pdf")
-                    .contentType(MediaType.APPLICATION_PDF)
-                    .body(cvData);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+    public ResponseEntity<byte[]> downloadCVPDF(@PathVariable Long id) throws java.io.IOException {
+        byte[] cvData = candidateService.downloadCVPDF(id);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=cv_" + id + ".pdf")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(cvData);
     }
 
     @Operation(summary = "Fichier candidat", description = "Retourne un fichier attaché à un candidat")
@@ -127,16 +101,9 @@ public class CandidateController {
     @Operation(summary = "Changer mot de passe", description = "Change le mot de passe d'un candidat")
     @PreAuthorize("hasRole('CANDIDATE')")
     @PutMapping("/{id}/change-password")
-    public ResponseEntity<Map<String,String>> changePassword(
+    public String changePassword(
             @PathVariable Long id,
             @RequestBody ChangePassword changePasswordRequest) {
-        try {
-            String message = candidateService.changePassword(id, changePasswordRequest);
-            return ResponseEntity.ok().body(Collections.singletonMap("message", message));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Collections.singletonMap("erreur",e.getMessage()));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.singletonMap("erreur",e.getMessage()));
-        }
+        return candidateService.changePassword(id, changePasswordRequest);
     }
 }

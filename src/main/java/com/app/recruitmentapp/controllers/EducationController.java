@@ -10,9 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 @Tag(name = "Formations", description = "Gestion des formations des candidats")
 @CrossOrigin("http://localhost:4200")
@@ -46,23 +44,14 @@ public class EducationController {
 
     @Operation(summary = "Modifier une formation", description = "Met à jour une formation existante")
     @PutMapping("/{id}")
-    public ResponseEntity<EducationDTO> updateEducation(@PathVariable Long id, @RequestBody EducationDTO educationDTO) {
-        try {
-            EducationDTO updated = educationService.updateEducation(id, educationDTO);
-            return ResponseEntity.ok(updated);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+    public EducationDTO updateEducation(@PathVariable Long id, @RequestBody EducationDTO educationDTO) {
+        return educationService.updateEducation(id, educationDTO);
     }
 
     @Operation(summary = "Supprimer une formation", description = "Supprime une formation par son ID")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Map<String, String>> deleteEducation(@PathVariable Long id) {
-        try {
-            educationService.deleteEducation(id);
-            return ResponseEntity.ok(Collections.singletonMap("message", "Education deleted successfully"));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+    public ResponseEntity<Void> deleteEducation(@PathVariable Long id) {
+        educationService.deleteEducation(id);
+        return ResponseEntity.ok().build();
     }
 }

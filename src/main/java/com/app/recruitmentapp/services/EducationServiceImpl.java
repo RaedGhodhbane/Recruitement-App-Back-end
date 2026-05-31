@@ -4,6 +4,7 @@ import com.app.recruitmentapp.dto.EducationDTO;
 import com.app.recruitmentapp.entities.Candidate;
 import com.app.recruitmentapp.entities.Education;
 import com.app.recruitmentapp.mapper.EntityMapper;
+import com.app.recruitmentapp.exceptions.ResourceNotFoundException;
 import com.app.recruitmentapp.repositories.CandidateRepository;
 import com.app.recruitmentapp.repositories.EducationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +43,7 @@ public class EducationServiceImpl implements EducationService {
     @Override
     public EducationDTO updateEducation(Long id, EducationDTO educationDTO) {
         Education e = educationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Education non trouvé"));
+                .orElseThrow(() -> new ResourceNotFoundException("Education non trouvé"));
         e.setDiploma(educationDTO.getDiploma());
         e.setUniversity(educationDTO.getUniversity());
         e.setEndDate(educationDTO.getEndDate());
@@ -56,7 +57,7 @@ public class EducationServiceImpl implements EducationService {
         if (educationRepository.existsById(id)) {
             educationRepository.deleteById(id);
         } else {
-            throw new RuntimeException("Education non trouvé");
+            throw new ResourceNotFoundException("Education non trouvé");
         }
     }
 }
