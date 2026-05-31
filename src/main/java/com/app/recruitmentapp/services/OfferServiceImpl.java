@@ -82,7 +82,11 @@ public class OfferServiceImpl implements OfferService {
 
     @Override
     public ResponseEntity<Resource> getFile(String filename) {
-        Path file = Paths.get(uploadDir).resolve(filename);
+        Path baseDir = Paths.get(uploadDir).normalize();
+        Path file = baseDir.resolve(filename).normalize();
+        if (!file.startsWith(baseDir)) {
+            return ResponseEntity.notFound().build();
+        }
         Resource resource;
         try {
             resource = new UrlResource(file.toUri());
