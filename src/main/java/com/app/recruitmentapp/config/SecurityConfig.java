@@ -2,6 +2,7 @@ package com.app.recruitmentapp.config;
 
 import com.app.recruitmentapp.security.JwtAuthenticationFilter;
 import com.app.recruitmentapp.security.JwtLogoutHandler;
+import com.app.recruitmentapp.security.LoginRateLimiter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,6 +31,8 @@ public class SecurityConfig {
     private JwtAuthenticationFilter jwtAuthenticationFilter;
     @Autowired
     private JwtLogoutHandler jwtLogoutHandler;
+    @Autowired
+    private LoginRateLimiter loginRateLimiter;
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -49,6 +52,7 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         .requestMatchers(HttpMethod.GET, "/offer/offers", "/offer/{id}", "/offer/files/**").permitAll()
                         .anyRequest().authenticated())
+                .addFilterBefore(loginRateLimiter, JwtAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .cors(Customizer.withDefaults())
                 .build();
