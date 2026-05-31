@@ -4,6 +4,7 @@ import com.app.recruitmentapp.dto.QuestionDTO;
 import com.app.recruitmentapp.services.QuestionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,7 +37,7 @@ public class QuestionController {
     @Operation(summary = "Ajouter une question", description = "Ajoute une question à une offre")
     @PreAuthorize("hasRole('RECRUITER')")
     @PostMapping("/{idOffer}")
-    public ResponseEntity<QuestionDTO> addQuestion(@RequestBody QuestionDTO questionDTO, @PathVariable Long idOffer) {
+    public ResponseEntity<QuestionDTO> addQuestion(@Valid @RequestBody QuestionDTO questionDTO, @PathVariable Long idOffer) {
         QuestionDTO saved = questionService.saveQuestion(questionDTO, idOffer);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
@@ -44,7 +45,7 @@ public class QuestionController {
     @Operation(summary = "Modifier une question", description = "Met à jour une question existante")
     @PreAuthorize("hasRole('RECRUITER')")
     @PutMapping("/{id}")
-    public QuestionDTO updateQuestion(@PathVariable Long id, @RequestBody QuestionDTO questionDTO) {
+    public QuestionDTO updateQuestion(@PathVariable Long id, @Valid @RequestBody QuestionDTO questionDTO) {
         return questionService.updateQuestion(id, questionDTO);
     }
 

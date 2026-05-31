@@ -1,14 +1,24 @@
 package com.app.recruitmentapp.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
+
 import java.sql.Date;
 
 public class ExperienceDTO {
     private Long id;
+    @NotBlank(message = "Le nom de l'entreprise est requis")
     private String companyName;
+    @NotBlank(message = "Le titre du poste est requis")
     private String jobTitle;
+    @NotNull(message = "La date de début est requise")
+    @PastOrPresent(message = "La date de début doit être dans le passé ou le présent")
     private Date startExpDate;
     private Date endExpDate;
+    @NotBlank(message = "La description est requise")
     private String description;
+    @NotNull(message = "Le candidat est requis")
     private Long candidateId;
 
     public ExperienceDTO() {}

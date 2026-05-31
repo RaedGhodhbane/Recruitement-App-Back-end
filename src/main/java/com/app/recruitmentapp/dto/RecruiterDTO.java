@@ -1,15 +1,22 @@
 package com.app.recruitmentapp.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+
 import java.time.Instant;
 
 public class RecruiterDTO extends UserDTO {
+    @NotBlank(message = "L'adresse est requise")
     private String address;
     private Instant creationDate;
     private String image;
     private boolean active;
+    @NotBlank(message = "Le nom de l'entreprise est requis")
     private String companyName;
+    @Pattern(regexp = "^\\+?[0-9\\s\\-]{8,15}$", message = "Le numéro de téléphone est invalide")
     private String phone;
     private String website;
+    @NotBlank(message = "La description est requise")
     private String description;
 
     public RecruiterDTO() {}

@@ -4,6 +4,7 @@ import com.app.recruitmentapp.dto.EducationDTO;
 import com.app.recruitmentapp.services.EducationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,14 +38,14 @@ public class EducationController {
 
     @Operation(summary = "Ajouter une formation", description = "Ajoute une formation à un candidat")
     @PostMapping("/{idCandidate}")
-    public ResponseEntity<EducationDTO> addEducation(@RequestBody EducationDTO educationDTO, @PathVariable Long idCandidate) {
+    public ResponseEntity<EducationDTO> addEducation(@Valid @RequestBody EducationDTO educationDTO, @PathVariable Long idCandidate) {
         EducationDTO saved = educationService.saveEducation(educationDTO, idCandidate);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @Operation(summary = "Modifier une formation", description = "Met à jour une formation existante")
     @PutMapping("/{id}")
-    public EducationDTO updateEducation(@PathVariable Long id, @RequestBody EducationDTO educationDTO) {
+    public EducationDTO updateEducation(@PathVariable Long id, @Valid @RequestBody EducationDTO educationDTO) {
         return educationService.updateEducation(id, educationDTO);
     }
 

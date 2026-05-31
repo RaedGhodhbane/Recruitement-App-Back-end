@@ -1,8 +1,12 @@
 package com.app.recruitmentapp.dto;
 
+import jakarta.validation.constraints.NotNull;
+
 public class FavouriteDTO {
     private Long id;
+    @NotNull(message = "L'utilisateur est requis")
     private Long userId;
+    @NotNull(message = "L'offre est requise")
     private Long offerId;
 
     public FavouriteDTO() {}

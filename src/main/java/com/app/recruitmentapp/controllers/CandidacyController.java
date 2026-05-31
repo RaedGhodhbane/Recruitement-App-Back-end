@@ -4,6 +4,7 @@ import com.app.recruitmentapp.dto.CandidacyDTO;
 import com.app.recruitmentapp.services.CandidacyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,7 +39,7 @@ public class CandidacyController {
     @Operation(summary = "Postuler", description = "Soumet une nouvelle candidature")
     @PreAuthorize("hasRole('CANDIDATE')")
     @PostMapping()
-    public ResponseEntity<CandidacyDTO> addCandidacy(@RequestBody CandidacyDTO candidacyDTO) {
+    public ResponseEntity<CandidacyDTO> addCandidacy(@Valid @RequestBody CandidacyDTO candidacyDTO) {
         CandidacyDTO saved = candidacyService.saveCandidacy(candidacyDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
@@ -46,7 +47,7 @@ public class CandidacyController {
     @Operation(summary = "Modifier une candidature", description = "Met à jour une candidature existante")
     @PreAuthorize("hasRole('CANDIDATE')")
     @PutMapping("/{id}")
-    public CandidacyDTO updateCandidacy(@PathVariable Long id, @RequestBody CandidacyDTO candidacyDTO) {
+    public CandidacyDTO updateCandidacy(@PathVariable Long id, @Valid @RequestBody CandidacyDTO candidacyDTO) {
         return candidacyService.updateCandidacy(id, candidacyDTO);
     }
 

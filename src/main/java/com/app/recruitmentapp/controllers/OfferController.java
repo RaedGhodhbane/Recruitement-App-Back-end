@@ -4,6 +4,7 @@ import com.app.recruitmentapp.dto.OfferDTO;
 import com.app.recruitmentapp.services.OfferService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
@@ -39,7 +40,7 @@ public class OfferController {
     @PreAuthorize("hasRole('RECRUITER')")
     @PostMapping(path = "/{idRecruiter}")
     public ResponseEntity<OfferDTO> addOffer(
-            @RequestBody OfferDTO offerDTO,
+            @Valid @RequestBody OfferDTO offerDTO,
             @PathVariable Long idRecruiter) {
         OfferDTO saved = offerService.saveOffer(offerDTO, idRecruiter);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
@@ -48,7 +49,7 @@ public class OfferController {
     @Operation(summary = "Modifier une offre", description = "Met à jour une offre existante")
     @PreAuthorize("hasRole('RECRUITER')")
     @PutMapping("/{id}")
-    public OfferDTO updateOffer(@PathVariable Long id, @RequestBody OfferDTO offerDTO) {
+    public OfferDTO updateOffer(@PathVariable Long id, @Valid @RequestBody OfferDTO offerDTO) {
         return offerService.updateOffer(id, offerDTO);
     }
 

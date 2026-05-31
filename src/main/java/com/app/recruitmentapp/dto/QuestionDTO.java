@@ -1,12 +1,20 @@
 package com.app.recruitmentapp.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 public class QuestionDTO {
     private Long id;
+    @NotBlank(message = "Le titre est requis")
     private String title;
+    @NotBlank(message = "Le choix 1 est requis")
     private String choice1;
+    @NotBlank(message = "Le choix 2 est requis")
     private String choice2;
     private String choice3;
+    @NotBlank(message = "La réponse est requise")
     private String response;
+    @NotNull(message = "L'offre est requise")
     private Long offerId;
 
     public QuestionDTO() {}

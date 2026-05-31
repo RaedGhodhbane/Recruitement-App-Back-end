@@ -4,6 +4,7 @@ import com.app.recruitmentapp.dto.ExperienceDTO;
 import com.app.recruitmentapp.services.ExperienceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,14 +37,14 @@ public class ExperienceController {
 
     @Operation(summary = "Ajouter une expérience", description = "Ajoute une expérience à un candidat")
     @PostMapping("/{idCandidate}")
-    public ResponseEntity<ExperienceDTO> addExperience(@RequestBody ExperienceDTO experienceDTO, @PathVariable Long idCandidate) {
+    public ResponseEntity<ExperienceDTO> addExperience(@Valid @RequestBody ExperienceDTO experienceDTO, @PathVariable Long idCandidate) {
         ExperienceDTO saved = experienceService.saveExperience(experienceDTO, idCandidate);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @Operation(summary = "Modifier une expérience", description = "Met à jour une expérience existante")
     @PutMapping("/{id}")
-    public ExperienceDTO updateExperience(@PathVariable Long id, @RequestBody ExperienceDTO experienceDTO) {
+    public ExperienceDTO updateExperience(@PathVariable Long id, @Valid @RequestBody ExperienceDTO experienceDTO) {
         return experienceService.updateExperience(id, experienceDTO);
     }
 

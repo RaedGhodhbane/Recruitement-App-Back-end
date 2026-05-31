@@ -1,12 +1,24 @@
 package com.app.recruitmentapp.dto;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+
 public class ContactDTO {
     private Long id;
+    @NotBlank(message = "Le nom est requis")
     private String name;
+    @NotBlank(message = "Le sujet est requis")
     private String subject;
+    @NotBlank(message = "L'email est requis")
+    @Email(message = "L'email doit être valide")
     private String email;
+    @Pattern(regexp = "^\\+?[0-9\\s\\-]{8,15}$", message = "Le numéro de téléphone est invalide")
     private String phone;
+    @NotBlank(message = "Le message est requis")
     private String message;
+    @NotNull(message = "L'utilisateur est requis")
     private Long userSendId;
 
     public ContactDTO() {}

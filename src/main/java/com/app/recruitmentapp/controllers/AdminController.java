@@ -7,6 +7,7 @@ import com.app.recruitmentapp.services.AdminService;
 import com.app.recruitmentapp.services.ContactService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
@@ -102,7 +103,7 @@ public class AdminController {
     @PutMapping("/{id}/change-password")
     public String changePassword(
             @PathVariable Long id,
-            @RequestBody ChangePassword changePasswordRequest) {
+            @Valid @RequestBody ChangePassword changePasswordRequest) {
         return adminService.changePassword(id, changePasswordRequest);
     }
 

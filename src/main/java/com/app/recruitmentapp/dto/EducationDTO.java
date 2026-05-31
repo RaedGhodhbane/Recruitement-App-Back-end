@@ -1,11 +1,18 @@
 package com.app.recruitmentapp.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 public class EducationDTO {
     private Long id;
+    @NotBlank(message = "Le diplôme est requis")
     private String diploma;
+    @NotBlank(message = "L'université est requise")
     private String university;
+    @NotBlank(message = "La date de fin est requise")
     private String endDate;
     private String description;
+    @NotNull(message = "Le candidat est requis")
     private Long candidateId;
 
     public EducationDTO() {}

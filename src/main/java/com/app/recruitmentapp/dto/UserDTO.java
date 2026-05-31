@@ -1,10 +1,18 @@
 package com.app.recruitmentapp.dto;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
 public class UserDTO {
     private Long id;
+    @NotBlank(message = "Le nom est requis")
     private String name;
+    @NotBlank(message = "Le prénom est requis")
     private String firstName;
+    @NotBlank(message = "L'email est requis")
+    @Email(message = "L'email doit être valide")
     private String email;
+    @NotBlank(message = "Le rôle est requis")
     private String role;
 
     public UserDTO() {}

@@ -4,6 +4,7 @@ import com.app.recruitmentapp.dto.UserDTO;
 import com.app.recruitmentapp.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,14 +37,14 @@ public class UserController {
 
     @Operation(summary = "Créer un utilisateur", description = "Ajoute un nouvel utilisateur")
     @PostMapping()
-    public ResponseEntity<UserDTO> addUser(@RequestBody UserDTO userDTO, @RequestParam("password") String password) {
+    public ResponseEntity<UserDTO> addUser(@Valid @RequestBody UserDTO userDTO, @RequestParam("password") String password) {
         UserDTO saved = userService.saveUser(userDTO, password);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @Operation(summary = "Modifier un utilisateur", description = "Met à jour un utilisateur existant")
     @PutMapping("/{id}")
-    public UserDTO updateUser(@PathVariable Long id, @RequestBody UserDTO userDTO) {
+    public UserDTO updateUser(@PathVariable Long id, @Valid @RequestBody UserDTO userDTO) {
         return userService.updateUser(id, userDTO);
     }
 

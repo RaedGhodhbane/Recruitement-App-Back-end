@@ -1,5 +1,7 @@
 package com.app.recruitmentapp.dto;
 
+import jakarta.validation.constraints.NotNull;
+
 import java.util.Date;
 
 public class CandidacyDTO {
@@ -7,7 +9,9 @@ public class CandidacyDTO {
     private Date submissionDate;
     private String status;
     private double score;
+    @NotNull(message = "Le candidat est requis")
     private Long candidateId;
+    @NotNull(message = "L'offre est requise")
     private Long offerId;
 
     public CandidacyDTO() {}

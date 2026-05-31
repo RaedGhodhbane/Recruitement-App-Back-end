@@ -4,6 +4,7 @@ import com.app.recruitmentapp.dto.SkillDTO;
 import com.app.recruitmentapp.services.SkillService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,14 +37,14 @@ public class SkillController {
 
     @Operation(summary = "Ajouter une compétence", description = "Ajoute une compétence à un candidat")
     @PostMapping("/{idCandidate}")
-    public ResponseEntity<SkillDTO> addSkill(@RequestBody SkillDTO skillDTO, @PathVariable Long idCandidate) {
+    public ResponseEntity<SkillDTO> addSkill(@Valid @RequestBody SkillDTO skillDTO, @PathVariable Long idCandidate) {
         SkillDTO saved = skillService.saveSkill(skillDTO, idCandidate);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @Operation(summary = "Modifier une compétence", description = "Met à jour une compétence existante")
     @PutMapping("/{id}")
-    public SkillDTO updateSkill(@PathVariable Long id, @RequestBody SkillDTO skillDTO) {
+    public SkillDTO updateSkill(@PathVariable Long id, @Valid @RequestBody SkillDTO skillDTO) {
         return skillService.updateSkill(id, skillDTO);
     }
 

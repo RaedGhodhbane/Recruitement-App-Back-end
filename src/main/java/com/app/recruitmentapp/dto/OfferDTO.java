@@ -1,17 +1,30 @@
 package com.app.recruitmentapp.dto;
 
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
+
 import java.time.LocalDate;
 
 public class OfferDTO {
     private Long id;
+    @NotBlank(message = "Le titre est requis")
     private String title;
+    @NotBlank(message = "La description est requise")
     private String description;
+    @NotBlank(message = "Le type est requis")
     private String type;
+    @NotBlank(message = "L'adresse est requise")
     private String address;
+    @PositiveOrZero(message = "Le salaire doit être positif ou nul")
     private double salary;
+    @NotBlank(message = "L'expérience est requise")
     private String experience;
     private LocalDate publicationDate;
+    @Future(message = "La date d'expiration doit être dans le futur")
     private LocalDate expirationDate;
+    @NotNull(message = "Le recruteur est requis")
     private Long recruiterId;
 
     public OfferDTO() {}

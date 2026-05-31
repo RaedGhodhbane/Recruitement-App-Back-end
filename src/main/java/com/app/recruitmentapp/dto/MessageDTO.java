@@ -1,11 +1,19 @@
 package com.app.recruitmentapp.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 public class MessageDTO {
     private Long id;
+    @NotBlank(message = "Le nom complet est requis")
     private String fullName;
+    @NotBlank(message = "Le sujet est requis")
     private String subject;
+    @NotBlank(message = "Le message est requis")
     private String message;
+    @NotNull(message = "L'expéditeur est requis")
     private Long userSendId;
+    @NotNull(message = "Le destinataire est requis")
     private Long userReceiveId;
 
     public MessageDTO() {}

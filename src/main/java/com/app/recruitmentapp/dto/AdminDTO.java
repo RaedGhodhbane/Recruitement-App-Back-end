@@ -1,15 +1,24 @@
 package com.app.recruitmentapp.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Pattern;
+
 import java.sql.Date;
 
 public class AdminDTO extends UserDTO {
     private boolean active;
     private String gender;
+    @Past(message = "La date de naissance doit être dans le passé")
     private Date birthdate;
+    @NotBlank(message = "L'adresse est requise")
     private String address;
+    @NotBlank(message = "La ville est requise")
     private String city;
     private String state;
+    @NotBlank(message = "Le pays est requis")
     private String country;
+    @Pattern(regexp = "^\\+?[0-9\\s\\-]{8,15}$", message = "Le numéro de téléphone est invalide")
     private String phone;
     private String image;
 

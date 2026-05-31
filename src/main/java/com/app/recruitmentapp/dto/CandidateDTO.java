@@ -1,5 +1,8 @@
 package com.app.recruitmentapp.dto;
 
+import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Pattern;
+
 import java.util.Date;
 
 public class CandidateDTO extends UserDTO {
@@ -9,7 +12,9 @@ public class CandidateDTO extends UserDTO {
     private String address;
     private String title;
     private String image;
+    @Pattern(regexp = "^\\+?[0-9\\s\\-]{8,15}$", message = "Le numéro de téléphone est invalide")
     private String phone;
+    @Past(message = "La date de naissance doit être dans le passé")
     private Date dateOfBirth;
     private String gender;
     private boolean active;

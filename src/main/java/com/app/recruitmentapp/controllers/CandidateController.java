@@ -5,6 +5,7 @@ import com.app.recruitmentapp.entities.ChangePassword;
 import com.app.recruitmentapp.services.CandidateService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -60,7 +61,7 @@ public class CandidateController {
     @Operation(summary = "Modifier un candidat", description = "Met à jour un candidat existant")
     @PreAuthorize("hasRole('CANDIDATE')")
     @PutMapping("/update/{id}")
-    public CandidateDTO updateCandidate(@PathVariable Long id, @RequestBody CandidateDTO candidateDTO) {
+    public CandidateDTO updateCandidate(@PathVariable Long id, @Valid @RequestBody CandidateDTO candidateDTO) {
         return candidateService.updateCandidate(id, candidateDTO);
     }
 
@@ -103,7 +104,7 @@ public class CandidateController {
     @PutMapping("/{id}/change-password")
     public String changePassword(
             @PathVariable Long id,
-            @RequestBody ChangePassword changePasswordRequest) {
+            @Valid @RequestBody ChangePassword changePasswordRequest) {
         return candidateService.changePassword(id, changePasswordRequest);
     }
 }
