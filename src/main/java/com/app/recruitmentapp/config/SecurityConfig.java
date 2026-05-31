@@ -2,8 +2,6 @@ package com.app.recruitmentapp.config;
 
 import com.app.recruitmentapp.security.JwtAuthenticationFilter;
 import com.app.recruitmentapp.security.JwtLogoutHandler;
-import com.app.recruitmentapp.security.JwtAuthenticationFilter;
-import com.app.recruitmentapp.security.JwtLogoutHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
