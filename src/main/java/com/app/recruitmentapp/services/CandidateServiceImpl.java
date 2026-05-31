@@ -104,7 +104,8 @@ public class CandidateServiceImpl implements CandidateService {
 
     @Override
     public CandidateDTO updateCandidate(Long id, CandidateDTO candidateDTO) {
-        Candidate c = candidateRepository.findById(id).orElse(null);
+        Candidate c = candidateRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Candidate not found"));
 
         c.setName(candidateDTO.getName());
         c.setFirstName(candidateDTO.getFirstName());
