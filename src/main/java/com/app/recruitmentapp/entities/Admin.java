@@ -1,7 +1,6 @@
 package com.app.recruitmentapp.entities;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.Lob;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -31,7 +30,6 @@ public class Admin extends User {
 
     private String phone;
 
-    @Lob
     private String image;
 
 
