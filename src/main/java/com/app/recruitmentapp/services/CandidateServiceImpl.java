@@ -22,7 +22,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
@@ -48,7 +47,9 @@ public class CandidateServiceImpl implements CandidateService {
     @Autowired
     private UserRepository userRepository;
 
-    private static final String CV_FOLDER = "/C:/downloads";
+    @Value("${cv.upload.dir}")
+    private String cvUploadDir;
+
     @Autowired
     private JwtUtil jwtUtil;
 
@@ -146,10 +147,11 @@ public class CandidateServiceImpl implements CandidateService {
 
         String filename = "cv_" + candidateId + ".pdf";
 
-        File dest = new File(CV_FOLDER + filename);
-        cvFile.transferTo(dest);
+        Path dest = Paths.get(cvUploadDir, filename);
+        Files.createDirectories(dest.getParent());
+        Files.copy(cvFile.getInputStream(), dest, StandardCopyOption.REPLACE_EXISTING);
 
-        candidate.setCvPath(dest.getAbsolutePath());
+        candidate.setCvPath(dest.toAbsolutePath().toString());
         candidateRepository.save(candidate);
     }
 
